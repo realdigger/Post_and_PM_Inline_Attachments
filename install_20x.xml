@@ -18,25 +18,17 @@
 <file name="$sourcedir/Display.php">
 	<operation>
 		<search position="replace"><![CDATA[loadAttachmentContext($message['id_msg']),]]></search>
-		<add><![CDATA[$context['ila_attachments'],]]></add>
+		<add><![CDATA[$context['ila']['attachments'][$context['ila']['msg']],]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Post.php">
-	<operation>
-		<search position="replace"><![CDATA[loadLanguage('Post');
-
-	// You can't reply with a poll... hacker.]]></search>
-		<add><![CDATA[loadLanguage('Post+Modifications');
-
-	// You can't reply with a poll... hacker.]]></add>
-	</operation>
 	<operation>
 		<search position="before"><![CDATA[
 		$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
 ]]></search>
 		<add><![CDATA[
 		// Show attachment string or error message in topic history
-		$row['body'] = ILA_Remove_Tags($row['body']);
+		$row['body'] = ILA_Invalid_Tags($row['body']);
 ]]></add>
 	</operation>
 	<operation>
@@ -44,44 +36,38 @@
 		<add><![CDATA[$context['preview_message'] = parse_bbc($context['preview_message'], isset($_REQUEST['ns']) ? 0 : 1, 'pre' . ((isset($_REQUEST['msg']) ? $_REQUEST['msg'] : '')));
 
 			// Show attachment string or error message in topic history
-			$context['preview_message'] = ILA_Remove_Tags($context['preview_message']);
+			$context['preview_message'] = ILA_Invalid_Tags($context['preview_message']);
 ]]></add>
 	</operation>
 	<operation>
 		<search position="after"><![CDATA[removeAttachments($attachmentQuery);
 ]]></search>
-		<add><![CDATA[$_POST['message'] = ILA_Remove_Attachment($_POST['message'], $attachmentQuery);
+		<add><![CDATA[ILA_Fix_Tags($_POST['message'], $attachmentQuery);
 		]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[// Collect all parameters for the creation or modification of a post.]]></search>
+		<add><![CDATA[
+	ILA_Process_Quotes($_POST['message']);]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Profile-View.php">
 	<operation>
-		<search position="before"><![CDATA[function showPosts($memID)
-{
-	global $txt, $user_info, $scripturl, $modSettings]]></search>
-		<add><![CDATA[, $topic]]></add>
-	</operation>
-	<operation>
 		<search position="replace"><![CDATA[$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);]]></search>
-		<add><![CDATA[$topic = $row['id_topic'];
-		$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
+		<add><![CDATA[$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
 
 		// Show attachment string or error message in topic history
-		$row['body'] = ILA_Remove_Tags($row['body']);]]></add>
+		$row['body'] = ILA_Invalid_Tags($row['body']);]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Recent.php">
 	<operation>
-		<search position="before"><![CDATA[global $txt, $scripturl, $user_info, $context, $modSettings, $sourcedir, $board, $smcFunc]]></search>
-		<add><![CDATA[, $topic]]></add>
-	</operation>
-	<operation>
 		<search position="replace"><![CDATA[$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);]]></search>
 		<add><![CDATA[$topic = $row['id_topic'];
 		$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
 
 		// Show attachment string or error message in topic history
-		$row['body'] = ILA_Remove_Tags($row['body']);]]></add>
+		$row['body'] = ILA_Invalid_Tags($row['body']);]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Subs.php">
@@ -89,7 +75,7 @@
 		<search position="after"><![CDATA[// Shall we take the time to cache this?
 ]]></search>
 		<add><![CDATA[// Setup for Inline Attachments
-	$message = ILA_Setup($cache_id, $message);
+	ILA_Setup($cache_id, $message);
 		
 	]]></add>
 	</operation>
@@ -110,14 +96,6 @@
 	</operation>
 </file>
 <file name="$sourcedir/PersonalMessage.php">
-	<operation>
-		<search position="replace"><![CDATA[loadLanguage('PersonalMessage');
-
-	if (WIRELESS && WIRELESS_PROTOCOL == 'wap')]]></search>
-		<add><![CDATA[loadLanguage('PersonalMessage+Modifications');
-
-	if (WIRELESS && WIRELESS_PROTOCOL == 'wap')]]></add>
-	</operation>
 	<operation error="ignore">
 		<search position="replace"><![CDATA[loadPMAttachmentContext($message['id_pm']),]]></search>
 		<add><![CDATA[$context['ila_attachments'],]]></add>

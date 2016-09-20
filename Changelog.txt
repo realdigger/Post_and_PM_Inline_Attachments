@@ -1,3 +1,17 @@
+v3.0 - April 17th, 2015
+o Added "msg" parameter so that attachments from other posts can be included/quoted.
+o Added code to allow inline attachments used in a post to be properly quoted.
+o Added code to internally change the "[attach=n]" form to "[attach=n][/attach]" without modifying posts.
+o Added code to remove text between brackets, aka "[attach=0]This file[/attach]" without modifying posts.
+o Added option to use "One-based numbering" instead of "Zero-based numbering".
+o Modified ID parameter so that invalid ID numbers are errored out instead of zeroed.
+o Added option to make "[attach=n]" as same as "[attachment=n]" bbcodes.
+o Fixed ILA_Remove_Tags function so that it removes the other 11 ILA bbcodes forms.
+o Fixed ILA_Remove_Attachment function so that it removes the other 11 ILA bbcodes forms.
+o Removed BBC buttton introduced in v2.8beta2 from the editor.
+o Language strings are in seperate file and now loaded from Subs-InlineAttachments.php.
+o Moved code responsible for setting topic ID (2.8beta3 fix) into Subs-InlineAttachments.php.
+
 v2.8beta3 - April 13th, 2015
 o Fixed display code in unread and unreadreplies action, as well as show posts in profile area.
 

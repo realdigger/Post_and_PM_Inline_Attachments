@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v2.8[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v3.0[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -8,13 +8,13 @@
 This mod adds the ability to position your attachments in either your forum post or your personal message post using [attachment=n][/attachment] bbcode (where [b]n[/b] is the number of the attachment in the post, eg first = 0, second = 1).
 
 [color=blue][b][size=12pt][u]BBcode Usage Forms[/u][/size][/b][/color]
-Version 1.0 introduced the following forms:
+[b]Version 1.0[/b] introduced the following forms:
 [quote]
 [nobbc][attachment=[/nobbc][b]{id}[/b]][/attachment]
 [nobbc][attachment=[/nobbc][b]{id}[/b],[b]{width}[/b]][/attachment]
 [nobbc][attachment=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]][/attachment]
 [/quote]
-Version 2.0 keeps the version 1.0 forms, plus introduces more natural forms:
+[b]Version 2.0[/b] keeps the version 1.0 forms, plus introduces more natural forms:
 [quote]
 [nobbc][attachment[/nobbc] id=[b]{id}[/b]][/attachment]
 [nobbc][attachment[/nobbc] id=[b]{id}[/b] margin=[b]{pixels}[/b]][/attachment]
@@ -33,17 +33,19 @@ Version 2.0 keeps the version 1.0 forms, plus introduces more natural forms:
 [nobbc][attachment=[/nobbc] id=[b]{id}[/b] height=[b]{height}[/b] float=[b]{float}[/b]][/attachment]
 [nobbc][attachment=[/nobbc] id=[b]{id}[/b] height=[b]{height}[/b] float=[b]{float}[/b] margin=[b]{pixels}[/b]][/attachment]
 [/quote]
-Version 2.1 keeps the version 1.0 and 2.0 forms, plus introduces more BBCodes:
+[b]Version 2.1[/b] keeps the version 1.0 and 2.0 forms, plus introduces more BBCodes:
 [quote]
 [b]attach[/b] => Shows the attachment as a thumbnail, expandable to full size.
 [b]attachthumb[/b] => Shows only the thumbnail of the attachment.
 [b]attachmini[/b] => Shows the attachment, omitting the download count and filename beneath.
 [/quote]
-Version 2.2 introduces one more BBCode:
+[b]Version 2.2[/b] introduces one more BBCode:
 [quote]
 [b]attachurl[/b] => Shows the attachment like you used an [b]img[/b] tag instead of this tag.
 [/quote]
 Each of these new BBCodes uses the same format as the [b][nobbc][attachment][/nobbc][/b] BBCodes.
+
+[b]Version 3.0[/b] makes further changes and allows the use of the inline attachments bbcodes [b]WITHOUT[/b] closing brackets, as well as using attachments from another post!
 
 In each case, [b]{id}[/b] is the attachment number relative to the topic, [b]{width}[/b] is the max desired width, [b]{height}[/b] is the max desired height, [b]{pixels}[/b] is the number of pixels surrounding the image, and [b]{float}[/b] can be either [b]left[/b], [b]right[/b], or [b]center[/b].  All text between the opening and closing attachment tags is discarded.
 
@@ -52,12 +54,12 @@ If width and height are not specified, max image width and height settings set b
 [color=blue][b][size=12pt][u]Other Mod Features[/u][/size][/b][/color]
 o Error Text strings are shown for invalid/missing/deleted attachments.
 o Inline attachment processes takes place in the [b]parse_bbc[/b] function, which means any parsing requests can benefit from this mod!
-o Text string is shown as alternative when quoted or in code
+o Text string is shown as alternative in code
 o Adds [Insert Attachment x] next to each attachment/upload box to insert the bbcode.
 o Attachments used by the inline attachments mod can be omitted from the attachment display at the bottom of the post
-o Reloads the attachments for Ajax Editing
-o Text string shown in place of attachment for Recent posts/Previewing and Topic&Reply History
+o Reloads the attachments for Ajax Editing.
 o Removing an attachment removes the attachment bbcode for that attachment & changes remaining attachment tags to ensure proper post appearance.
+o Text between inline attachment brackets are removed (as of version 3.0).
 
 [color=blue][b][size=12pt][u]Admin Settings[/u][/size][/b][/color]
 The bbcode may be disabled by going to [b][i]Admin[/i] -> [i]Forums[/i] -> [i]Posts and Topics[/i] -> [i]Bulletin Board Code[/i][/b] and unchecking the [b]attachment[/b] bbcode.
@@ -69,7 +71,7 @@ o Show download link and counter under inline attachment, like non-inline attach
 [color=blue][b][size=12pt][u]Compatibility Notes[/u][/size][/b][/color]
 This mod was tested on SMF 2.0.9, but should work on SMF 2.1 Beta 1, as well as SMF 2.0 and up.  SMF 1.x is not and will not be supported.
 
-This mod currently contains no functionality for PM attachments, and posting regular attachments has been changed slightly to allow only 1 file per input box.
+For SMF 2.1 Beta 1, this mod contains no functionality for PM attachments, and posting regular attachments has been changed slightly to allow only 1 file per input box.
 
 These mods can be installed at any time (not required):
 o [url=http://custom.simplemachines.org/mods/index.php?mod=1450]Highslide Image Viewer[/url]
