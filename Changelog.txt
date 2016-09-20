@@ -1,7 +1,10 @@
+v3.3.1 - May 2nd, 2015
+o Fixed code that shows the Highslide and EXIF option in the ILA settings.
+
 v3.3 - May 2nd, 2015
 o Added checkbox to enable the display of EXIF information (when available) to ILA settings.
-o Modified [b]Subs-InlineAttachments.php[/b] to display EXIF information when option is enabled.
-o Modified code to optimize memory usage within [b]Sources/Display.php[/b].
+o Modified Subs-InlineAttachments.php to display EXIF information when option is enabled.
+o Modified code to optimize memory usage within Sources/Display.php.
 
 v3.2 - May 2nd, 2015
 o Modified inserting attachment javascript code so that it works with SMF 2.1 Beta 1....

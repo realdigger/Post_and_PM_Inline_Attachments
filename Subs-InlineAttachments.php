@@ -649,9 +649,9 @@ function ILA_Admin_Settings($return_config = false)
 		array('check', 'ila_allow_quoted_images'),
 	);
 	if (function_exists('hs4smf') || function_exists('highslide_images') || (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css')))
-		$config[] = array('check', 'ila_highslide');
+		$config_vars[] = array('check', 'ila_highslide');
 	if (file_exists($sourcedir . '/exif.php'))
-		$config[] = array('check', 'ila_display_exif');
+		$config_vars[] = array('check', 'ila_display_exif');
 		
 	if ($return_config)
 		return $config_vars;
