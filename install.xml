@@ -226,7 +226,7 @@
 								function addAttachment()
 								{
 									allowed_attachments = allowed_attachments - 1;
-									count_attachments = count_attachments + 1 ;
+									current_attachment = current_attachment + 1;
 									if (allowed_attachments <= 0)
 										return alert("', $txt['more_attachments_error'], '");
 
