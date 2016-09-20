@@ -190,7 +190,7 @@
 		<search position="replace"><![CDATA[
 							<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" />]]></search>
 		<add><![CDATA[
-							<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> <a href="javascript:void(0);" onclick="replaceText(\'[attachment=', count($context['current_attachments']) ,'][/attachment]\', document.forms.postmodify.', $context['post_box_name'], '); return false;">(', $txt['ila_insert'] ,' ', count($context['current_attachments']) ,')</a>]]></add>
+							<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> <a href="javascript:void(0);" onclick="replaceText(\'[attachment=', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,'][/attachment]\', document.forms.postmodify.', $context['post_box_name'], '); return false;">(', $txt['ila_insert'] ,' ', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,')</a>]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[

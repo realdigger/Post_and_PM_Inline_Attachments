@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v1.0[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v1.1[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -42,6 +42,9 @@ If you use [url=http://custom.simplemachines.org/mods/index.php?mod=1974]PM Atta
 If you want to use the [url=http://www.simplemachines.org/community/index.php?topic=379200]Highslide4SMF v0.8.1[/url] mod (which has been removed from SMF's Modifications area), it can be found at [url=https://github.com/Spuds/SMF-HS4SMF]GitHub.com[/url].
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
+[b][u]v1.1 - July 28th, 2013[/u][/b]
+o Fixed two undeclared array element errors in [b]PersonalMessage.template.php[/b]...
+
 [b][u]v1.0 - July 21th, 2013[/u][/b]
 o Initial Release of the mod
 
