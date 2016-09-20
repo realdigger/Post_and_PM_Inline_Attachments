@@ -39,15 +39,15 @@ function ILA_Admin_Settings($return_config = false)
 	// Get latest version of the mod and display whether current mod is up-to-date:
 	if (($file = cache_get_data('ila_mod_version', 86400)) == null)
 	{
-		$file = file_get_contents('http://www.xptsp.com/tools/mod_version.php?url=Post_and_PM_Inline_Attachments');
+		$file = @file_get_contents('http://www.xptsp.com/tools/mod_version.php?url=Post_and_PM_Inline_Attachments');
 		cache_put_data('ila_mod_version', $file, 86400);
 	}
-	if (preg_match('#Post_and_PM_Inline_Attachments_v(.+?)\.zip#i', $file, $version))
+	if (!empty($file) && preg_match('#Post_and_PM_Inline_Attachments_v(.+?)\.zip#i', $file, $version))
 	{
 		if (isset($modSettings['ila_version']) && $version[1] > $modSettings['ila_version'])
-			$context['settings_body'] = '<strong>' . sprintf($txt['ila_no_update'], $version[1]) . '</strong>';
+			$context['settings_insert_above'] = '<div class="information"><p class="alert">' . sprintf($txt['ila_new_version'], $version[1]) . '<p></div>';
 		else
-			$context['settings_body'] = '<strong>' . $txt['ila_no_update'] . '</strong>';
+			$context['settings_insert_above'] = '<div class="information"><p>' . $txt['ila_no_update'] . '</p></div>';
 	}
 
 	// Assemble the options available in this mod:
@@ -181,6 +181,9 @@ function ILA_Admin_Adjust($ascending = true)
 	// There are two cycles to this operation: posts & PMs....
 	foreach (array(array('messages', 'id_msg'), array('personal_messages', 'id_pm')) as $cycle)
 	{
+		// Split the "$cycle" array into 2 variables: $table AND $id
+		list($table, $id) = $cycle;
+		
 		// Process only the posts that has at least one ILA tag within it:
 		foreach ($tags as $tag)
 		{
@@ -192,7 +195,7 @@ function ILA_Admin_Adjust($ascending = true)
 			// Get the number of posts that have an ILA tag within it:
 			$request = $smcFunc['db_query']('', '
 				SELECT COUNT(*) AS count
-				FROM {db_prefix}' . $cycle[0] . '
+				FROM {db_prefix}' . $table . '
 				WHERE body LIKE "%' . $tag . '=%"
 					OR body LIKE "%' . $tag . ' id=%"',
 				array(
@@ -206,8 +209,8 @@ function ILA_Admin_Adjust($ascending = true)
 			do 
 			{
 				$request = $smcFunc['db_query']('', '
-					SELECT ' . $cycle[1] . ', body
-					FROM {db_prefix}' . $cycle[0] . '
+					SELECT ' . $id . ', body
+					FROM {db_prefix}' . $table . '
 					WHERE body LIKE "%' . $tag . '=%"
 						OR body LIKE "%' . $tag . ' id=%"
 					LIMIT {int:start}, 100',
@@ -233,22 +236,22 @@ function ILA_Admin_Adjust($ascending = true)
 
 					// Change the attachment ID number that the bbcode is using:
 					$begin = $end = '';
-					foreach ($attachtags as $txt)
+					foreach ($attachtags as $attach)
 					{
-						if (preg_match('#\[' . $tag . '(=| id=)(\d+)(|(,| )(.+?))\]#i', $txt, $params))
+						if (preg_match('#\[' . $tag . '(=| id=)(\d+)(|(,| )(.+?))\]#i', $attach, $params))
 						{
 							$begin .= 'REPLACE(';
-							$end .= ', "[' . $tag . $params[1] . $params[2] . '", "[' . $tag . $params[1] . ($params[2] + $change_by) . '")';
+							$end .= ', "[' . $tag . $params[1] . $params[2] . $params[3] . '", "[' . $tag . $params[1] . ($params[2] + $change_by) . $params[3] . '")';
 						}
 					}
 
 					// Modify the message in the database so that it is correct:
 					$smcFunc['db_query']('', '
-						UPDATE {db_prefix}' . $cycle[0] . '
+						UPDATE {db_prefix}' . $table . '
 						SET body = ' . $begin . 'body' . $end . '
-						WHERE ' . $cycle[1] . ' = {int:id}',
+						WHERE ' . $id . ' = {int:id}',
 						array(
-							'id' => $row[$cycle[1]],
+							'id' => $row[$id],
 						)
 					);
 
@@ -261,7 +264,8 @@ function ILA_Admin_Adjust($ascending = true)
 						$context['substep_continue_percent'] = floor(($count / $max) * 100);
 						$context['continue_percent'] = floor( ( (($step - 1) / (count($tags) * 2)) + ($context['substep_continue_percent'] * (1 / count($tags) * 2)) ) * 100);
 						$context['continue_get_data'] = 'action=admin;area=manageattachments;sa=ila;' . ($ascending ? 'ascend' : 'descend');
-						$context['continue_post_data'] = '<input type="hidden" name="' . $context['session_var'] . '" value="' . $context['session_id'] . '" />
+						$context['continue_post_data'] = '
+					<input type="hidden" name="' . $context['session_var'] . '" value="' . $context['session_id'] . '" />
 					<input type="hidden" name="step" value="' . $step .'" />
 					<input type="hidden" name="count" value="' . $count . '" />
 					<input type="hidden" name="start" value="' . $start . '" />';

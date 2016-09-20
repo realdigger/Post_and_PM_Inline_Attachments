@@ -43,7 +43,7 @@ $txt['ila_embed_txt_files'] = 'Embed TXT files as part of the post?';
 $txt['ila_embed_pdf_files'] = 'Embed PDF files within the post?';
 
 $txt['ila_attach_same_as_attachment'] = '&quot;attach&quot; bbcode same as &quot;attachment&quot;?';
-$txt['ila_turn_nosniff_off'] = 'Turns &quot;nosniff&quot; option off?';
+$txt['ila_turn_nosniff_off'] = 'Turns &quot;nosniff&quot; option off for IE 8+?';
 $txt['ila_display_exif'] = 'Display EXIF information below image?';
 
 ?>

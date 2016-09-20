@@ -1,3 +1,14 @@
+v4.13 - November 15th, 2015
+o Rewrote ILA admin page so that hopefully the ILA tags are modified correctly.
+o Fixed potential issue with adjusting ILA tags with attachment IDs greater than 9.
+o Made changes suggested by dcmouser to code using HighSlide for SMF (HS4SMF) mod.
+o Added message during post preview to indicate attachment has not been uploaded yet.
+o Adjusted admin page because some servers error on trying to retrieve latest mod version.
+o Modified permission checking code so that the board permissions can be properly used.
+o Fixed issue where global language variable was overwritten by ILA_Invalid_Tags function.
+o Fixed a few typecasting issues found which caused a few problems on some servers.
+o Fixed error message where array was passed instead of integer value in loop.
+
 v4.12 - November 11th, 2015
 o Fixed the ILA_Admin_Adjust function so that it doesn't screw up posts with ILA tags.
 

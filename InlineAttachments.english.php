@@ -17,6 +17,7 @@ $txt['ila_attachment'] = ' [ Attachment ] ';
 $txt['ila_nopermission'] = ' [ You are not allowed to view attachments ] ';
 $txt['ila_invalid'] = ' [ Invalid Attachment ] ';
 $txt['ila_unapproved'] = ' [ Attachment has not been approved yet ] ';
+$txt['ila_not_uploaded'] = ' [ Attachment has not been uploaded yet ] ';
 $txt['ila_pdf1'] = 'It appears you don\'t have Adobe Reader or PDF support in this web browser.';
 $txt['ila_pdf2'] = 'Click here to download the PDF.';
 $txt['ila_no_video'] = 'No video playback capabilities, please download the video below.';
