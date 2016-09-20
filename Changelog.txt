@@ -1,3 +1,6 @@
+v3.3.2 - May 3rd, 2015
+o Minor font size adjustment to the code displaying the EXIF information.
+
 v3.3.1 - May 2nd, 2015
 o Fixed code that shows the Highslide and EXIF option in the ILA settings.
 

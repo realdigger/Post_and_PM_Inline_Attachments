@@ -595,11 +595,11 @@ function ILA_Build_Link(&$tag, &$id)
 
 	// If the option to show EXIF is checked, let's show the EXIF information (if available):
 	if (!empty($modSettings['ila_display_exif']) && isset($attachment['exif']))
-		$html .= $attachment['exif'] . '<br /><br />';
+		$html .= '<span class="smalltext">' . $attachment['exif'] . '</span><br />' . (!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini' ? '' : '<br />');
 
 	// Add the download count to the image tag if requested:
 	if (!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini')
-		$html = '<div class="smalltext"' . $divfloat . '>' . $html . '<br/><a href="' . $image . '"><img src="' . $settings['images_url'] . '/icons/clip.gif" align="middle" alt="*" border="0" />&nbsp;' . $attachment['name'] . '</a> ('. $attachment['size']. ($attachment['is_image'] ? '. ' . $src_width . 'x' . $src_height . ' - ' . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . '.)</div>';
+		$html = '<div' . $divfloat . '>' . $html . '<br/><span class="smalltext"><a href="' . $image . '"><img src="' . $settings['images_url'] . '/icons/clip.gif" align="middle" alt="*" border="0" />&nbsp;' . $attachment['name'] . '</a> ('. $attachment['size']. ($attachment['is_image'] ? '. ' . $src_width . 'x' . $src_height . ' - ' . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . '.)</span></div>';
 
 	// Clear the parameter set for the next usage and return string to caller:
 	unset($context['ila_params']);
