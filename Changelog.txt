@@ -1,3 +1,20 @@
+v4.0 - August 28th, 2015
+o Added code to adjust the inline attachment IDs when "one-based numbering" option is changed.
+o For post author, admin and moderators, unapproved image attachments are shown as partly transparent.
+o Fixed issue with links in ILA download info not being formed correctly.
+o Fixed issue with ILA download info not showing the original image size correctly.
+o Seperated admin functions from general bbcode functions and placed in new file.
+o Reorganized ILA options so that their organization makes more sense (at least to me).
+o Revised the video playing code so that hopefully it works better now.
+o Added default video width and height options.  Defaults to 640x400.
+o Added support for SVG files as inline attachments and option to enable it.
+o Added support for TXT files as inline attachments and option to enable it.  Inserts as part of post.
+o Added support for PDF files as inline attachments and option to enable it.  Defaults to 500x600.
+o Added option to control unapproved image opacity percentage.  0 returns "unapproved" message.
+o Made "Highslide" option visible, but disabled when no supported Highslide mods are installed.
+o Made "EXIF" option visible, but disabled when EXIF mod isn't installed.
+o Modified install code so that only mod settings that aren't already set are set.
+
 v3.17 - August 10th, 2015
 o Fixed issue with the post preview display of inline attachments.
 o Fixed issue with download counter being display with image styles being applied.

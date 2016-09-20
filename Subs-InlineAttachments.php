@@ -5,9 +5,9 @@
 * This mod is licensed under the 2-clause BSD License, which can be found here:
 *	http://opensource.org/licenses/BSD-2-Clause
 ***********************************************************************************
-* This program is distributed in the hope that it is and will be useful, but      *
-* WITHOUT ANY WARRANTIES; without even any implied warranty of MERCHANTABILITY    *
-* or FITNESS FOR A PARTICULAR PURPOSE.                                            *
+* This program is distributed in the hope that it is and will be useful, but	  *
+* WITHOUT ANY WARRANTIES; without even any implied warranty of MERCHANTABILITY	  *
+* or FITNESS FOR A PARTICULAR PURPOSE.											  *
 **********************************************************************************/
 if (!defined('SMF'))
 	die('Hacking attempt...');
@@ -23,7 +23,7 @@ function ILA_tags()
 function ILA_parameters(&$params1, &$params2)
 {
 	global $sourcedir;
-	
+
 	$params1 = array(
 		'id' => array('match' => '(\d+)', 'validate' => 'ILA_Param_ID'),
 		'width' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Width'),
@@ -36,7 +36,7 @@ function ILA_parameters(&$params1, &$params2)
 		'margin-bottom' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Margin_Bottom'),
 	);
 	$params2 = array_merge($params1, array(
-		'border-style' => array('match' => '(dotted|dashed|solid|double|groove|ridge|inset|outset)', 'validate' => 'ILA_Param_Border_Style'),
+		'border-style' => array('match' => '(none|dotted|dashed|solid|double|groove|ridge|inset|outset)', 'validate' => 'ILA_Param_Border_Style'),
 		'border-width' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Border_Width'),
 		'border-color' => array('optional' => true, 'match' => '(#[\da-fA-F]{3}|#[\da-fA-F]{6}|[A-Za-z]{1,20}|rgb\(\d{1,3}, ?\d{1,3}, ?\d{1,3}\))', 'validate' => 'ILA_Param_Border_Color'),
 	));
@@ -189,8 +189,8 @@ function ILA_Post_Attachments($msg_id, $override = false)
 	{
 		// Set the topic variable to whatever topic is being pulled from:
 		$request = $smcFunc['db_query']('', '
-			SELECT id_topic 
-			FROM {db_prefix}messages 
+			SELECT id_topic, id_member
+			FROM {db_prefix}messages
 			WHERE id_msg = {int:msg}',
 			array(
 				'msg' => (int) $msg_id,
@@ -199,6 +199,7 @@ function ILA_Post_Attachments($msg_id, $override = false)
 		$row = $smcFunc['db_fetch_assoc']($request);
 		$smcFunc['db_free_result']($request);
 		$topic = $row['id_topic'];
+		$context['ila']['id_member'][$msg_id] = $row['id_member'];
 	}
 
 	// Check to make sure that we can view attachments for the topic:
@@ -227,7 +228,7 @@ function ILA_Post_Attachments($msg_id, $override = false)
 		$temp = array();
 		while ($row = $smcFunc['db_fetch_assoc']($request))
 		{
-			if (!$row['approved'] && !empty($modSettings['postmod_active']))
+			if (!$row['approved'] && $modSettings['postmod_active'] && !allowedTo('approve_posts') && $context['ila']['id_member'][$msg_id] != $user_info['id'])
 				continue;
 
 			$temp[$row['id_attach']] = $row;
@@ -654,12 +655,12 @@ function ILA_Start_v20(&$tag, &$data, &$disabled)
 //================================================================================
 function ILA_Build_HTML(&$tag, &$id)
 {
-	global $context, $modSettings, $settings, $txt, $topic;
+	global $context, $modSettings, $settings, $txt, $topic, $sourcedir, $user_info, $smcFunc;
 
 	// If the "one-based numbering" option is set, subtract 1 from the attachment ID to make it compatible:
 	$id = $id - !empty($modSettings['ila_one_based_numbering']);
 
-	// Are attachments enabled and can we see them?  If not, return no permission message:
+	// Are attachments enabled and can we see them?	 If not, return no permission message:
 	if (empty($context['ila']['pm_attach']) && (empty($modSettings['attachmentEnable']) || empty($context['ila']['view_attachments'][$topic])))
 		return $txt['ila_nopermission'];
 	if (!empty($context['ila']['pm_attach']) && (empty($modSettings['pmAttachmentEnable']) || empty($context['ila']['pm_view_attachments'])))
@@ -672,18 +673,25 @@ function ILA_Build_HTML(&$tag, &$id)
 	else
 		$msg = (isset($context['ila']['msg']) ? $context['ila']['msg'] : -1);
 
-	// Does the specified attachment exist in the message?  If not, return attachment invalid message:
+	// Does the specified attachment exist in the message?	If not, return attachment invalid message:
 	if ($msg == 'new')
 		return $txt['ila_attachment'];
 	if (!isset($context['ila']['attachments'][$msg]) || !isset($context['ila']['attachments'][$msg][$id]))
 		return $txt['ila_invalid'];
 
-	// Mark attachment as "don't show" if admin has checked that option:
+	// Return message that message is unapproved ONLY IF not admin, moderator, or post author:
 	$attachment = &$context['ila']['attachments'][$msg][$id];
-	if (empty($attachment['is_approved']))
+	if (empty($attachment['is_approved']) && ($user_info['id'] != $context['ila']['id_member'][$msg_id] && !$user_info['is_admin'] && !$user_info['is_mod']))
 		return $txt['ila_unapproved'];
-	if (!empty($modSettings['ila_duplicate']))
-		$context['ila']['dont_show'][$msg][$attachment['id']] = true;
+
+	// Assemble everything we need for this operation:
+	$url = &$attachment['href'];
+	$ext = strtolower(pathinfo($attachment['name'], PATHINFO_EXTENSION));
+	$opacity = min(100, max(0, (isset($modSettings['ila_transparent']) ? $modSettings['ila_transparent'] : 40)));
+	if (empty($attachment['is_approved']) && empty($opacity))
+		return $txt['ila_unapproved'];
+	$opacity = (empty($attachment['is_approved']) ? ' style=" opacity: ' . ($opacity / 100) . '; filter: alpha(opacity=' . $opacity . ');"' : '');
+	$download_count = !empty($modSettings['ila_duplicate']);
 
 	//===========================================================================================
 	// Is this an image?  If so, assemble the HTML necessary to show it:
@@ -710,6 +718,8 @@ function ILA_Build_HTML(&$tag, &$id)
 		}
 		elseif ($tag['tag'] == 'attachthumb')
 			$image = $thumb = (($use_thumbnail = !empty($attachment['thumbnail']['has_thumb'])) ? $attachment['thumbnail']['href'] : $attachment['href']);
+		$pic_width = $attachment['real_width'];
+		$pic_height = $attachment['real_height'];
 		$real_width = ($use_thumbnail ? $attachment['thumb_width'] : $attachment['real_width']);
 		$real_height = ($use_thumbnail ? $attachment['thumb_height'] : $attachment['real_height']);
 
@@ -751,17 +761,17 @@ function ILA_Build_HTML(&$tag, &$id)
 					$slidegroup = hs4smf_get_slidegroup($id);
 					if (!isset($settings['hs4smf_slideshow']) && $settings['hs4smf_img_count'] > 1)
 						$settings['hs4smf_slideshow'] = 1;
-					$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" onclick="return hs.expand(this, ' . $slidegroup . ')"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . ' id="thumb_' . $id . '" /></a>';
+					$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" onclick="return hs.expand(this, ' . $slidegroup . ')"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . ' id="thumb_' . $id . '"' . $opacity  .' /></a>';
 				}
 				// Highslide Image Viewer Installed?
 				elseif (function_exists('highslide_images'))
-					$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" rel="highslide"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . ' id="thumb_' . $id . '" /></a>' . (isset($context['subject']) ? '<span class="highslide-heading">' . $context['subject'] . '</span>' : '');
+					$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" rel="highslide"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . ' id="thumb_' . $id . '"' . $opacity	.' /></a>' . (isset($context['subject']) ? '<span class="highslide-heading">' . $context['subject'] . '</span>' : '');
 				// jQLightbox Installed?
 				elseif (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css'))
-					$html = '<a href="' . $image . ';image" id="link_' . $id . '" rel="lightbox[gallery]"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . ' id="thumb_' . $id . '" /></a>';
+					$html = '<a href="' . $image . ';image" id="link_' . $id . '" rel="lightbox[gallery]"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . ' id="thumb_' . $id . '"' . $opacity  .' /></a>';
 			}
 			if (empty($html))
-				$html = '<img src="' . $image . ';image" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . ' class="bbc_img resized" />';
+				$html = '<img src="' . $image . ';image" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . ' class="bbc_img resized"' . $opacity	.' />';
 
 			// If the option to show EXIF is checked, let's show the EXIF information (if available):
 			if (!empty($modSettings['ila_display_exif']) && isset($attachment['exif']))
@@ -769,37 +779,95 @@ function ILA_Build_HTML(&$tag, &$id)
 		}
 	}
 	//===========================================================================================
-	// If this is not an image, show it as a video if the attachment has certain extensions:
+	// If this is not an image, see if we can still display the attachment:
 	//===========================================================================================
 	else
 	{
-		// Assemble everything we need for this operation:
-		$url = &$attachment['href'];
-		$ext = strtolower(pathinfo($attachment['name'], PATHINFO_EXTENSION));
-		$context['ila_params']['width'] = (!empty($context['ila_params']['width']) ? $context['ila_params']['width'] : 640);
-		$context['ila_params']['height'] = (!empty($context['ila_params']['height']) ? $context['ila_params']['height'] : 400);
-		$dim = ' width="' . $context['ila_params']['width'] . '" height="' . $context['ila_params']['height'] . '"';
-
-		// Start assembling the HTML string to return to the caller:
-		if (!empty($modSettings['ila_allow_playing_videos']))
+		// If we are allowed to embed attached SVG files, then do so:
+		if (!empty($modSettings['ila_embed_svg_files']) && $ext == 'svg')
 		{
-			if ($ext == 'avi' || $ext == 'divx')
-				$html = '<object classid="clsid:67DABFBF-D0AB-41fa-9C46-CC0F21721616"' . $dim . ' codebase="http://go.divx.com/plugin/DivXBrowserPlugin.cab"><param name="mode" value="full" /><param name="autoPlay" value="false" /><param name="src" value="' . $url . '" /><embed type="video/divx" src="' . $url . '" mode="full"' . $dim . ' autoPlay="false" pluginspage="http://go.divx.com/plugin/download/"></embed></object>';
+			$width = (!empty($context['ila_params']['width']) ? $context['ila_params']['width'] : 0);
+			$height = (!empty($context['ila_params']['height']) ? $context['ila_params']['height'] : 0);
+			$html = '<img src="' .$url . '"' . (empty($width) ? '' : ' width="' . $width . '"') . (empty($height) ? '' : ' height="' . $height . '"') . ' alt="' . $attachment['name'] . '" class="bbc_img" />';
+		}
+		// If we are allowed to embed attached TXT files, then do so:
+		elseif (!empty($modSettings['ila_embed_txt_files']) && $ext == 'txt')
+		{
+			require_once($sourcedir . '/Subs-Package.php');
+			$html = str_replace("\n", '<br/>', htmlentities(fetch_web_data($url)));
+		}
+		// If we are allowed to embed attached PDF files, then do so:
+		elseif (!empty($modSettings['ila_embed_pdf_files']) && $ext == 'pdf')
+		{
+			$width = (isset($context['ila_params']['width']) ? $context['ila_params']['width'] : 500);
+			$height = (isset($context['ila_params']['height']) ? $context['ila_params']['height'] : 600);
+			$turl = preg_replace('#index.php\?action=dlattach;topic=(\d+)\.(\d+);attach=(\d+)#i', 'attachment_$1.$2_$3.pdf', $url);
+			$html = '<iframe src="http://docs.google.com/gview?url=' . $turl .'&embedded=true" width="' . $width . '" height="' . $height .'" frameborder="0"></iframe>';
+		}
+		// If we are allowed to embed videos, then do so for supported formats:
+		elseif (!empty($modSettings['ila_embed_video_files']))
+		{
+			$width = (!empty($context['ila_params']['width']) ? $context['ila_params']['width'] :
+				(!empty($modSettings['ila_video_default_width']) ? $modSettings['ila_video_default_width'] : 640));
+			$height = (!empty($context['ila_params']['height']) ? $context['ila_params']['height'] :
+				(!empty($modSettings['ila_video_default_height']) ? $modSettings['ila_video_default_height'] : 400));
+			$dim = ' width="' . $width . '" height="' . $height . '"';
+			$download_count = !empty($modSettings['ila_video_show_download_link']);
+
+			if ($ext == 'avi')
+				$html = '<object classid="clsid:67DABFBF-D0AB-41fa-9C46-CC0F21721616"' . $dim . ' codebase="http://go.divx.com/plugin/DivXBrowserPlugin.cab">' .
+						'<param name="mode" value="full" />' .
+						'<param name="autoPlay" value="false" />' .
+						'<param name="src" value="' . $url . '" />' .
+						'<embed type="video/divx" src="' . $url . '" mode="full"' . $dim . ' autoPlay="false" pluginspage="http://go.divx.com/plugin/download/"></embed>' .
+					'</object>';
 			elseif ($ext == 'wmv')
-				$html = '<object classid="clsid:22D6F312-B0F6-11D0-94AB-0080C74C7E95"' . $dim . ' standby="Loading Windows Media Player components..." type="application/x-oleobject" id="MediaPlayer"><param name="FileName" value="' . $url . '"><param name="autostart" value="false"><param name="ShowControls" value="true"><param name="ShowStatusBar" value="false"><param name="ShowDisplay" value="false"><embed type="application/x-mplayer2" src="' . $url . '" name="MediaPlayer"' . $dim . ' ShowControls="1" ShowStatusBar="0" ShowDisplay="0" autostart="0"></embed></object>';
-			elseif ($ext == 'mp4')
-				$html = '<video' . $dim . ' controls><source src="' . $url . '" type="video/mp4">Your browser does not support the video tag.</video>';
-			elseif ($ext == 'ogg')
-				$html = '<video' . $dim . ' controls><source src="' . $url . '" type="video/ogg">Your browser does not support the video tag.</video>';
-			elseif ($ext == 'webm')
-				$html = '<video' . $dim . ' controls><source src="' . $url . '" type="video/webm">Your browser does not support the video tag.</video>';
+				$html = '<object classid="clsid:22D6F312-B0F6-11D0-94AB-0080C74C7E95"' . $dim . ' standby="Loading Windows Media Player components..." type="application/x-oleobject" id="MediaPlayer">' .
+						'<param name="FileName" value="' . $url . '">' .
+						'<param name="autostart" value="false">' .
+						'<param name="ShowControls" value="true">' .
+						'<param name="ShowStatusBar" value="false">' .
+						'<param name="ShowDisplay" value="false">' .
+						'<embed type="application/x-mplayer2" src="' . $url . '" name="MediaPlayer"' . $dim . ' ShowControls="1" ShowStatusBar="0" ShowDisplay="0" autostart="0"></embed>' .
+					'</object>';
+			elseif ($ext == 'mp4' || $ext == 'ogv' || $ext == 'webm')
+			{
+				// Search for other video attachments with similar names:
+				$file = array();
+				$filename = pathinfo($attachment['name'], PATHINFO_FILENAME);
+				foreach (array('mp4', 'ogv', 'webm', 'jpg', 'png') as $ext)
+				{
+					foreach ($context['ila']['attachments'][$msg] as $attachment)
+						if ($attachment['name'] == $filename . '.' . $ext)
+							$file[$ext] = $attachment;
+				}
+
+				// Build the video HTML to show the user:
+				$img = (!empty($file['png']) ? $file['png']['href'] : (!empty($file['jpg']) ? $file['jpg']['href'] : ''));
+				$html = '<video controls="controls" width="'. $width . '" height="' . $height . '">' .
+					(!empty($file['mp4']['href']) ? '<source src="' . $file['mp4']['href'] . '" type="video/mp4" />' : '') .
+					(!empty($file['ogv']['href']) ? '<source src="' . $file['ogv']['href'] . '" type="video/ogv" />' : '') .
+					(!empty($file['webm']['href']) ? '<source src="' . $file['webm']['href'] . '" type="video/webm" />' : '')  .
+					(!empty($file['mp4']['href']) || !empty($file['webm']['href']) ?
+					'<object type="application/x-shockwave-flash" data="http://player.longtailvideo.com/player.swf" width="' . $width . '" height="' . $height .'">' .
+						'<param name="movie" value="http://player.longtailvideo.com/player.swf" />' .
+						'<param name="allowFullScreen" value="true" />' .
+						'<param name="wmode" value="transparent" />' .
+						'<param name="flashVars" value="controlbar=over&amp;' . (!empty($img) ? 'image=' . urlencode($img) . '&amp;' : '') . 'file=' . (!empty($file['mp4']['href']) ? urlencode($file['mp4']['href']) : urlencode($file['webm']['href'])) . '" />' .
+						(!empty($img) ? '<img src="' . $img . '" width="' . $width . '" height="' . $height .'" title="' . $txt['ila_no_video'] . '" />' : $txt['ila_no_video']) .
+					'</object>' : '') . '</video>';
+			}
 		}
 	}
 
 	//===========================================================================================
 	// Add the download count to the image tag if requested:
-	if ((!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini') || $tag['tag'] == 'attachurl')
-		$html = (!empty($html) ? $html . '<br/>' : '') . '<span class="smalltext"><a href="' . $image . '"><img src="' . $settings['images_url'] . '/icons/clip.gif" align="middle" alt="*" border="0" /> ' . $attachment['name'] . '</a> ('. $attachment['size']. ($attachment['is_image'] ? '. ' . $real_width . 'x' . $real_height . ' - ' . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . '.)</span>';
+	if (empty($html) || ($download_count && $tag['tag'] != 'attachmini') || $tag['tag'] == 'attachurl')
+	{
+		$idc = (isset($modSettings['ila_download_count']) ? $modSettings['ila_download_count'] : ($tag['tag'] == 'attachurl' ? 4 : 0));
+		$temp = ($idc == 1 ? '' : ($idc >= 5 ? '<br/>' : ' ') . '(' . $attachment['size'] . ($attachment['is_image'] ? ' . ' . $pic_width . 'x' . $pic_height . ($idc == 6 ? ')<br/>(' : ' - ') . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . ')');
+		$html = (!empty($html) ? $html . '<br/>' : '') . '<span class="smalltext"><a href="' . $attachment['href'] . '"><img src="' . $settings['images_url'] . '/icons/clip.gif" align="middle" alt="*" border="0" /> ' . $attachment['name'] . '</a>' . $temp . '</span>';
+	}
 
 	// Do we have something to float or put a margin around?
 	if (!empty($html))
@@ -836,83 +904,29 @@ function ILA_Build_HTML(&$tag, &$id)
 				$html = str_replace('<img src="', '<img style="' . $style . '" src="', $html);
 		}
 	}
+
+	// Mark ONLY approved attachments as "don't show" if admin has checked that option:
+	if (!empty($modSettings['ila_download_count']) && !empty($attachment['is_approved']))
+		$context['ila']['dont_show'][$msg][$attachment['id']] = true;
+
+	// Return to our lord and saviour, our caller! :p
 	return $html;
 }
 
 //================================================================================
-// Hook functions to add new subsection to the Modifications Setting page:
+// Helper function to return the correct MIME type for certain types of files:
 //================================================================================
-function ILA_Admin_Menu_Hook(&$area)
+function ILA_Mime_Type($ext, &$mime_type)
 {
-	global $txt;
-	ILA_Load_Stuff();
-	$area['layout']['areas']['manageattachments']['subsections']['ila'] = array($txt['ila_admin_settings']);
-}
-
-function ILA_Admin_Settings_Hook(&$sub)
-{
-	$sub['ila'] = 'ILA_Admin_Settings';
-}
-
-function ILA_Admin_Settings($return_config = false)
-{
-	global $context, $modSettings, $txt, $scripturl, $sourcedir;
-	isAllowedTo('admin_forum');
-
-	// Load required stuff in order to make this work right:
-	require_once($sourcedir . '/ManagePermissions.php');
-	require_once($sourcedir . '/ManageServer.php');
-
-	// Get latest version of the mod and display whether current mod is up-to-date:
-	if (($file = cache_get_data('ila_mod_version', 86400)) == null)
-	{
-		$file = file_get_contents('http://www.xptsp.com/tools/mod_version.php?url=Post_and_PM_Inline_Attachments');
-		cache_put_data('ila_mod_version', $file, 86400);
-	}
-	if (preg_match('#Post_and_PM_Inline_Attachments_v(.+?)\.zip#i', $file, $version))
-	{
-		if (isset($modSettings['ila_version']) && $version[1] > $modSettings['ila_version'])
-			$context['settings_message'] = '<strong>' . sprintf($txt['ila_no_update'], $version[1]) . '</strong>';
-		else
-			$context['settings_message'] = '<strong>' . $txt['ila_no_update'] . '</strong>';
-	}
-
-	// Assemble the options available in this mod:
-	if (!isset($modSettings['ila_insert_tag']))
-		$modSettings['ila_insert_tag'] = 'attachment';
-	$tags = array();
-	foreach (ILA_tags() as $tag)
-		$tags[$tag] = $tag;
-	$config_vars = array(
-		array('title', 'ila_mod_settings'),
-		array('select', 'ila_insert_tag', $tags),
-		array('check', 'ila_attach_same_as_attachment'),
-		array('check', 'ila_one_based_numbering'),
-		array('check', 'ila_allow_quoted_images'),
-		array('check', 'ila_duplicate'),
-		array('check', 'ila_download_count'),
-		array('check', 'ila_turn_nosniff_off'),
-		array('check', 'ila_allow_playing_videos'),
+	$mime = array(
+		'svg' => 'image/svg+xml',
+		'pdf' => 'application/pdf',
+		'ogv' => 'video/ogg',
+		'mp4' => 'video/mp4',
+		'webm' => 'video/webm',
 	);
-	if (function_exists('hs4smf') || function_exists('highslide_images') || (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css')))
-		$config_vars[] = array('check', 'ila_highslide');
-	if (file_exists($sourcedir . '/exif.php'))
-		$config_vars[] = array('check', 'ila_display_exif');
-
-	if ($return_config)
-		return $config_vars;
-	$context['sub_template'] = 'show_settings';
-	$context['settings_title'] = $txt['ila_title'];
-	$context['post_url'] = $scripturl . '?action=admin;area=manageattachments;sa=ila;save';
-
-	// Saving?
-	if (isset($_GET['save']))
-	{
-		checkSession();
-		saveDBSettings($config_vars);
-		redirectexit('action=admin;area=manageattachments;sa=ila');
-	}
-	prepareDBSettingContext($config_vars);
+	$mime_type = (isset($mime[$ext]) ? $mime[$ext] : '');
+	return !empty($mime_type);
 }
 
 ?>
