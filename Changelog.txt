@@ -1,3 +1,6 @@
+v4.15 - April 15th, 2016
+o Added Spanish Latin translation by [url=http://www.simplemachines.org/community/index.php?action=profile;u=322597]Rock Lee [BC][/url].
+
 v4.14 - November 21st, 2015
 o Added support for the "Boilerplates for Posts" mod to update ILA tags used.
 o Modified ILA_Admin_Adjust to attempt to avoid incorrect of post messages.

@@ -17,13 +17,11 @@ if (!defined('SMF'))
 //================================================================================
 function ILA_tags()
 {
-	return array('attach', 'attachment', 'attachmini', 'attachthumb', 'attachurl', 'attachthumb');
+	return array('attach', 'attachment', 'attachmini', 'attachthumb', 'attachurl', 'attachimg');
 }
 
 function ILA_parameters(&$params1, &$params2)
 {
-	global $sourcedir;
-
 	$params1 = array(
 		'id' => array('match' => '(\d+)', 'validate' => 'ILA_Param_ID'),
 		'width' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Width'),
@@ -686,16 +684,17 @@ function ILA_Build_HTML(&$tag, &$id)
 
 	// Are attachments enabled and can we see them?	 If not, return no permission message:
 	$attachment = &$context['ila']['attachments'][$msg][$id];
+
+	// If we are previewing the post, return "attachment not uploaded yet" message:
+	if (!isset($context['ila']['attachments'][$msg]) && isset($_REQUEST['action']) && $_REQUEST['action'] == 'post2')
+		return $txt['ila_not_uploaded'];
+	
+	// This part is done after board permission check because we don't want to give user false hope.
 	if (empty($context['ila']['pm_attach']) && (empty($modSettings['attachmentEnable']) || empty($context['ila']['view_attachments'][$topic])))
 		return $txt['ila_nopermission'];
 	if (!empty($context['ila']['pm_attach']) && (empty($modSettings['pmAttachmentEnable']) || empty($context['ila']['pm_view_attachments'])))
 		return $txt['ila_nopermission'];
 
-	// This part is done after board permission check because we don't want to give user false hope.
-	// If we are previewing the post, return "attachment not uploaded yet" message:
-	if (!isset($context['ila']['attachments'][$msg]) && (isset($_REQUEST['action']) ? $_REQUEST['action'] : '') == 'post2')
-		return $txt['ila_not_uploaded'];
-	
 	// Does the specified attachment exist in the message?  If not, return attachment invalid message:
 	if ($msg == 'new')
 		return $txt['ila_attachment'];
