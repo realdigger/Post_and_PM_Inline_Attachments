@@ -1,3 +1,7 @@
+v4.11 - November 10th, 2015
+o Fixed undefined index error in PersonalMessage.template.php, reported by brynn.
+o Modified renumbering function to avoid "hacking attempt" error message.
+
 v4.10 - November 5th, 2015
 o "Allow quoted attachments from another post" is ignored if Tapatalk mod is detected.
 o "Allow quoted attachments from another post" is now unchecked and disabled when Tapatalk mod is detected.

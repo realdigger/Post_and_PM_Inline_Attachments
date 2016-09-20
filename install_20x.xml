@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>4.10</version>
+<version>4.11</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -231,6 +231,14 @@
 		$output['attachment'] = &$context['ila']['attachments'][$context['ila']['msg']];
 
 ]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[// This file contains the basic functions for sending a PM.
+	require_once($sourcedir . '/Subs-Post.php');
+
+	loadLanguage('PersonalMessage');]]></search>
+		<add><![CDATA[
+	loadLanguage('InlineAttachments');]]></add>
 	</operation>
 </file>
 

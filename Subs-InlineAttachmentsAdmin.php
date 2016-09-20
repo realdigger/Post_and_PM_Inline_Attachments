@@ -232,23 +232,22 @@ function ILA_Admin_Adjust($ascending = true)
 						asort($attachtags);
 
 					// Change the attachment ID number that the bbcode is using:
+					$begin = $end = '';
 					foreach ($attachtags as $txt)
 					{
 						if (preg_match('#\[' . $tag . '(=| id=)(\d+)(|(,| )(.+?))\]#i', $txt, $params))
 						{
-							$search = '[' . $tag . $params[1] . $params[2];
-							$replace = '[' . $tag . $params[1] . ($params[2] + $change_by);
-							$row['body'] = str_replace($search, $replace, $row['body']);
+							$begin .= 'REPLACE(';
+							$end = ', "[' . $tag . $params[1] . $params[2] . '", "[' . $tag . $params[1] . ($params[2] + $change_by) . '")' . $end;
 						}
 					}
 
-					// Write the new message back to the database:
+					// Modify the message in the database so that it is correct:
 					$smcFunc['db_query']('', '
 						UPDATE {db_prefix}' . $cycle[0] . '
-						SET body = "{raw:body}"
+						SET body = ' . $begin . 'body' . $end . '
 						WHERE ' . $cycle[1] . ' = {int:id}',
 						array(
-							'body' => $row['body'],
 							'id' => $row[$cycle[1]],
 						)
 					);
