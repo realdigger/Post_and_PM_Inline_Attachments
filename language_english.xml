@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
-<id>Dougiefresh:Enhanced_PM_System</id>
-<version>1.4</version>
+<name>Post and PM Inline Attachments</name>
+<id>Dougiefresh:ILA</id>
+<version>1.2</version>
 
 <!-------------------------------------------------------------------------->
 <!-- Language file edits (English - Modifications)                        -->

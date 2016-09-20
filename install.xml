@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 	<name>Post and PM Inline Attachments</name>
 	<id>Dougiefresh:ILA</id>
-	<version>1.0</version>
+	<version>1.2</version>
 
 <!-------------------------------------------------------------------------->
 <!-- Source file edits                                                    -->
@@ -25,6 +25,14 @@
 	</operation>
 </file>
 <file name="$sourcedir/Post.php">
+	<operation>
+		<search position="replace"><![CDATA[loadLanguage('Post');
+
+	// You can't reply with a poll... hacker.]]></search>
+		<add><![CDATA[loadLanguage('Post+Modifications');
+
+	// You can't reply with a poll... hacker.]]></add>
+	</operation>
 	<operation>
 		<search position="before"><![CDATA[
 		$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
@@ -64,6 +72,14 @@
 	</operation>
 </file>
 <file name="$sourcedir/PersonalMessage.php">
+	<operation>
+		<search position="replace"><![CDATA[loadLanguage('PersonalMessage');
+
+	if (WIRELESS && WIRELESS_PROTOCOL == 'wap')]]></search>
+		<add><![CDATA[loadLanguage('PersonalMessage+Modifications');
+
+	if (WIRELESS && WIRELESS_PROTOCOL == 'wap')]]></add>
+	</operation>
 	<operation error="ignore">
 		<search position="replace"><![CDATA[loadPMAttachmentContext($message['id_pm']),]]></search>
 		<add><![CDATA[$context['ila_attachments'],]]></add>
@@ -134,7 +150,7 @@
 		<search position="replace"><![CDATA[
 									<input type="file" size="38" name="attachment[]" class="input_file" />';]]></search>
 		<add><![CDATA[
-									<input type="file" size="38" name="attachment[]" id="attachment1" class="input_file" /> <a href="javascript:void(0);" onclick="replaceText(\'[attachment=', count($context['current_attachments']) ,'][/attachment]\', document.forms.postmodify.', $context['post_box_name'], '); return false;">(', $txt['ila_insert'] ,' ', count($context['current_attachments']) ,')</a>';]]></add>
+									<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a href="javascript:void(0);" onclick="replaceText(\'[attachment=', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,'][/attachment]\', document.forms.postmodify.', $context['post_box_name'], '); return false;">', $txt['ila_insert'] ,' ', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,'</a>)';]]></add>
 	</operation>
 	<operation error="ignore">
 		<search position="replace"><![CDATA[
@@ -150,17 +166,17 @@
 											return true;
 										}
 ]]></search>
-		<add><![CDATA[
-										var count_attachments = ', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,' + 1;
+		<add><![CDATA[										var current_attachment = 1;
+
 										function addAttachment()
 										{
-											allowed_attachments = allowed_attachments - 1;
 											current_attachment = current_attachment + 1;
-											count_attachments = count_attachments + 1 ;
 											if (allowed_attachments <= 0)
 												return alert("', $txt['more_attachments_error'], '");
 
-											setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(', $txt['more_attachments'], ')<\' + \'/a><\' + \'/dd>\');
+											setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + (current_attachment - 1) + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="replaceText(\\\'[attachment=\' + (current_attachment - 1) + \'][/attachment]\\\', document.forms.postmodify.', $context['post_box_name'], '); return false;">', $txt['ila_insert'] ,' \' + (current_attachment - 1) + \')</a>\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(', $txt['more_attachments'], ')<\' + \'/a><\' + \'/dd>\');
+
+											allowed_attachments = allowed_attachments - 1;
 
 											return true;
 										}
@@ -190,7 +206,7 @@
 		<search position="replace"><![CDATA[
 							<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" />]]></search>
 		<add><![CDATA[
-							<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> <a href="javascript:void(0);" onclick="replaceText(\'[attachment=', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,'][/attachment]\', document.forms.postmodify.', $context['post_box_name'], '); return false;">(', $txt['ila_insert'] ,' ', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,')</a>]]></add>
+							<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a href="javascript:void(0);" onclick="replaceText(\'[attachment=', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,'][/attachment]\', document.forms.postmodify.', $context['post_box_name'], '); return false;">', $txt['ila_insert'] ,' ', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,'</a>)]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[
@@ -207,16 +223,14 @@
 								}
 ]]></search>
 		<add><![CDATA[
-								var count_attachments = ', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,' + 1;
 								function addAttachment()
 								{
 									allowed_attachments = allowed_attachments - 1;
-									current_attachment = current_attachment + 1;
 									count_attachments = count_attachments + 1 ;
 									if (allowed_attachments <= 0)
 										return alert("', $txt['more_attachments_error'], '");
 
-									setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(', $txt['more_attachments'], ')<\' + \'/a><\' + \'/dd>\');
+									setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + (current_attachment - 1) + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="replaceText(\\\'[attachment=\' + (current_attachment - 1) + \'][/attachment]\\\', document.forms.postmodify.', $context['post_box_name'], '); return false;">', $txt['ila_insert'] ,' \' + (current_attachment - 1) + \')</a> (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + (current_attachment - 1) + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(', $txt['more_attachments'], ')<\' + \'/a><\' + \'/dd>\');
 
 									return true;
 								}
@@ -249,8 +263,6 @@
 	</operation>
 </file>
 
-</modification>
-
 <!-------------------------------------------------------------------------->
 <!-- Highslide4SMF v0.8.1 support file edit                               -->
 <!-------------------------------------------------------------------------->
@@ -263,3 +275,4 @@
 //				continue;]]></add>
 	</operation>
 </file>
+</modification>
