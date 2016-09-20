@@ -19,8 +19,11 @@ $txt['ila_nopermission'] = ' [ You are not allowed to view attachments ] ';
 $txt['ila_invalid'] = ' [ Invalid Attachment ] ';
 $txt['ila_disabled'] = ' [ Attachments Disabled ] ';
 
-// MOD Configuration options strings
-$txt['ila_title'] = 'Inline Attachments';
+// MOD Configuration options strings:
+$txt['ila_admin_settings'] = 'ILA';
+$txt['ila_new_version'] = 'Post and PM Inline Attachments mod version %s is available for download!';
+$txt['ila_no_update'] = 'Your install of Post and PM Inline Attachments is up to date!';
+$txt['ila_title'] = 'Post and PM Inline Attachments';
 $txt['ila_highslide'] = 'Enable Highslide effects for inline attachment?';
 $txt['ila_duplicate'] = 'Remove attachment image under post after in-post use?';
 $txt['ila_download_count'] = 'Show download link and counter under inline attachment?';

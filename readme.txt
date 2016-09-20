@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v3.0[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v3.1[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -64,9 +64,13 @@ o Text between inline attachment brackets are removed (as of version 3.0).
 [color=blue][b][size=12pt][u]Admin Settings[/u][/size][/b][/color]
 The bbcode may be disabled by going to [b][i]Admin[/i] -> [i]Forums[/i] -> [i]Posts and Topics[/i] -> [i]Bulletin Board Code[/i][/b] and unchecking the [b]attachment[/b] bbcode.
 
-On the [b][i]Admin[/i] -> [i]Configuration[/i] -> [i]Modification Settings[/i] -> [i]Miscellaneous[/i][/b] page, there are two new options under the heading [i][b]Inline Attachments[/b][/i]:
-o Remove attachment image under post after in-post use
-o Show download link and counter under inline attachment, like non-inline attachments
+On the [b][i]Admin[/i] -> [i]Configuration[/i] -> [i]Modification Settings[/i] -> [i]ILA[/i][/b] page, there are several new options:
+o Remove attachment image under post after in-post use.
+o Show download link and counter under inline attachment, like non-inline attachments.
+o Turn off "nosniff" option for IE and Chrome browsers.
+o Use "One based numbering" for attachment IDs (first attachment is 1 instead of 0).
+o Allow quoted attachment images from another post.
+o Use Highslide effects for inline attachments.
 
 [color=blue][b][size=12pt][u]Compatibility Notes[/u][/size][/b][/color]
 This mod was tested on SMF 2.0.9, but should work on SMF 2.1 Beta 1, as well as SMF 2.0 and up.  SMF 1.x is not and will not be supported.

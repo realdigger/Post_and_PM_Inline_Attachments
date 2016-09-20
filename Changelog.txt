@@ -1,3 +1,16 @@
+v3.1 - April 24th, 2015
+o Fixed a bug preventing previewing posts from working correctly.
+o Viewing inline attachments now works for guests when viewing PM attachments permission is granted.
+o Edited posts will be changed to use the new "Version 3.0"-style tags.
+o Changed inserted inline attachment tag from "[attachment=n][/attachment]" to "[attachment=n]".
+o Added some forgotten template changes to make the "One-based numbering" option work correctly.
+o Fixed a bug so that quotes without message ID no longer remove inline attachments with message ID specifed.
+o Fixed bug so that floating inline attachment had a download link & counter beneath it when option is set.
+o Fixed a few undefined errors within Subs-InlineAttachments.php.
+o Fixed multiple bugs in ILA_Fix_Tags function.
+o Fixed undefined element error within Sources/Display.php.
+o ILA settings moved into a seperate area under Modification Settings, includes online version check.
+
 v3.0 - April 17th, 2015
 o Added "msg" parameter so that attachments from other posts can be included/quoted.
 o Added code to allow inline attachments used in a post to be properly quoted.

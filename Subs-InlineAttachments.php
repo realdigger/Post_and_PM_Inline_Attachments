@@ -8,7 +8,6 @@
 **********************************************************************************/
 if (!defined('SMF'))
 	die('Hacking attempt...');
-$ila_version = "3.0";
 
 //================================================================================
 // BBCode hook function & supporting subfunction for ILA mod
@@ -66,11 +65,8 @@ function ILA_Load_Stuff()
 	$context['ila']['pm_attach'] = false;
 	if (!isset($context['ila']['attachments']))
 		$context['ila']['attachments'] = array();
-	if (!isset($context['ila']['view_attachments']))
-		$context['ila']['view_attachments'] = allowedTo('view_attachments');
 	if (!isset($context['ila']['pm_view_attachments']))
 		$context['ila']['pm_view_attachments'] = allowedTo('pm_view_attachments');
-	$context['ila']['base'] = (isset($modSettings['ila_one_based_numbering']) && !empty($modSettings['ila_one_based_numbering']));
 }
 
 //================================================================================
@@ -78,23 +74,24 @@ function ILA_Load_Stuff()
 //================================================================================
 function ILA_Setup($msg_id, &$message)
 {
-	global $context;
+	global $context, $topic;
 	
 	// Load language strings and stuff (duh)
 	ILA_Load_Stuff();
 
 	// We can't load attachments if we don't know the message id number....
-	if (($context['ila']['msg'] = (int) $msg_id) != 0)
-		ILA_Post_Attachments($msg_id);
-	elseif (($context['ila']['msg'] = (int) str_replace('pre', '', $msg_id)) != 0)
-		ILA_Post_Attachments($context['ila']['msg']);
+	if (($id = $context['ila']['msg'] = (int) $msg_id) != 0)
+		ILA_Post_Attachments($id);
+	elseif (($id = $context['ila']['msg'] = (int) str_replace('pre', '', $msg_id)) != 0)
+		ILA_Post_Attachments($id);
 	elseif (function_exists('loadPMAttachmentContext'))
 	{
-		if (($context['ila']['msg'] = (int) str_replace('pm', '', $msg_id)) != 0)
-			ILA_PM_Attachments($context['ila']['msg']);
-		elseif (($context['ila']['msg'] = (int) str_replace('pm_pre', '', $msg_id)) != 0)
-			ILA_PM_Attachments($context['ila']['msg']);
+		if (($id = $context['ila']['msg'] = (int) str_replace('pm', '', $msg_id)) != 0)
+			ILA_PM_Attachments($id);
+		elseif (($id = $context['ila']['msg'] = (int) str_replace('pm_pre', '', $msg_id)) != 0)
+			ILA_PM_Attachments($id);
 	}
+
 
 	// If there isn't a message to setup for, just return to the caller:
 	if (empty($message))
@@ -110,13 +107,13 @@ function ILA_Setup($msg_id, &$message)
 		$message = str_replace('[/' . $tag .'][/' . $tag .']', '[/' . $tag . ']', $message);
 	}
 
-	// Replace attachments inside codes cause we don't know what post/PM it belongs to...
+	// Replace attachments inside code brackets cause we don't know what post/PM it belongs to...
 	$pattern = '#\[code(.+?)\](.+?)\[/code\]#i' . ($context['utf8'] ? 'u' : '');
 	if (preg_match_all($pattern, $message, $codes, PREG_PATTERN_ORDER))
 	{
 		$codes = array_unique($codes[0]);
-		foreach ($codes as $b)
-			$message = str_replace($b, ILA_Invalid_Tags($b), $message);
+		foreach ($codes as $code)
+			$message = str_replace($code, ILA_Invalid_Tags($code), $message);
 	}
 
 	// Process the inline attachments in the quotes, then pass the result back:
@@ -128,20 +125,30 @@ function ILA_Setup($msg_id, &$message)
 //================================================================================
 function ILA_Post_Attachments($msg_id)
 {
-	global $modSettings, $smcFunc, $attachments, $context, $sourcedir, $topic;
+	global $context, $modSettings, $smcFunc, $attachments, $sourcedir, $topic;
 
+	// Check to make sure that we can view attachments:
+	$request = $smcFunc['db_query']('', '
+		SELECT id_topic FROM {db_prefix}messages WHERE id_msg = {int:msg}',
+		array('msg' => (int) $msg_id)
+	);
+	$row = $smcFunc['db_fetch_assoc']($request);
+	$smcFunc['db_free_result']($request);
+	$topic = $row['id_topic'];
+	if (!isset($context['ila']['view_attachments'][$topic]))
+		$context['ila']['view_attachments'][$topic] = allowedTo('view_attachments');
+	
 	// Fetch attachments for use in "parse_bbc" function...
 	unset($attachments[$msg_id]);
-	if (!empty($modSettings['attachmentEnable']) && !empty($context['ila']['view_attachments']))
+	if (!empty($modSettings['attachmentEnable']) && !empty($context['ila']['view_attachments'][$topic]))
 	{
 		$request = $smcFunc['db_query']('', '
 			SELECT
-				m.id_topic, a.id_attach, a.id_folder, a.id_msg, a.filename, a.file_hash, IFNULL(a.size, 0) AS filesize, a.downloads, a.approved,
+				a.id_attach, a.id_folder, a.id_msg, a.filename, a.file_hash, IFNULL(a.size, 0) AS filesize, a.downloads, a.approved,
 				a.width, a.height' . (empty($modSettings['attachmentShowImages']) || empty($modSettings['attachmentThumbnails']) ? '' : ',
 				IFNULL(thumb.id_attach, 0) AS id_thumb, thumb.width AS thumb_width, thumb.height AS thumb_height') . '
 			FROM {db_prefix}attachments AS a' . (empty($modSettings['attachmentShowImages']) || empty($modSettings['attachmentThumbnails']) ? '' : '
 				LEFT JOIN {db_prefix}attachments AS thumb ON (thumb.id_attach = a.id_thumb)') . '
-				LEFT JOIN {db_prefix}messages AS m ON (m.id_msg = a.id_msg)
 			WHERE a.id_msg = {int:message_id}
 				AND a.attachment_type = {int:attachment_type}',
 			array(
@@ -157,8 +164,6 @@ function ILA_Post_Attachments($msg_id)
 				continue;
 
 			$temp[$row['id_attach']] = $row;
-			$topic = $row['id_topic'];
-
 			if (!isset($attachments[$row['id_msg']]))
 				$attachments[$row['id_msg']] = array();
 		}
@@ -180,7 +185,7 @@ function ILA_Post_Attachments($msg_id)
 //================================================================================
 function ILA_PM_Attachments($msg_id)
 {
-	global $modSettings, $smcFunc, $attachments, $context, $sourcedir, $user_info;
+	global $context, $modSettings, $smcFunc, $attachments, $sourcedir, $user_info;
 
 	// Fetch attachments for use in "parse_bbc" function...
 	unset($attachments[$msg_id]);
@@ -227,6 +232,230 @@ function ILA_PM_Attachments($msg_id)
 }
 
 //================================================================================
+// Functions that are called to alter ILA tags that have been quoted:
+//================================================================================
+function ILA_Process_Quotes(&$message)
+{
+	global $context;
+
+	$pattern = '#\[quote(.+?)\](.+?)\[/quote\]#i' . ($context['utf8'] ? 'u' : '');
+	if (preg_match_all($pattern, $message, $quotes, PREG_PATTERN_ORDER))
+	{
+		$quotes = array_unique($quotes[0]);
+		foreach ($quotes as $quote)
+			$message = str_replace($quote, ILA_Add_MsgID($quote), $message);
+	}
+}
+
+function ILA_Add_MsgID($message)
+{
+	global $context;
+	
+	// Start searching for the SMF 2.0.x-style message ID in the quote bracket:
+	$pattern = '#\[quote(.+?)\#msg(\d+)(.+?)\]#i' . ($context['utf8'] ? 'u' : '');
+	if (!preg_match_all($pattern, $message, $info, PREG_PATTERN_ORDER))
+	{
+		// Look for SMF 2.1-style message ID in the quote bracket:
+		$pattern = '#\[quote(.+?)msg=(\d+)(.+?)\]#i' . ($context['utf8'] ? 'u' : '');
+		if (!preg_match_all($pattern, $message, $info, PREG_PATTERN_ORDER))
+			return ILA_Invalid_Tags($message, true);
+	}
+	foreach (ILA_tags() as $tag)
+	{
+		// Process the "Version 1.0" bbcode forms here:
+		$pattern = '#\[' . $tag . '=(.+?)\]#i' . ($context['utf8'] ? 'u' : '');
+		$message = preg_replace($pattern, '[' . $tag . '=$1,msg' . $info[2][0] . ']', $message);
+		$pattern = '#msg(\d+),msg(\d+)#i' . ($context['utf8'] ? 'u' : '');
+		$message = preg_replace($pattern, 'msg$1', $message);
+
+		// Process the "Version 2.0" bbcode forms here:
+		$pattern = '#\[' . $tag . ' (.+?)\]#i' . ($context['utf8'] ? 'u' : '');
+		$message = preg_replace($pattern, '[' . $tag . ' $1 msg=' . $info[2][0] . ']', $message);
+		$pattern = '#msg=(\d+) msg=(\d+)#i' . ($context['utf8'] ? 'u' : '');
+		$message = preg_replace($pattern, 'msg=$1', $message);
+	}
+	return $message;
+}
+
+//================================================================================
+// Function called to replace invalid attachment tags in the message
+//================================================================================
+function ILA_Invalid_Tags($message, $exclude_msgid = false)
+{
+	global $txt, $context, $modSettings, $topic;
+
+	// Load language strings and stuff (duh)
+	ILA_Load_Stuff();
+
+	// Show attachment text string or error text string in topic history
+	$replacement = ((empty($modSettings['attachmentEnable']) || empty($context['ila']['view_attachments'][$topic])) ? $txt['ila_nopermission'] : $txt['ila_attachment']);
+	foreach (ILA_tags() as $tag)
+	{
+		// Force each inline attachment tag into our mutant "Version 3.0" form :p
+		$pattern = '#\[' . $tag . '(=| )(.+?)\]([^\[]*)\[/' . $tag . '\]#i' . ($context['utf8'] ? 'u' : '');
+		$message = preg_replace($pattern, '[' . $tag . '$1$2]', $message);
+
+		// If "$exclude_msgid" is false, clear all invalid inline attachments from the message:
+		$pattern = '#\[' . $tag . '(=| )(.+?)\]#i' . ($context['utf8'] ? 'u' : '');
+		if (empty($exclude_msgid))
+			$message = preg_replace($pattern, $replacement, $message);
+			
+		// Otherwise, clear invalid inline attachments that don't have a message ID linked to it:
+		elseif (preg_match_all($pattern, $message, $attachcode, PREG_PATTERN_ORDER))
+		{
+			$attachcode = array_unique($attachcode[0]);
+			asort($attachcode);
+			foreach ($attachcode as $txt)
+			{
+				if (!preg_match('# msg=(/d+)#i', $txt) && !preg_match('#,msg(/d+)#i', $txt))
+					$message = str_replace($txt, $replacement, $message);
+			}
+		}		
+	}
+	return $message;
+}
+
+//================================================================================
+// Function to fix the tags after an attachment has been removed:
+//================================================================================
+function ILA_Fix_Tags(&$message, &$query)
+{
+	global $context, $attachments, $modSettings;
+
+	// Load language strings and stuff (duh)
+	ILA_Load_Stuff();
+
+	// Convert all inline attachment tags to "Version 3.0" form:
+	foreach (ILA_tags() as $tag)
+	{
+		// Force each inline attachment tag into our mutant "Version 3.0" form :p
+		$pattern = '#\[' . $tag . '(=| )(.+?)\]([^\[]*)\[/' . $tag . '\]#i' . ($context['utf8'] ? 'u' : '');
+		$message = preg_replace($pattern, '[' . $tag . '$1$2]', $message);
+
+		// Start processing missing attachments:
+		$pattern = '#\[' . $tag . '(=| )(.+?)\]#i' . ($context['utf8'] ? 'u' : '');
+		if (preg_match_all($pattern, $message, $attachtags, PREG_PATTERN_ORDER))
+		{
+			// Figure out where the attachments will be once the requested ones are deleted:
+			$msg_id = $query['id_msg'];
+			if (!isset($attachment[$msg_id]))
+				ILA_Setup($msg_id, $msg_id);
+			$i = $modSettings['ila_one_based_numbering'];
+			$attach = array();
+			foreach ($attachments[$msg_id] as $b)
+			{
+				if (in_array($b['id_attach'], $query['not_id_attach']))
+					$attach[$b['id_attach']] = $i++;
+			}
+			foreach ($query['not_id_attach'] as $b)
+			{
+				if (!isset($attachments[$msg_id][$b]) && !isset($attach[$b]))
+					$attach[$b] = $i++;
+			}				
+
+			// Find the unique attachment bbcodes and sort them so we don't change the same bbcode multiple times:
+			$attachtags = array_unique($attachtags[0]);
+			asort($attachtags);
+
+			// Adjust or remove the attachment bbcodes so that the ones remaining still work:
+			foreach ($attachtags as $txt)
+			{
+				if (preg_match('# id=(\d+)#i', $txt, $attach_num))
+				{
+					if (!preg_match('# msg=(/d+)#i', $txt))
+					{
+						$look_for = $attach_num[1] - $modSettings['ila_one_based_numbering'];
+						if (!empty($attachments[$msg_id][$look_for]['id_attach']))
+						{
+							$id_attach = $attachments[$msg_id][$look_for]['id_attach'];
+							if (!isset($attach[$id_attach]))
+								$message = str_replace($txt, '', $message);
+							else
+								$message = preg_replace('#\[' . $tag . '(.+?)' . $attach_num[0] . '(.+?)\]#i' . ($context['utf8'] ? 'u' : ''), '[' . $tag . '$1id=' . $attach[$id_attach] . '$2]', $message);
+						}
+						else
+							$message = str_replace($txt, '', $message);
+					}
+				}
+				elseif (preg_match('(\d+)', $txt, $attach_num))
+				{
+					if (!preg_match('#,msg(/d+)#i', $txt))
+					{
+						$look_for = $attach_num[0] - $modSettings['ila_one_based_numbering'];
+						if (!empty($attachments[$msg_id][$look_for]['id_attach']))
+						{
+							$id_attach = $attachments[$msg_id][$look_for]['id_attach'];
+							if (!isset($attach[$id_attach]))
+								$message = str_replace($txt, '', $message);
+							else
+								$message = str_replace($txt, '[' . $tag . '=' . $attach[$id_attach] . substr($txt, strlen($tag) + strlen($attach[$id_attach]) + 2), $message);
+						}
+						else
+							$message = str_replace($txt, '', $message);
+					}
+				}
+				else
+					$message = str_replace($txt, '', $message);
+			}
+		}
+	}
+}
+
+//================================================================================
+// BBCode parameter validation functions
+//================================================================================
+function ILA_Param_Scale($answer)
+{
+	global $context;
+	$context['ila_params']['scale'] = ($answer == false || $answer == 'no');
+}
+
+function ILA_Param_ID($id)
+{
+	global $context;
+	$context['ila_params']['id'] = (int) $id;
+}
+
+function ILA_Param_Width($width)
+{
+	global $context;
+	$context['ila_params']['width'] = max(0, (int) $width);
+}
+
+function ILA_Param_Height($height)
+{
+	global $context;
+	$context['ila_params']['height'] = max(0, (int) $height);
+}
+
+function ILA_Param_Float($where)
+{
+	global $context;
+	$context['ila_params']['float'] = ($where == 'left' ? 'left' : ($where == 'right' ? 'right' : 'center'));
+}
+
+function ILA_Param_Margin($margin)
+{
+	global $context;
+	$context['ila_params']['margin'] = max(0, (int) $margin);
+}
+
+function ILA_Param_Msg($msg)
+{
+	global $context, $modSettings;
+	
+	if (isset($modSettings['ila_allow_quoted_images']) && empty($modSettings['ila_allow_quoted_images']))
+		return;
+	$context['ila_params']['msg'] = $msg = (int) $msg;
+	if (empty($msg))
+		return;
+	elseif (!isset($context['ila']['attachments'][$msg]) && empty($context['ila']['pm_attach']))
+		ILA_Post_Attachments($msg);
+	elseif (!isset($context['ila']['attachments'][$msg]) && !empty($context['ila']['pm_attach']))
+		ILA_PM_Attachments($msg);
+}
+
+//================================================================================
 // Validation & link building function for the Inline Attachment mod
 //================================================================================
 function ILA_Start_v1x(&$tag, &$data, $disabled)
@@ -237,18 +466,13 @@ function ILA_Start_v1x(&$tag, &$data, $disabled)
 		$data = $txt['ila_invalid'];
 	else
 	{
-		if (substr($data[ count($data) - 1 ], 0, 3) == 'msg')
-		{
-			$msg = substr($data[ count($data) - 1 ], 3);
-			unset($data[ count($data) - 1 ]);
-		}
 		$context['ila_params'] = array(
 			'id' => (int) $data[1],
 			'width' => isset($data[2]) ? (int) $data[2] : 0,
 			'height' => isset($data[3]) ? (int) $data[3] : 0,
 		);
-		if (isset($msg))
-			ILA_Param_Msg($msg);
+		if (substr($data[ count($data) - 1 ], 0, 3) == 'msg')
+			ILA_Param_Msg( substr($data[ count($data) - 1 ], 3) );
 		$data[0] = ILA_Build_Link($tag, $context['ila_params']['id']);
 	}
 }
@@ -266,13 +490,13 @@ function ILA_Start_v20(&$tag, &$data, $disabled)
 
 function ILA_Build_Link(&$tag, &$id)
 {
-	global $modSettings, $context, $txt, $settings;
+	global $context, $modSettings, $txt, $settings, $topic;
 
 	// If the "one-based numbering" option is set, subtract 1 from the attachment ID to make it compatible:
-	$id = $id - $context['ila']['base'];
+	$id = $id - $modSettings['ila_one_based_numbering'];
 
 	// Are attachments enabled and can we see them?  If not, return no permission message:
-	if (empty($context['ila']['pm_attach']) && (empty($modSettings['attachmentEnable']) || empty($context['ila']['view_attachments'])))
+	if (empty($context['ila']['pm_attach']) && (empty($modSettings['attachmentEnable']) || empty($context['ila']['view_attachments'][$topic])))
 		return $txt['ila_nopermission'];
 	if (!empty($context['ila']['pm_attach']) && (empty($modSettings['pmAttachmentEnable']) || empty($context['ila']['pm_view_attachments'])))
 		return $txt['ila_nopermission'];
@@ -341,7 +565,8 @@ function ILA_Build_Link(&$tag, &$id)
 	// Process the remaining bbcode parameters:
 	$width = (!empty($src_width) ? ' width="' . $src_width .'"' : '');
 	$height = (!empty($src_height) ? ' height="' . $src_height .'"' : '');
-	$float = (isset($context['ila_params']['float']) ? ' style="float:' . $context['ila_params']['float'] . (isset($context['ila_params']['margin']) ? '; margin:' . $context['ila_params']['margin'] . 'px' : '') . '"' : '');
+	$divfloat = (isset($context['ila_params']['float']) ? ' style="float:' . $context['ila_params']['float'] . (isset($context['ila_params']['margin']) ? '; margin:' . $context['ila_params']['margin'] . 'px' : '') . '"' : '');
+	$float = ((!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini') ? '' : $divfloat);
 	$margin = (!isset($context['ila_params']['float']) && isset($context['ila_params']['margin']) ? ' style="margin:' . $context['ila_params']['margin'] . 'px"' : '');
 
 	// Build the replacement string for the caller:
@@ -370,8 +595,8 @@ function ILA_Build_Link(&$tag, &$id)
 		$html = '<img src="' . $thumb . ';image" alt=""' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' class="bbc_img resized" />';
 
 	// Add the download count to the image tag if requested:
-	if (!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini')
-		$html .= '<div class="smalltext"><a href="' . $image . '"><img src="' . $settings['images_url'] . '/icons/clip.gif" align="middle" alt="*" border="0" />&nbsp;' . $attachment['name'] . '</a> ('. $attachment['size']. ($attachment['is_image'] ? '. ' . $src_width . 'x' . $src_height . ' - ' . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . '.)</div>';
+	if (!empty($divfloat))
+		$html .= '<div class="smalltext"' . $divfloat . '>' . $html . '<br/><a href="' . $image . '"><img src="' . $settings['images_url'] . '/icons/clip.gif" align="middle" alt="*" border="0" />&nbsp;' . $attachment['name'] . '</a> ('. $attachment['size']. ($attachment['is_image'] ? '. ' . $src_width . 'x' . $src_height . ' - ' . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . '.)</div>';
 
 	// Clear the parameter set for the next usage and return string to caller:
 	unset($context['ila_params']);
@@ -379,208 +604,59 @@ function ILA_Build_Link(&$tag, &$id)
 }
 
 //================================================================================
-// BBCode parameter validation functions
+// Hook functions to add new subsection to the Modifications Setting page:
 //================================================================================
-function ILA_Param_Scale($answer)
+function ILA_Admin_Menu_Hook(&$area)
 {
-	global $context;
-	$context['ila_params']['scale'] = ($answer == false || $answer == 'no');
-}
-
-function ILA_Param_ID($id)
-{
-	global $context;
-	$context['ila_params']['id'] = (int) $id;
-}
-
-function ILA_Param_Width($width)
-{
-	global $context;
-	$context['ila_params']['width'] = max(0, (int) $width);
-}
-
-function ILA_Param_Height($height)
-{
-	global $context;
-	$context['ila_params']['height'] = max(0, (int) $height);
-}
-
-function ILA_Param_Float($where)
-{
-	global $context;
-	$context['ila_params']['float'] = ($where == 'left' ? 'left' : ($where == 'right' ? 'right' : 'center'));
-}
-
-function ILA_Param_Margin($margin)
-{
-	global $context;
-	$context['ila_params']['margin'] = max(0, (int) $margin);
-}
-
-function ILA_Param_Msg($id)
-{
-	global $context, $modSettings;
-	if (isset($modSettings['ila_allow_quoted_images']) && empty($modSettings['ila_allow_quoted_images']))
-		return;
-	$context['ila_params']['msg'] = $id = (int) $id;
-	if (!isset($context['ila']['attachments'][$id]) && empty($context['ila']['pm_attach']))
-		ILA_Post_Attachments($id);
-	elseif (!isset($context['ila']['attachments'][$id]) && !empty($context['ila']['pm_attach']))
-		ILA_PM_Attachments($id);
-}
-
-//================================================================================
-// Functions that are called to alter ILA tags that have been quoted:
-//================================================================================
-function ILA_Process_Quotes(&$message)
-{
-	global $context;
-	$pattern = '#\[quote(.+?)\](.+?)\[/quote\]#i' . ($context['utf8'] ? 'u' : '');
-	if (preg_match_all($pattern, $message, $quotes, PREG_PATTERN_ORDER))
-	{
-		$quotes = array_unique($quotes[0]);
-		foreach ($quotes as $b)
-			$message = str_replace($b, ILA_Add_MsgID($b), $message);
-	}
-}
-
-function ILA_Add_MsgID($message)
-{
-	global $context, $forum_version;
-	
-	// Start searching for the bbcodes we need to add the message number to:
-	if (substr($forum_version, 0, 7) == 'SMF 2.1')
-		$pattern = '#\[quote(.+?)msg=(\d+)(.+?)\]#i' . ($context['utf8'] ? 'u' : '');
-	else
-		$pattern = '#\[quote(.+?)\#msg(\d+)(.+?)\]#i' . ($context['utf8'] ? 'u' : '');
-	if (!preg_match_all($pattern, $message, $info, PREG_PATTERN_ORDER))
-		return ILA_Invalid_Tags($message);
-	foreach (ILA_tags() as $tag)
-	{
-		// Process the "Version 1.0" bbcode forms:
-		$pattern = '#\[' . $tag . '=(.+?)\]#i' . ($context['utf8'] ? 'u' : '');
-		$message = preg_replace($pattern, '[' . $tag . '=$1,msg' . $info[2][0] . ']', $message);
-		$pattern = '#msg(\d+),msg(\d+)#i' . ($context['utf8'] ? 'u' : '');
-		$message = preg_replace($pattern, 'msg$1', $message);
-
-		// Process the "Version 2.0" bbcode forms:
-		$pattern = '#\[' . $tag . ' (.+?)\]#i' . ($context['utf8'] ? 'u' : '');
-		$message = preg_replace($pattern, '[' . $tag . ' $1 msg=' . $info[2][0] . ']', $message);
-		$pattern = '#msg=(\d+) msg=(\d+)#i' . ($context['utf8'] ? 'u' : '');
-		$message = preg_replace($pattern, 'msg=$1', $message);
-	}
-	return $message;
-}
-
-//================================================================================
-// Function called to replace invalid attachment tags in the message
-//================================================================================
-function ILA_Invalid_Tags($message)
-{
-	global $txt, $modSettings, $context;
-
-	// Load language strings and stuff (duh)
+	global $txt;
 	ILA_Load_Stuff();
+	$area['config']['areas']['modsettings']['subsections']['ila'] = array($txt['ila_admin_settings']);
+}
 
-	// Show attachment text string or error text string in topic history
-	foreach (ILA_tags() as $tag)
+function ILA_Admin_Settings_Hook(&$sub)
+{
+	$sub['ila'] = 'ILA_Admin_Settings';
+}
+
+function ILA_Admin_Settings($return_config = false)
+{
+	global $context, $modSettings, $txt;
+
+	// Get latest version of the mod and display whether current mod is up-to-date:
+	$file = file_get_contents('http://www.xptsp.com/tools/mod_version.php?url=Post_and_PM_Inline_Attachments');
+	if (preg_match('#Post_and_PM_Inline_Attachments_v(.+?)\.zip#i', $file, $version))
 	{
-		$pattern = '#\[' . $tag . '(=| )(.+?)\]([^\[]*)\[/' . $tag . '\]#i' . ($context['utf8'] ? 'u' : '') ;
-		if (empty($modSettings['attachmentEnable']) || empty($context['ila']['view_attachments']))
-			$message = preg_replace($pattern, $txt['ila_nopermission'], $message);
+		if (isset($modSettings['ila_version']) && $version[1] > $modSettings['ila_version'])
+			$context['settings_message'] = '<strong>' . sprintf($txt['ila_no_update'], $version[1]) . '</strong>';
 		else
-			$message = preg_replace($pattern, $txt['ila_attachment'], $message);
+			$context['settings_message'] = '<strong>' . $txt['ila_no_update'] . '</strong>';
 	}
-	return $message;
-}
-
-//================================================================================
-// Function to fix the tags after an attachment has been removed:
-//================================================================================
-function ILA_Fix_Tags(&$message, &$query)
-{
-	global $context, $attachments;
-
-	// Load language strings and stuff (duh)
-	ILA_Load_Stuff();
-
-	// Start processing missing attachments:
-	foreach (ILA_tags() as $tag)
-	{
-		$pattern = '#\[' . $tag . '(=| )(.+?)\]([^\[]*)\[/' . $tag . '\]#i' . ($context['utf8'] ? 'u' : '');
-		if (preg_match_all($pattern, $message, $attachcode, PREG_PATTERN_ORDER))
-		{
-			// Figure out where the attachments will be once the requested ones are deleted:
-			$msg_id = $query['id_msg'];
-			if (!isset($attachment[$msg_id]))
-				ILA_Setup($msg_id, $msg_id);
-			$i = 0;
-			$attach = array();
-			foreach ($attachments[$msg_id] as $b)
-			{
-				if (!in_array($b['id_attach'], $query['not_id_attach']))
-					$attach[$b['id_attach']] = $i++;
-			}
-
-			// Find the unique attachment bbcodes and sort them so we don't change the same bbcode multiple times:
-			$attachcode = array_unique($attachcode[0]);
-			asort($attachcode);
-
-			// Adjust or remove the attachment bbcodes so that the ones remaining still work:
-			$base = $context['ila']['base'];
-			foreach ($attachcode as $txt)
-			{
-				if (preg_match('# id=(\d+)#i', $txt, $attach_num))
-				{
-					$look_for = $attach_num[1] - $base;
-					if (!empty($attachments[$msg_id][$look_for]['id_attach']))
-					{
-						$id_attach = $attachments[$msg_id][$look_for]['id_attach'];
-						if (!isset($attach[$id_attach]))
-							$message = str_replace($txt, '', $message);
-						else
-							$message = preg_replace('#\[' . $tag . '(.+?)' . $attach_num[0] . '(.+?)\]#i' . ($context['utf8'] ? 'u' : ''), '[' . $tag . '$1id=' . ($attach[$id_attach] + $base) . '$2]', $message);
-					}
-					else
-						$message = str_replace($txt, '', $message);
-				}
-				elseif (preg_match('(\d+)', $txt, $attach_num))
-				{
-					$look_for = $attach_num[0] - $base;
-					if (!empty($attachments[$msg_id][$look_for]['id_attach']))
-					{
-						$id_attach = $attachments[$msg_id][$look_for]['id_attach'];
-						if (!isset($attach[$id_attach]))
-							$message = str_replace($txt, '', $message);
-						else
-							$message = str_replace($txt, '[' . $tag . '=' . ($attach[$id_attach] + $base) . substr($txt, strpos($txt, $look_for) + strlen($look_for)), $message);
-					}
-					else
-						$message = str_replace($txt, '', $message);
-				}
-			}
-		}
-	}
-}
-
-//================================================================================
-// Hook function to add options to the Modifications Setting page
-//================================================================================
-function ILA_Mod_Settings(&$vars)
-{
-	// Load language strings and stuff (duh)
-	ILA_Load_Stuff();
 
 	// Assemble the options available in this mod:
-	$vars[] = array('title', 'ila_title');
+	$config_vars = array(
+		array('check', 'ila_duplicate'),
+		array('check', 'ila_download_count'),
+		array('check', 'ila_turn_nosniff_off'),
+		array('check', 'ila_one_based_numbering'),
+		array('check', 'ila_attach_same_as_attachment'),
+		array('check', 'ila_allow_quoted_images'),
+	);
 	if (function_exists('hs4smf') || function_exists('highslide_images') || (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css')))
-		$vars[] = array('check', 'ila_highslide');
-	$vars[] = array('check', 'ila_duplicate');
-	$vars[] = array('check', 'ila_download_count');
-	$vars[] = array('check', 'ila_turn_nosniff_off');
-	$vars[] = array('check', 'ila_one_based_numbering');
-	$vars[] = array('check', 'ila_attach_same_as_attachment');
-	$vars[] = array('check', 'ila_allow_quoted_images');
+		$config[] = array('check', 'ila_highslide');
+		
+	if ($return_config)
+		return $config_vars;
+	$context['post_url'] = $scripturl . '?action=admin;area=modsettings;sa=ila;save';
+	$context['settings_title'] = $txt['ila_title'];
+
+	// Saving?
+	if (isset($_GET['save']))
+	{
+		checkSession();
+		saveDBSettings($config_vars);
+		redirectexit('action=admin;area=modsettings;sa=ila');
+	}
+	prepareDBSettingContext($config_vars);
 }
 
 ?>

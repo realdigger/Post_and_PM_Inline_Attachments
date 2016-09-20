@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>2.8</version>
+<version>3.1</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -11,7 +11,7 @@
 <file name="$sourcedir/Display.php">
 	<operation>
 		<search position="replace"><![CDATA[loadAttachmentContext($message['id_msg']),]]></search>
-		<add><![CDATA[$context['ila']['attachments'][$context['ila']['msg']],]]></add>
+		<add><![CDATA[(!empty($context['ila']['msg']) ? $context['ila']['attachments'][$context['ila']['msg']] : array()),]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Post.php">
@@ -33,10 +33,91 @@
 ]]></add>
 	</operation>
 	<operation>
-		<search position="after"><![CDATA[removeAttachments($attachmentQuery);
-]]></search>
-		<add><![CDATA[ILA_Fix_Tags($_POST['message'], $attachmentQuery);
-			]]></add>
+		<search position="after"><![CDATA[$attachIDs[] = $attachmentOptions['id'];]]></search>
+		<add><![CDATA[$_POST['attach_del'][] = ]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// First check to see if they are trying to delete any current attachments.
+	if (isset($_POST['attach_del']))
+	{
+		$keep_temp = array();
+		$keep_ids = array();
+		foreach ($_POST['attach_del'] as $dummy)
+			if (strpos($dummy, 'post_tmp_' . $user_info['id']) !== false)
+				$keep_temp[] = $dummy;
+			else
+				$keep_ids[] = (int) $dummy;
+
+		if (isset($_SESSION['temp_attachments']))
+			foreach ($_SESSION['temp_attachments'] as $attachID => $attachment)
+			{
+				if ((isset($_SESSION['temp_attachments']['post']['files'], $attachment['name']) && in_array($attachment['name'], $_SESSION['temp_attachments']['post']['files'])) || in_array($attachID, $keep_temp) || strpos($attachID, 'post_tmp_' . $user_info['id']) === false)
+					continue;
+
+				unset($_SESSION['temp_attachments'][$attachID]);
+				unlink($attachment['tmp_name']);
+			}
+
+		if (!empty($_REQUEST['msg']))
+		{
+			require_once($sourcedir . '/ManageAttachments.php');
+			$attachmentQuery = array(
+				'attachment_type' => 0,
+				'id_msg' => (int) $_REQUEST['msg'],
+				'not_id_attach' => $keep_ids,
+			);
+			removeAttachments($attachmentQuery);
+		}
+	}
+
+	// Then try to upload any attachments.
+	$context['can_post_attachment'] = !empty($modSettings['attachmentEnable']) && $modSettings['attachmentEnable'] == 1 && (allowedTo('post_attachment') || ($modSettings['postmod_active'] && allowedTo('post_unapproved_attachments')));
+	if ($context['can_post_attachment'] && empty($_POST['from_qr']))
+	{
+		 require_once($sourcedir . '/Subs-Attachments.php');
+		 processAttachments();
+	}]]></search>
+		<add><![CDATA[// SWAPPED: Then try to upload any attachments.
+	$context['can_post_attachment'] = !empty($modSettings['attachmentEnable']) && $modSettings['attachmentEnable'] == 1 && (allowedTo('post_attachment') || ($modSettings['postmod_active'] && allowedTo('post_unapproved_attachments')));
+	if ($context['can_post_attachment'] && empty($_POST['from_qr']))
+	{
+		 require_once($sourcedir . '/Subs-Attachments.php');
+		 processAttachments();
+	}
+
+	// SWAPPED: First check to see if they are trying to delete any current attachments.
+	if (isset($_POST['attach_del']))
+	{
+		$keep_temp = array();
+		$keep_ids = array();
+		foreach ($_POST['attach_del'] as $dummy)
+			if (strpos($dummy, 'post_tmp_' . $user_info['id']) !== false)
+				$keep_temp[] = $dummy;
+			else
+				$keep_ids[] = (int) $dummy;
+
+		if (isset($_SESSION['temp_attachments']))
+			foreach ($_SESSION['temp_attachments'] as $attachID => $attachment)
+			{
+				if ((isset($_SESSION['temp_attachments']['post']['files'], $attachment['name']) && in_array($attachment['name'], $_SESSION['temp_attachments']['post']['files'])) || in_array($attachID, $keep_temp) || strpos($attachID, 'post_tmp_' . $user_info['id']) === false)
+					continue;
+
+				unset($_SESSION['temp_attachments'][$attachID]);
+				unlink($attachment['tmp_name']);
+			}
+
+		if (!empty($_REQUEST['msg']))
+		{
+			require_once($sourcedir . '/ManageAttachments.php');
+			$attachmentQuery = array(
+				'attachment_type' => 0,
+				'id_msg' => (int) $_REQUEST['msg'],
+				'not_id_attach' => $keep_ids,
+			);
+			ILA_Fix_Tags($_POST['message'], $attachmentQuery);
+			removeAttachments($attachmentQuery);
+		}
+	}]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA[// Collect all parameters for the creation or modification of a post.]]></search>
@@ -46,15 +127,8 @@
 </file>
 <file name="$sourcedir/Profile-View.php">
 	<operation>
-		<search position="before"><![CDATA[function showPosts($memID)
-{
-	global $txt, $user_info, $scripturl, $modSettings]]></search>
-		<add><![CDATA[, $topic]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);]]></search>
-		<add><![CDATA[$topic = $row['id_topic'];
-		$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
+		<search position="before"><![CDATA[$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);]]></search>
+		<add><![CDATA[
 
 		// Show attachment string or error message in topic history
 		$row['body'] = ILA_Invalid_Tags($row['body']);]]></add>
@@ -62,13 +136,8 @@
 </file>
 <file name="$sourcedir/Recent.php">
 	<operation>
-		<search position="before"><![CDATA[global $txt, $scripturl, $user_info, $context, $modSettings, $board, $smcFunc]]></search>
-		<add><![CDATA[, $topic]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);]]></search>
-		<add><![CDATA[$topic = $row['id_topic'];
-		$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
+		<search position="before"><![CDATA[$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);]]></search>
+		<add><![CDATA[
 
 		// Show attachment string or error message in topic history
 		$row['body'] = ILA_Invalid_Tags($row['body']);]]></add>
@@ -130,11 +199,11 @@
 			echo '
 							<dd class="smalltext">
 								<label for="attachment_', $attachment['id'], '"><input type="checkbox" id="attachment_', $attachment['id'], '" name="attach_del[]" value="', $attachment['id'], '"', empty($attachment['unchecked']) ? ' checked' : '', ' class="input_check"> ', $attachment['name'], (empty($attachment['approved']) ? ' (' . $txt['awaiting_approval'] . ')' : ''),
-								!empty($modSettings['attachmentPostLimit']) || !empty($modSettings['attachmentSizeLimit']) ? sprintf($txt['attach_kb'], comma_format(round(max($attachment['size'], 1028) / 1028), 0)) : '', ' <a href="javascript:void(0);" onclick="replaceText(\'[attachment=',$attid,'][/attachment]\', document.forms.postmodify.', $context['post_box_name'], '); return false;">(', $txt['ila_insert'] ,' ', $attid,')</a></label>]]></add>
+								!empty($modSettings['attachmentPostLimit']) || !empty($modSettings['attachmentSizeLimit']) ? sprintf($txt['attach_kb'], comma_format(round(max($attachment['size'], 1028) / 1028), 0)) : '', ' <a href="javascript:void(0);" onclick="replaceText(\'[attachment=',$attid,']\', document.forms.postmodify.', $context['post_box_name'], '); return false;">(', $txt['ila_insert'] ,' ', $attid,')</a></label>]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[<input type="file" multiple="multiple" name="attachment[]" id="attachment1" class="input_file">]]></search>
-		<add><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a href="javascript:void(0);" onclick="replaceText(\'[attachment=', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,'][/attachment]\', document.forms.postmodify.', $context['post_box_name'], '); return false;">', $txt['ila_insert'] ,' ', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,'</a>)]]></add>
+		<add><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a href="javascript:void(0);" onclick="replaceText(\'[attachment=', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,']\', document.forms.postmodify.', $context['post_box_name'], '); return false;">', $txt['ila_insert'] ,' ', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,'</a>)]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[var current_attachment = 1;
@@ -150,7 +219,7 @@
 
 										return true;
 									}]]></search>
-		<add><![CDATA[var current_attachment = ', count($context['current_attachments']), ';
+		<add><![CDATA[var current_attachment = ', (count($context['current_attachments']) + $modSettings['ila_one_based_numbering']), ';
 
 									function addAttachment()
 									{
@@ -159,7 +228,7 @@
 										if (allowed_attachments <= 0)
 											return alert("', $txt['more_attachments_error'], '");
 
-										setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="replaceText(\\\'[attachment=\' + current_attachment + \'][/attachment]\\\', document.forms.postmodify.', $context['post_box_name'], '); return false;">', $txt['ila_insert'] ,' \' + current_attachment + \')</a> (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
+										setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="replaceText(\\\'[attachment=\' + current_attachment + \']\\\', document.forms.postmodify.', $context['post_box_name'], '); return false;">', $txt['ila_insert'] ,' \' + current_attachment + \')</a> (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
 
 										return true;
 									}]]></add>
