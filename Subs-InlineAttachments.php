@@ -494,7 +494,7 @@ function ILA_Fix_Param_Order(&$message)
 {
 	global $context;
 
-	ILA_parameters($dummy, $ila_params);
+	ILA_parameters($dummy, $parameters);
 	foreach (ILA_tags() as $tag)
 	{
 		$pattern = '#\[' . $tag . ' (.+?)\]#i' . ($context['utf8'] ? 'u' : '');
@@ -517,7 +517,7 @@ function ILA_Fix_Param_Order(&$message)
 			$out = '[' . $tag;
 			foreach ($parameters as $key => $ignore)
 				$out .= (isset($order[$key]) ? ' ' . $key . '=' . $order[$key] : '');
-			$message = str_replace($match, $out . ']', $message);
+			$message = str_replace($match, $out, $message);
 		}
 	}
 }
