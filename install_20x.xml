@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>3.12</version>
+<version>3.13</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -186,9 +186,10 @@
 	</operation>
 	<operation>
 		<search position="after"><![CDATA[	$counter++;]]></search>
-		<add><![CDATA[if (!empty($context['ila']['msg']) && !empty($context['ila']['attachments'][$context['ila']['msg']]))
+		<add><![CDATA[	if (!empty($context['ila']['msg']) && !empty($context['ila']['attachments'][$context['ila']['msg']]))
 		$output['attachment'] = &$context['ila']['attachments'][$context['ila']['msg']];
-	]]></add>
+
+]]></add>
 	</operation>
 </file>
 

@@ -1,3 +1,10 @@
+v3.13 - July 12th, 2015
+o Added "margin-left", "margin-right", "margin-top" and "margin-bottom" ILA parameters.
+o Rewrote code to apply float and margin parameters to all ILA tags used.
+o Fixed a few undefined errors within Subs-InlineAttachments.php.
+o Fixed issue when quoted ILA tags were disabled, normal ILA tags didn't work either.
+o Fixed issue where download link/counter didn't line up with image when margin was used.
+
 v3.12 - July 12th, 2015
 o Resurrected some changes from v3.9 that somehow disappeared in v3.10.
 o Fixed the ILA settings page so that it correctly saves the settings.

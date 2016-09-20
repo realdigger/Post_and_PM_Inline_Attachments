@@ -28,6 +28,10 @@ function ILA_parameters()
 		'height' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Height'),
 		'float' => array('optional' => true, 'match' => '(left|right|center)', 'validate' => 'ILA_Param_Float'),
 		'margin' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Margin'),
+		'margin-left' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Margin_Left'),
+		'margin-right' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Margin_Right'),
+		'margin-top' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Margin_Top'),
+		'margin-bottom' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Margin_Bottom'),
 		'scale' => array('optional' => true, 'match' => '(true|false|yes|no)', 'validate' => 'ILA_Param_Scale'),
 		'msg' => array('optional' => true, 'match' => '(new|\d+)', 'validate' => 'ILA_Param_Msg'),
 	);
@@ -127,7 +131,7 @@ function ILA_Setup($msg_id, &$message)
 		$pattern = '#\[' . $tag . '(=| )(.+?)\]#i' . ($context['utf8'] ? 'u' : '');
 		$message = preg_replace($pattern, '[' . $tag . '$1$2][/' . $tag .']', $message);
 		$message = str_replace('[/' . $tag .'][/' . $tag .']', '[/' . $tag . ']', $message);
-/*
+
 		// Kludgey workaround for messages with autonumbering closed tags, courtsey of "dcmouser" @ SMF:
 		$len = strlen( $findstr = '[' . $tag . ']' );
 		while (($pos = strpos($message, $findstr)) !== false)
@@ -135,7 +139,6 @@ function ILA_Setup($msg_id, &$message)
 			$message = substr_replace($message, '[' . $tag . '=' . $attach_id . '][/' . $tag . ']', $pos, $len);
 			$attach_id++;
 		}
-*/
 	}
 
 	// Replace attachments inside code brackets cause we don't know what post/PM it belongs to...
@@ -484,12 +487,6 @@ function ILA_Fix_Param_Order(&$message)
 //================================================================================
 // BBCode parameter validation functions
 //================================================================================
-function ILA_Param_Scale($answer)
-{
-	global $context;
-	$context['ila_params']['scale'] = (!empty($answer) ? ($answer == false || $answer == 'no') : false);
-}
-
 function ILA_Param_ID($id)
 {
 	global $context;
@@ -518,6 +515,36 @@ function ILA_Param_Margin($margin)
 {
 	global $context;
 	$context['ila_params']['margin'] = max(0, (int) $margin);
+}
+
+function ILA_Param_Margin_Left($margin)
+{
+	global $context;
+	$context['ila_params']['margin-left'] = max(0, (int) $margin);
+}
+
+function ILA_Param_Margin_Right($margin)
+{
+	global $context;
+	$context['ila_params']['margin-right'] = max(0, (int) $margin);
+}
+
+function ILA_Param_Margin_Top($margin)
+{
+	global $context;
+	$context['ila_params']['margin-top'] = max(0, (int) $margin);
+}
+
+function ILA_Param_Margin_Bottom($margin)
+{
+	global $context;
+	$context['ila_params']['margin-bottom'] = max(0, (int) $margin);
+}
+
+function ILA_Param_Scale($answer)
+{
+	global $context;
+	$context['ila_params']['scale'] = (!empty($answer) ? ($answer == false || $answer == 'no') : false);
 }
 
 function ILA_Param_Msg($msg)
@@ -552,7 +579,7 @@ function ILA_Start_v1x(&$tag, &$data, &$disabled)
 		);
 		if (substr($data[ count($data) - 1 ], 0, 3) == 'msg')
 			ILA_Param_Msg( substr($data[ count($data) - 1 ], 3) );
-		$data[0] = ILA_Build_Image($tag, $context['ila_params']['id']);
+		$data[0] = ILA_Build_HTML($tag, $context['ila_params']['id']);
 	}
 	unset($context['ila_params']);
 }
@@ -564,16 +591,16 @@ function ILA_Start_v20(&$tag, &$data, &$disabled)
 	if (!isset($context['ila_params']['id']))
 		$data = $txt['ila_invalid'];
 	else
-		$data = ILA_Build_Image($tag, $context['ila_params']['id']);
+		$data = ILA_Build_HTML($tag, $context['ila_params']['id']);
 	unset($context['ila_params']);
 }
 
 //================================================================================
 // Link building functions for the Inline Attachment mod
 //================================================================================
-function ILA_Build_Image(&$tag, &$id)
+function ILA_Build_HTML(&$tag, &$id)
 {
-	global $context, $modSettings, $txt, $settings, $topic;
+	global $context, $modSettings, $settings, $txt, $topic;
 
 	// If the "one-based numbering" option is set, subtract 1 from the attachment ID to make it compatible:
 	$id = $id - !empty($modSettings['ila_one_based_numbering']);
@@ -584,9 +611,14 @@ function ILA_Build_Image(&$tag, &$id)
 	if (!empty($context['ila']['pm_attach']) && (empty($modSettings['pmAttachmentEnable']) || empty($context['ila']['pm_view_attachments'])))
 		return $txt['ila_nopermission'];
 
-	// Does the specified attachment exist in the message?  If not, return attachment invalid message:
+	// Make sure that we can access other messages:
 	$allowed = (isset($modSettings['ila_allow_quoted_images']) && !empty($modSettings['ila_allow_quoted_images']));
-	$msg = (isset($context['ila_params']['msg']) ? ($allowed ? $context['ila_params']['msg'] : -1) : (isset($context['ila']['msg']) ? $context['ila']['msg'] : -1));
+	if (isset($context['ila_params']['msg']))
+		$msg = ($allowed || (isset($context['ila']['msg']) && $context['ila_params']['msg'] == $context['ila']['msg']) ? $context['ila_params']['msg'] : -1);
+	else
+		$msg = (isset($context['ila']['msg']) ? $context['ila']['msg'] : -1);
+
+	// Does the specified attachment exist in the message?  If not, return attachment invalid message:
 	if ($msg == 'new')
 		return $txt['ila_attachment'];
 	if (!isset($context['ila']['attachments'][$msg]))
@@ -601,127 +633,141 @@ function ILA_Build_Image(&$tag, &$id)
 	if (!empty($modSettings['ila_duplicate']))
 		$context['ila']['dont_show'][$msg][$attachment['id']] = true;
 
-	// Return empty string if a non-image attachment was requested:
-	if (!$attachment['is_image'] && $tag['tag'] != 'attachmini')
-		return ILA_Build_Video($tag, $attachment);
-	elseif (!$attachment['is_image'])
-		return '';
-
-	// If neither width nor height is set, use the global max image size settings:
-	$max_width = &$context['ila_params']['width'];
-	$max_height = &$context['ila_params']['height'];
-	if (empty($max_width) && empty($max_height))
-	{
-		$max_width = $modSettings['max_image_width'];
-		$max_height = $modSettings['max_image_height'];
-	}
-
-	// Figure out which parameters we are going to use:
-	$use_thumbnail = ($tag['tag'] == 'attachthumb');
-	if (!empty($modSettings['ila_attach_same_as_attachment']) && empty($modSettings['ila_attach_same_as_attachment']))
-		$use_thumbnail = $use_thumbnail || ($tag['tag'] == 'attach');
-	$thumb = ($use_thumbnail && !empty($attachment['thumbnail']['has_thumb']) ? $attachment['thumbnail']['href'] : $attachment['href']);
-	$image = ($tag['tag'] == 'attachthumb' ? $thumb : $attachment['href']);
-	$src_width = $real_width = ($use_thumbnail ? $attachment['thumb_width'] : $attachment['real_width']);
-	$src_height = $real_height = ($use_thumbnail ? $attachment['thumb_height'] : $attachment['real_height']);
-
-	// Did the user request no scaling activities?
-	$shrunk = false;
-	if (!empty($context['ila_params']['scale']))
-	{
-		$src_width = $max_width;
-		$src_height = $max_height;
-	}
-	// Scale the image if desired dimensions are specified by user OR maximum image size is set by admin:
-	elseif ((!empty($max_width) || !empty($max_height)))
-	{
-		if (!empty($max_width) && $src_width > $max_width)
-		{
-			$src_height = floor($src_height * $max_width / $src_width);
-			$src_width = $max_width;
-			$shrunk = true;
-		}
-		if (!empty($max_height) && $src_height > $max_height)
-		{
-			$src_width = floor($src_width * $max_height / $src_height);
-			$src_height = $max_height;
-			$shrunk = true;
-		}
-	}
-
-	// Process the remaining bbcode parameters:
-	$width = (!empty($src_width) ? 'width="' . $src_width .'"' : '');
-	$height = (!empty($src_height) ? 'height="' . $src_height .'"' : '');
-	$divfloat = (isset($context['ila_params']['float']) ? ($context['ila_params']['float'] == 'center' ? ' style="margin-left: auto; margin-right: auto; display: block; "' : ' style="float: ' . $context['ila_params']['float'] . ';' . (!empty($context['ila_params']['margin']) ? ' margin:' . $context['ila_params']['margin'] . 'px' : '') . '"') : '');
-	$float = ((!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini') ? '' : $divfloat);
-	$margin = (empty($context['ila_params']['float']) && !empty($context['ila_params']['margin']) ? ' style="margin:' . $context['ila_params']['margin'] . 'px"' : '');
-
-	// Build the replacement string for the caller:
+	//===========================================================================================
+	// Is this an image?  If so, assemble the HTML necessary to show it:
+	//===========================================================================================
 	$html = false;
-	if ($shrunk && !empty($modSettings['ila_highslide']) && $tag['tag'] != 'attachurl')
+	if ($attachment['is_image'])
 	{
-		// HS4SMF Installed?
-		if (!empty($modSettings['hs4smf_enabled']) && function_exists('hs4smf_get_slidegroup'))
+		// If neither width nor height is set, use the global max image size settings:
+		$max_width = &$context['ila_params']['width'];
+		$max_height = &$context['ila_params']['height'];
+		if (empty($max_width) && empty($max_height))
 		{
-			$settings['hs4smf_img_count'] = (isset($settings['hs4smf_img_count'])) ? $settings['hs4smf_img_count'] + 1 : 1;
-			$slidegroup = hs4smf_get_slidegroup($id);
-			if (!isset($settings['hs4smf_slideshow']) && $settings['hs4smf_img_count'] > 1)
-				$settings['hs4smf_slideshow'] = 1;
-			$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" onclick="return hs.expand(this, ' . $slidegroup . ')"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' id="thumb_' . $id . '" /></a>';
+			$max_width = $modSettings['max_image_width'];
+			$max_height = $modSettings['max_image_height'];
 		}
-		// Highslide Image Viewer Installed?
-		elseif (function_exists('highslide_images'))
-			$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" rel="highslide"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' id="thumb_' . $id . '" /></a>' . (isset($context['subject']) ? '<span class="highslide-heading">' . $context['subject'] . '</span>' : '');
-		// jQLightbox Installed?
-		elseif (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css'))
-			$html = '<a href="' . $image . ';image" id="link_' . $id . '" rel="lightbox[gallery]"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' id="thumb_' . $id . '" /></a>';
+
+		// Figure out which parameters we are going to use:
+		$use_thumbnail = ($tag['tag'] == 'attachthumb');
+		if (!empty($modSettings['ila_attach_same_as_attachment']) && empty($modSettings['ila_attach_same_as_attachment']))
+			$use_thumbnail = $use_thumbnail || ($tag['tag'] == 'attach');
+		$thumb = ($use_thumbnail && !empty($attachment['thumbnail']['has_thumb']) ? $attachment['thumbnail']['href'] : $attachment['href']);
+		$image = ($tag['tag'] == 'attachthumb' ? $thumb : $attachment['href']);
+		$src_width = $real_width = ($use_thumbnail ? $attachment['thumb_width'] : $attachment['real_width']);
+		$src_height = $real_height = ($use_thumbnail ? $attachment['thumb_height'] : $attachment['real_height']);
+
+		// Did the user request no scaling activities?
+		$shrunk = false;
+		if (!empty($context['ila_params']['scale']))
+		{
+			$src_width = $max_width;
+			$src_height = $max_height;
+		}
+		// Scale the image if desired dimensions are specified by user OR maximum image size is set by admin:
+		elseif ((!empty($max_width) || !empty($max_height)))
+		{
+			if (!empty($max_width) && $src_width > $max_width)
+			{
+				$src_height = floor($src_height * $max_width / $src_width);
+				$src_width = $max_width;
+				$shrunk = true;
+			}
+			if (!empty($max_height) && $src_height > $max_height)
+			{
+				$src_width = floor($src_width * $max_height / $src_height);
+				$src_height = $max_height;
+				$shrunk = true;
+			}
+		}
+
+		$width = (!empty($src_width) ? 'width="' . $src_width .'"' : '');
+		$height = (!empty($src_height) ? 'height="' . $src_height .'"' : '');
+
+		// Build the replacement string for the caller:
+		if ($shrunk && !empty($modSettings['ila_highslide']) && $tag['tag'] != 'attachurl')
+		{
+			// HS4SMF Installed?
+			if (!empty($modSettings['hs4smf_enabled']) && function_exists('hs4smf_get_slidegroup'))
+			{
+				$settings['hs4smf_img_count'] = (isset($settings['hs4smf_img_count'])) ? $settings['hs4smf_img_count'] + 1 : 1;
+				$slidegroup = hs4smf_get_slidegroup($id);
+				if (!isset($settings['hs4smf_slideshow']) && $settings['hs4smf_img_count'] > 1)
+					$settings['hs4smf_slideshow'] = 1;
+				$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" onclick="return hs.expand(this, ' . $slidegroup . ')"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . ' id="thumb_' . $id . '" /></a>';
+			}
+			// Highslide Image Viewer Installed?
+			elseif (function_exists('highslide_images'))
+				$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" rel="highslide"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . ' id="thumb_' . $id . '" /></a>' . (isset($context['subject']) ? '<span class="highslide-heading">' . $context['subject'] . '</span>' : '');
+			// jQLightbox Installed?
+			elseif (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css'))
+				$html = '<a href="' . $image . ';image" id="link_' . $id . '" rel="lightbox[gallery]"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . ' id="thumb_' . $id . '" /></a>';
+		}
+		if (empty($html))
+			$html = '<img src="' . $thumb . ';image" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . ' class="bbc_img resized" />';
+
+		// If the option to show EXIF is checked, let's show the EXIF information (if available):
+		if (!empty($modSettings['ila_display_exif']) && isset($attachment['exif']))
+			$html .= '<span class="smalltext">' . preg_replace('/\s+/', " ", $attachment['exif']) . '</span><br />' . (!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini' ? '' : '<br />');
 	}
-	if (empty($html))
-		$html = '<img src="' . $thumb . ';image" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' class="bbc_img resized" />';
+	//===========================================================================================
+	// If this is not an image, show it as a video if the attachment has certain extensions:
+	//===========================================================================================
+	else
+	{
+		// Assemble everything we need for this operation:
+		$url = &$attachment['href'];
+		$ext = strtolower(pathinfo($attachment['name'], PATHINFO_EXTENSION));
+		$context['ila_params']['width'] = (!empty($context['ila_params']['width']) ? $context['ila_params']['width'] : 640);
+		$context['ila_params']['height'] = (!empty($context['ila_params']['height']) ? $context['ila_params']['height'] : 400);
+		$dim = ' width="' . $context['ila_params']['width'] . '" height="' . $context['ila_params']['height'] . '"';
+		
+		// Start assembling the HTML string to return to the caller:
+		$html = '';
+		if (!empty($modSettings['ila_allow_playing_videos']))
+		{
+			if ($ext == 'avi' || $ext == 'divx')
+				$html = '<object classid="clsid:67DABFBF-D0AB-41fa-9C46-CC0F21721616"' . $dim . ' codebase="http://go.divx.com/plugin/DivXBrowserPlugin.cab"><param name="mode" value="full" /><param name="autoPlay" value="false" /><param name="src" value="' . $url . '" /><embed type="video/divx" src="' . $url . '" mode="full"' . $dim . ' autoPlay="false" pluginspage="http://go.divx.com/plugin/download/"></embed></object>';
+			elseif ($ext == 'wmv')
+				$html = '<object classid="clsid:22D6F312-B0F6-11D0-94AB-0080C74C7E95"' . $dim . ' standby="Loading Windows Media Player components..." type="application/x-oleobject" id="MediaPlayer"><param name="FileName" value="' . $url . '"><param name="autostart" value="false"><param name="ShowControls" value="true"><param name="ShowStatusBar" value="false"><param name="ShowDisplay" value="false"><embed type="application/x-mplayer2" src="' . $url . '" name="MediaPlayer"' . $dim . ' ShowControls="1" ShowStatusBar="0" ShowDisplay="0" autostart="0"></embed></object>';
+			elseif ($ext == 'mp4')
+				$html = '<video' . $dim . ' controls><source src="' . $url . '" type="video/mp4">Your browser does not support the video tag.</video>';
+			elseif ($ext == 'ogg')
+				$html = '<video' . $dim . ' controls><source src="' . $url . '" type="video/ogg">Your browser does not support the video tag.</video>';
+			elseif ($ext == 'webm')
+				$html = '<video' . $dim . ' controls><source src="' . $url . '" type="video/webm">Your browser does not support the video tag.</video>';
+		}
+	}
 
-	// If the option to show EXIF is checked, let's show the EXIF information (if available):
-	if (!empty($modSettings['ila_display_exif']) && isset($attachment['exif']))
-		$html .= '<span class="smalltext">' . preg_replace('/\s+/', " ", $attachment['exif']) . '</span><br />' . (!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini' ? '' : '<br />');
-
+	//===========================================================================================
 	// Add the download count to the image tag if requested:
 	if (!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini')
-		$html = '<div' . $divfloat . '>' . $html . '<br/><span class="smalltext"><a href="' . $image . '"><img src="' . $settings['images_url'] . '/icons/clip.gif" align="middle" alt="*" border="0" />' . $attachment['name'] . '</a> ('. $attachment['size']. ($attachment['is_image'] ? '. ' . $src_width . 'x' . $src_height . ' - ' . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . '.)</span></div>';
+		$html = (!empty($html) ? $html . '<br/>' : '') . '<span class="smalltext"><a href="' . $image . '"><img src="' . $settings['images_url'] . '/icons/clip.gif" align="middle" alt="*" border="0" /> ' . $attachment['name'] . '</a> ('. $attachment['size']. ($attachment['is_image'] ? '. ' . $src_width . 'x' . $src_height . ' - ' . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . '.)</span>';
 
-	// Clear the parameter set for the next usage and return string to caller:
-	unset($context['ila_params']);
-	return $html;
-}
-
-function ILA_Build_Video(&$tag, &$attachment)
-{
-	global $context, $settings, $txt, $topic, $boardurl, $modSettings;
-	
-	// Assemble everything we need for this operation:
-	$url = &$attachment['href'];
-	$ext = strtolower(pathinfo($attachment['name'], PATHINFO_EXTENSION));
-	$context['ila_params']['width'] = (!empty($context['ila_params']['width']) ? $context['ila_params']['width'] : 640);
-	$context['ila_params']['height'] = (!empty($context['ila_params']['height']) ? $context['ila_params']['height'] : 400);
-	$dim = ' width="' . $context['ila_params']['width'] . '" height="' . $context['ila_params']['height'] . '"';
-	
-	// Start assembling the HTML string to return to the caller:
-	$html = '';
-	if (!empty($modSettings['ila_allow_playing_videos']))
+	// Do we have something to float or put a margin around?
+	if (!empty($html))
 	{
-		if ($ext == 'avi' || $ext == 'divx')
-			$html = '<object classid="clsid:67DABFBF-D0AB-41fa-9C46-CC0F21721616"' . $dim . ' codebase="http://go.divx.com/plugin/DivXBrowserPlugin.cab"><param name="mode" value="full" /><param name="autoPlay" value="false" /><param name="src" value="' . $url . '" /><embed type="video/divx" src="' . $url . '" mode="full" width="' . $width . ' ' . '" height="' . $height . ' ' .'" autoPlay="false" pluginspage="http://go.divx.com/plugin/download/"></embed></object>';
-		elseif ($ext == 'wmv')
-			$html = '<object classid="clsid:22D6F312-B0F6-11D0-94AB-0080C74C7E95"' . $dim . ' standby="Loading Windows Media Player components..." type="application/x-oleobject" id="MediaPlayer"><param name="FileName" value="' . $url . '"><param name="autostart" value="false"><param name="ShowControls" value="true"><param name="ShowStatusBar" value="false"><param name="ShowDisplay" value="false"><embed type="application/x-mplayer2" src="' . $url . '" name="MediaPlayer"' . $dim . ' ShowControls="1" ShowStatusBar="0" ShowDisplay="0" autostart="0"></embed></object>';
-		elseif ($ext == 'mp4')
-			$html = '<video' . $dim . ' controls><source src="' . $url . '" type="video/mp4">Your browser does not support the video tag.</video>';
-		elseif ($ext == 'ogg')
-			$html = '<video' . $dim . ' controls><source src="' . $url . '" type="video/ogg">Your browser does not support the video tag.</video>';
-		elseif ($ext == 'webm')
-			$html = '<video' . $dim . ' controls><source src="' . $url . '" type="video/webm">Your browser does not support the video tag.</video>';
-	}
-	if ($html == '' || !empty($modSettings['ila_download_count']))
-		$html .= '<div class="smalltext"><a href="' . $attachment['href'] . '"><img src="' . $settings['images_url'] . '/icons/clip.gif" align="middle" alt="*" border="0" />' . $attachment['name'] . '</a> ('. $attachment['size']. ($attachment['is_image'] ? '. ' . $attachment['real_width'] . 'x' . $attachment['real_height'] . ' - ' . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . '.)</div>';
+		// Process all the margin parameters:
+		$margin = false;
+		if (isset($context['ila_params']['margin']))
+			$margin .= ' margin: ' . $context['ila_params']['margin'] . 'px;';
+		if (isset($context['ila_params']['margin-left']))
+			$margin .= ' margin-left: ' . $context['ila_params']['margin-left'] . 'px;';
+		if (isset($context['ila_params']['margin-right']))
+			$margin .= ' margin-right: ' . $context['ila_params']['margin-right'] . 'px;';
+		if (isset($context['ila_params']['margin-top']))
+			$margin .= ' margin-top: ' . $context['ila_params']['margin-top'] . 'px;';
+		if (isset($context['ila_params']['margin-bottom']))
+			$margin .= ' margin-bottom: ' . $context['ila_params']['margin-bottom'] . 'px;';
 
-	// Return the string we just built to the caller:
+		// Add the margin and float params to the rest of the HTML:
+		if (isset($context['ila_params']['float']) && $context['ila_params']['float'] == 'center')
+			$html = '<div style="margin-left: auto; margin-right: auto; display: block;">' . $html . '</div>';
+		elseif (isset($context['ila_params']['float']))
+			$html = '<div style="float: ' . $context['ila_params']['float'] . ';' . (!empty($margin) ? $margin : '') . '">' . $html . '</div>';
+		elseif (!empty($margin))
+			$html = '<div style="' . $margin . '">' . $html . '</div>';
+	}
 	return $html;
 }
 
