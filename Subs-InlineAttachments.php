@@ -81,16 +81,20 @@ function ILA_Setup($msg_id, &$message)
 	ILA_Load_Stuff();
 
 	// We can't load attachments if we don't know the message id number....
-	if (($id = $context['ila']['msg'] = (int) $msg_id) != 0)
-		ILA_Post_Attachments($id);
-	elseif (($id = $context['ila']['msg'] = (int) str_replace('pre', '', $msg_id)) != 0)
-		ILA_Post_Attachments($id);
-	elseif (function_exists('loadPMAttachmentContext'))
+	$id = ($msg_id == '' ? $context['ila']['msg'] : $msg_id);
+	if ($msg_id != '')
 	{
-		if (($id = $context['ila']['msg'] = (int) str_replace('pm', '', $msg_id)) != 0)
-			ILA_PM_Attachments($id);
-		elseif (($id = $context['ila']['msg'] = (int) str_replace('pm_pre', '', $msg_id)) != 0)
-			ILA_PM_Attachments($id);
+		if (($id = $context['ila']['msg'] = (int) $msg_id) != 0)
+			ILA_Post_Attachments($id);
+		elseif (($id = $context['ila']['msg'] = (int) str_replace('pre', '', $msg_id)) != 0)
+			ILA_Post_Attachments($id);
+		elseif (function_exists('loadPMAttachmentContext'))
+		{
+			if (($id = $context['ila']['msg'] = (int) str_replace('pm', '', $msg_id)) != 0)
+				ILA_PM_Attachments($id);
+			elseif (($id = $context['ila']['msg'] = (int) str_replace('pm_pre', '', $msg_id)) != 0)
+				ILA_PM_Attachments($id);
+		}
 	}
 
 	// Make damn sure that the "dont_show" element is defined for this message:

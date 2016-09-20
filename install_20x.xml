@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>3.5</version>
+<version>3.6</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -32,6 +32,11 @@
 	</operation>
 </file>
 <file name="$sourcedir/Post.php">
+	<operation>
+		<search position="before"><![CDATA[loadLanguage('Post');]]></search>
+		<add><![CDATA[
+	ILA_Load_Stuff();]]></add>
+	</operation>
 	<operation>
 		<search position="before"><![CDATA[
 		$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
@@ -327,6 +332,21 @@
 	</operation>
 	<operation>
 		<search position="after"><![CDATA[// Show a special box for unapproved attachments...]]></search>
+		<add><![CDATA[// Skip over already-displayed inline attachments:
+				if (!empty($context['ila']['dont_show'][$msg_id][$attachment['id']]))
+					continue;
+				
+				]]></add>
+	</operation>
+</file>
+<file name="$boarddir/Themes/sunset-2-0-1-5/Display.template.php" error="skip">
+	<operation>
+		<search position="replace"><![CDATA[if (!empty($message['attachment']))]]></search>
+		<add><![CDATA[$msg_id = $message['id'];
+		if (!empty($message['attachment']) && count($context['ila']['dont_show'][$msg_id]) != count($message['attachment']))]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[// Show a special box for unpproved attachments...]]></search>
 		<add><![CDATA[// Skip over already-displayed inline attachments:
 				if (!empty($context['ila']['dont_show'][$msg_id][$attachment['id']]))
 					continue;
