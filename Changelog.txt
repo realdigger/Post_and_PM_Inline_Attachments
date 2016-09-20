@@ -1,3 +1,9 @@
+v4.9 - October 30th, 2015
+o Fixed double Javascript function declaration issue, found by asmith.
+o Fixed undefined index error where apparently no attachments were available for the post.
+o Fixed undefined variable error that detects whether SCEditor is installed.
+o SMF 2.1: Fixed code-breaking syntax error that was found by asmith.
+
 v4.8 - October 24th, 2015
 o Fixed issue where Javascript not inserted when no or only one more attachment is allowed in post.
 
