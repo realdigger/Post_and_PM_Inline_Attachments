@@ -1,3 +1,11 @@
+v3.12 - July 12th, 2015
+o Resurrected some changes from v3.9 that somehow disappeared in v3.10.
+o Fixed the ILA settings page so that it correctly saves the settings.
+o Fixed ILA_Fix_Param_Order so that it doesn't drop all the parameters.
+o Minor change to make sure internal message ID variable is set.
+o Fixed some invalid regular expressions to make sure they get the message ID.
+o Fixed error-creating operation within PersonalMessage.php.
+
 v3.11 - July 10th, 2015
 o Added code to internally transform closed ILA tags ([attach]) into proper ILA tags.  Thanks, dcmouser!
 o Moved settings from Modification Settings to the Attachments and Avatars section.
