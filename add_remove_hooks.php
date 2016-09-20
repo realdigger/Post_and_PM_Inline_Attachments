@@ -21,7 +21,7 @@ $hook_functions = array(
 	'integrate_pre_include' => '$sourcedir/Subs-InlineAttachments.php',
 	'integrate_bbc_codes' => 'ILA_BBCode',
 	'integrate_admin_areas' => 'ILA_Admin_Menu_Hook',
-	'integrate_modify_modifications' => 'ILA_Admin_Settings_Hook',
+	'integrate_manage_attachments' => 'ILA_Admin_Settings_Hook',
 );
 
 // Adding or removing them?

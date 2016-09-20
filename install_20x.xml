@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>3.10</version>
+<version>3.11</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -37,6 +37,16 @@
 	<operation>
 		<search position="replace"><![CDATA[function loadAttachmentContext($id_msg)]]></search>
 		<add><![CDATA[function loadAttachmentContext($id_msg, $override_show = false)]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/ManageAttachments.php">
+	<operation>
+		<search position="after"><![CDATA[
+	);
+
+	// Pick the correct sub-action.]]></search>
+		<add><![CDATA[,
+		'ila' => 'ILA_Admin_Settings']]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Post.php">
@@ -171,8 +181,17 @@
 </file>
 <file name="$sourcedir/PersonalMessage.php">
 	<operation error="ignore">
-		<search position="replace"><![CDATA[loadPMAttachmentContext($message['id_pm']),]]></search>
-		<add><![CDATA[$context['ila_attachments'],]]></add>
+		<search position="replace"><![CDATA['attachment' => loadPMAttachmentContext($message['id_pm']),]]></search>
+		<add><![CDATA['attachment' => array(),]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[
+	$counter++;]]></search>
+		<add><![CDATA[);
+	if (!empty($context['ila']['msg']) && !empty($context['ila']['attachments'][$context['ila']['msg']]))
+		$output['attachment'] = &$context['ila']['attachments'][$context['ila']['msg']];
+
+	$counter++;]]></add>
 	</operation>
 </file>
 

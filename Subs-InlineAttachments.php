@@ -35,6 +35,7 @@ function ILA_parameters()
 
 function ILA_BBCode(&$codes)
 {
+	$params = ILA_parameters();
 	foreach (ILA_tags() as $tag)
 	{
 		// BBCode Usage: [attach=id,width,height]content ignored[/attach]
@@ -51,7 +52,7 @@ function ILA_BBCode(&$codes)
 		$codes[] = array(
 			'tag' => $tag,
 			'type' => 'unparsed_content',
-			'parameters' => ILA_parameters(),
+			'parameters' => $params,
 			'content' => '$1',
 			'validate' => 'ILA_Start_v20',
 			'disabled_content' => '',
@@ -85,7 +86,7 @@ function ILA_Load_Stuff()
 //================================================================================
 function ILA_Setup($msg_id, &$message)
 {
-	global $context;
+	global $context, $modSettings;
 	
 	// Load language strings and stuff (duh)
 	ILA_Load_Stuff();
@@ -115,14 +116,24 @@ function ILA_Setup($msg_id, &$message)
 	if (empty($message))
 		return;
 
-	// Convert "[attach=n]" to "[attach=n][/attach]" and remove the stuff between the brackets:
+	// Convert v3.0+ tags into usable tags for the parser:
+	$attach_id = empty($modSettings['ila_one_based_numbering']) ? 0 : 1;
 	foreach (ILA_tags() as $tag)
 	{
+		// Convert "[attach=n]" to "[attach=n][/attach]" and remove the stuff between the brackets:
 		$pattern = '#\[' . $tag . '(=| )(.+?)\]([^\[]*)\[/' . $tag . '\]#i' . ($context['utf8'] ? 'u' : '');
 		$message = preg_replace($pattern, '[' . $tag . '$1$2][/' . $tag .']', $message);
 		$pattern = '#\[' . $tag . '(=| )(.+?)\]#i' . ($context['utf8'] ? 'u' : '');
 		$message = preg_replace($pattern, '[' . $tag . '$1$2][/' . $tag .']', $message);
 		$message = str_replace('[/' . $tag .'][/' . $tag .']', '[/' . $tag . ']', $message);
+
+		// Kludgey workaround for messages with autonumbering closed tags, courtsey of "dcmouser" @ SMF:
+		$len = strlen( $findstr = '[' . $tag . ']' );
+		while (($pos = strpos($message, $findstr)) !== false)
+		{
+			$message = substr_replace($message, '[' . $tag . '=' . $attach_id . '][/' . $tag . ']', $pos, $len);
+			$attach_id++;
+		}
 	}
 
 	// Replace attachments inside code brackets cause we don't know what post/PM it belongs to...
@@ -441,6 +452,7 @@ function ILA_Fix_Param_Order(&$message)
 {
 	global $context;
 	
+	$params = ILA_parameters();
 	foreach (ILA_tags() as $tag)
 	{
 		$pattern = '#\[' . $tag . ' (.+?)\]#i' . ($context['utf8'] ? 'u' : '');
@@ -460,7 +472,7 @@ function ILA_Fix_Param_Order(&$message)
 					$order[$key[0]] = $key[1];
 			}
 			$out = '[' . $tag;
-			foreach (ILA_parameters() as $key => $ignore)
+			foreach ($params as $key => $ignore)
 				$out .= (isset($order[$key]) ? ' ' . $key . '=' . $order[$key] : '');
 			$message = str_replace($match, $out . ']', $message);
 		}
@@ -729,7 +741,7 @@ function ILA_Admin_Menu_Hook(&$area)
 {
 	global $txt;
 	ILA_Load_Stuff();
-	$area['config']['areas']['modsettings']['subsections']['ila'] = array($txt['ila_admin_settings']);
+	$area['layout']['areas']['manageattachments']['subsections']['ila'] = array($txt['ila_admin_settings']);
 }
 
 function ILA_Admin_Settings_Hook(&$sub)
@@ -741,6 +753,11 @@ function ILA_Admin_Settings($return_config = false)
 {
 	global $context, $modSettings, $txt, $scripturl, $sourcedir;
 	isAllowedTo('admin_forum');
+
+	// Load required stuff in order to make this work right:
+	require_once($sourcedir . '/ManagePermissions.php');
+	require_once($sourcedir . '/ManageServer.php');
+	$context['sub_template'] = 'show_settings';
 
 	// Get latest version of the mod and display whether current mod is up-to-date:
 	if (($file = cache_get_data('ila_mod_version', 86400)) == null)

@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v3.10[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v3.11[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -47,6 +47,8 @@ Each of these new BBCodes uses the same format as the [b][nobbc][attachment][/no
 
 [b]Version 3.0[/b] makes further changes and allows the use of the inline attachments bbcodes [b]WITHOUT[/b] closing brackets, as well as using attachments from another post!
 
+[b]Version 3.11[/b] makes further changes and allows the use of closed tags, like [b][nobbc][attach][/nobbc][/b].  This new form is autonumbered!  Note that the [b][nobbc][attach][/nobbc][/b] tag is processed first, then [b][nobbc][attachment][/nobbc][/b], then [b][nobbc][attachmini][/nobbc][/b], then [b][nobbc][attachthumb][/nobbc][/b], then [b][nobbc][attachurl][/nobbc][/b].
+
 In each case, [b]{id}[/b] is the attachment number relative to the topic, [b]{width}[/b] is the max desired width, [b]{height}[/b] is the max desired height, [b]{pixels}[/b] is the number of pixels surrounding the image, and [b]{float}[/b] can be either [b]left[/b], [b]right[/b], or [b]center[/b].  All text between the opening and closing attachment tags is discarded.
 
 If width and height are not specified, max image width and height settings set by admin are respected.  Attachment image will be scaled proportionally to meet desired width/height settings.
@@ -64,13 +66,16 @@ o Text between inline attachment brackets are removed (as of version 3.0).
 [color=blue][b][size=12pt][u]Admin Settings[/u][/size][/b][/color]
 The bbcode may be disabled by going to [b][i]Admin[/i] -> [i]Forums[/i] -> [i]Posts and Topics[/i] -> [i]Bulletin Board Code[/i][/b] and unchecking the [b]attachment[/b] bbcode.
 
-On the [b][i]Admin[/i] -> [i]Configuration[/i] -> [i]Modification Settings[/i] -> [i]ILA[/i][/b] page, there are several new options:
+On the [b][i]Admin[/i] -> [i]Layout[/i] -> [i]Attachments and Avatars[/i] -> [i]Inline Attachments[/i][/b] page, there are several new options:
 o Remove attachment image under post after in-post use.
-o Show download link and counter under inline attachment, like non-inline attachments.
-o Turn off "nosniff" option for IE and Chrome browsers.
 o Use "One based numbering" for attachment IDs (first attachment is 1 instead of 0).
 o Allow quoted attachment images from another post.
-o Use Highslide effects for inline attachments.
+o Show download link and counter under inline attachment, like non-inline attachments.
+o Turn off "nosniff" option for IE and Chrome browsers.
+o Whether "attach" tag is the same as the "attachment" tag.
+o Allow playing inline attachments that are videos.
+o Use Highslide effects for inline attachments. (only if supported Highslide mod is installed)
+o Show EXIF information (only if [url=http://custom.simplemachines.org/mods/index.php?mod=169]EXIF[/url] mod is installed)
 
 [color=blue][b][size=12pt][u]Compatibility Notes[/u][/size][/b][/color]
 This mod was tested on SMF 2.0.9, but should work on SMF 2.1 Beta 1, as well as SMF 2.0 and up.  SMF 1.x is not and will not be supported.

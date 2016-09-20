@@ -20,7 +20,7 @@ $txt['ila_invalid'] = ' [ Invalid Attachment ] ';
 $txt['ila_unapproved'] = ' [ Attachments has not been approved yet ] ';
 
 // MOD Configuration options strings:
-$txt['ila_admin_settings'] = 'ILA';
+$txt['ila_admin_settings'] = 'Inline Attachments';
 $txt['ila_new_version'] = 'Post and PM Inline Attachments mod version %s is available for download!';
 $txt['ila_no_update'] = 'Your install of Post and PM Inline Attachments is up to date!';
 $txt['ila_mod_settings'] = 'MOD Settings';

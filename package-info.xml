@@ -4,7 +4,7 @@
 	<name>Post and PM Inline Attachments</name>
 	<id>Dougiefresh:ILA</id>
 	<type>modification</type>
-	<version>3.10</version>
+	<version>3.11</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme type="file" parsebbc="true">readme.txt</readme>
@@ -12,7 +12,7 @@
 		<modification>install_20x.xml</modification>
 		<require-file name="InlineAttachments.english.php" destination="$boarddir/Themes/default/languages" />
 		<require-file name="Subs-InlineAttachments.php" destination="$sourcedir" />
-		<redirect timeout="5000" url="?action=admin;area=modsettings;sa=ila" />
+		<redirect timeout="5000" url="?action=admin;area=manageattachments;sa=ila" />
 	</install>
 	<uninstall for="2.0 - 2.0.99">
 		<code>add_remove_hooks.php</code>
@@ -27,7 +27,7 @@
 		<modification>install_21x.xml</modification>
 		<require-file name="InlineAttachments.english.php" destination="$boarddir/Themes/default/languages" />
 		<require-file name="Subs-InlineAttachments.php" destination="$sourcedir" />
-		<redirect timeout="5000" url="?action=admin;area=modsettings;sa=ila" />
+		<redirect timeout="5000" url="?action=admin;area=manageattachments;sa=ila" />
 	</install>
 	<uninstall for="2.1 Beta 1">
 		<code>add_remove_hooks.php</code>
