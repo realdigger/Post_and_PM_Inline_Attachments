@@ -33,7 +33,7 @@ $txt['ila_attach_same_as_attachment'] = '&quot;attach&quot; bbcode same as &quot
 $txt['ila_allow_quoted_images'] = 'Allow quoted attachment images from another post?';
 $txt['ila_highslide'] = 'Enable Highslide effects for inline attachment?';
 $txt['ila_display_exif'] = 'Display EXIF information below image?';
-$txt['ila_dont_process_quotes'] = 'Don\'t add message ID to quoted inline attachment?';
 $txt['ila_allow_playing_videos'] = 'Allow attached videos to be played in the post?';
+$txt['ila_insert_tag'] = 'Tag to use when inserting inline attachments:';
 
 ?>

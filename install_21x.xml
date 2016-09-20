@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>3.14</version>
+<version>3.15</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -44,7 +44,7 @@
 		$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
 
 		// Show attachment string or error message in topic history
-		$row['body'] = ILA_Invalid_Tags($row['body']);]]></add>
+		$row['body'] = ILA_Invalid_Tags($row['body'], $row['id_msg']);]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[$context['preview_message'] = parse_bbc($context['preview_message'], isset($_REQUEST['ns']) ? 0 : 1);]]></search>
@@ -52,8 +52,7 @@
 			$context['preview_message'] = parse_bbc($context['preview_message'], isset($_REQUEST['ns']) ? 0 : 1, 'pre' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : ''));
 
 			// Show attachment string or error message in topic history
-			$context['preview_message'] = ILA_Invalid_Tags($context['preview_message']);
-]]></add>
+			$context['preview_message'] = ILA_Invalid_Tags($context['preview_message'], (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : ''));]]></add>
 	</operation>
 	<operation>
 		<search position="after"><![CDATA[$attachIDs[] = $attachmentOptions['id'];]]></search>
@@ -109,6 +108,7 @@
 	}
 
 	// SWAPPED: First check to see if they are trying to delete any current attachments.
+	ILA_Fix_Param_Order($_POST['message']);
 	if (isset($_POST['attach_del']))
 	{
 		$keep_temp = array();
@@ -143,10 +143,13 @@
 	}]]></add>
 	</operation>
 	<operation>
-		<search position="before"><![CDATA[// Collect all parameters for the creation or modification of a post.]]></search>
-		<add><![CDATA[
-	ILA_Fix_Param_Order($_POST['message']);
-	ILA_Process_Quotes($_POST['message']);]]></add>
+		<search position="before"><![CDATA[// Collect all parameters for the creation or modification of a post.
+	$msgOptions = array(
+		'id' => empty($_REQUEST['msg']) ? 0 : (int) $_REQUEST['msg'],]]></search>
+		<add><![CDATA[// Collect all parameters for the creation or modification of a post.
+	ILA_Process_Quotes($_POST['message'], $msg_id);
+	$msgOptions = array(
+		'id' => empty($_REQUEST['msg']) ? 0 : (int) $_REQUEST['msg'],]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA[$form_message = '[quote author=' . $mname . ' link=msg=' . (int) $_REQUEST['quote'] . ' date=' . $mdate . ']' . "\n" . rtrim($form_message) . "\n" . '[/quote]';]]></search>
@@ -160,6 +163,20 @@
 		if ($body_temp != $msgOptions['body'])
 			modifyPost($msgOptions, $topicOptions, $posterOptions);]]></add>
 	</operation>
+	<operation>
+		<search position="replace"><![CDATA[AND m.id_topic = {int:current_topic}',
+				array(]]></search>
+		<add><![CDATA[AND m.id_topic = {int:current_topic}
+				ORDER BY a.id_attach',
+				array(]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[AND m.id_topic = {int:current_topic}',
+			array(]]></search>
+		<add><![CDATA[AND m.id_topic = {int:current_topic}
+			ORDER BY a.id_attach',
+			array(]]></add>
+	</operation>
 </file>
 <file name="$sourcedir/Profile-View.php">
 	<operation>
@@ -167,7 +184,7 @@
 		<add><![CDATA[
 
 		// Show attachment string or error message in topic history
-		$row['body'] = ILA_Invalid_Tags($row['body']);]]></add>
+		$row['body'] = ILA_Invalid_Tags($row['body'], $row['id_msg']);]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Recent.php">
@@ -176,7 +193,7 @@
 		<add><![CDATA[
 
 		// Show attachment string or error message in topic history
-		$row['body'] = ILA_Invalid_Tags($row['body']);]]></add>
+		$row['body'] = ILA_Invalid_Tags($row['body'], $row['id_msg']);]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Subs.php">
@@ -267,7 +284,7 @@
 										if (allowed_attachments <= 0)
 											return alert("', $txt['more_attachments_error'], '");
 
-										setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="replaceText(\\\'[attachment=\' + current_attachment + \']\\\', document.forms.postmodify.', $context['post_box_name'], '); return false;">', $txt['ila_insert'] ,' \' + current_attachment + \')</a> (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
+										setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="insertAttachment(\' + current_attachment + \');">', $txt['ila_insert'] ,' \' + current_attachment + \')</a> (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
 
 										return true;
 									}

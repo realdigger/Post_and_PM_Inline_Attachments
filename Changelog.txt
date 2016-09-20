@@ -1,3 +1,12 @@
+v3.15 - July 26th, 2015
+o Added "border-style", "border-width" and "border-color" ILA parameters.
+o Rewrote code that controls which image is shown to the user using the ILA tags.
+o Added option in ILA settings to set inserted tag using the "Insert Attachment" link.
+o Resurrected template change to use version 2.0 bbcodes to insert inline attachments code.
+o Fixed code that reorganizes the ILA tags when insert new attachment and deleting existing attachment.
+o Fixed issue where attachments weren't in the correct order in the Edit Post screen.
+o Modified code to put the message ID in any ILA tags that don't have it upon posting.
+
 v3.14 - July 13th, 2015
 o Fixed the "attach bbcode same as attachment" option so that it works as expected.
 o Fixed incorrectly closed tag with SCEditor.

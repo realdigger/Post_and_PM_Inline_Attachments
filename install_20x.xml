@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>3.14</version>
+<version>3.15</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -60,16 +60,16 @@
 		<add><![CDATA[$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
 
 		// Show attachment string or error message in topic history
-		$row['body'] = ILA_Invalid_Tags($row['body']);]]></add>
+		$row['body'] = ILA_Invalid_Tags($row['body'], $row['id_msg']);]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[$context['preview_message'] = parse_bbc($context['preview_message'], isset($_REQUEST['ns']) ? 0 : 1);]]></search>
-		<add><![CDATA[ILA_Fix_Param_Order($context['preview_message']);
-			$context['preview_message'] = parse_bbc($context['preview_message'], isset($_REQUEST['ns']) ? 0 : 1, 'pre' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : ''));
+		<add><![CDATA[$msg_id = 'pre' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : '');
+			ILA_Fix_Param_Order($context['preview_message'], $msg_id);
+			$context['preview_message'] = parse_bbc($context['preview_message'], $msg_id);
 
 			// Show attachment string or error message in topic history
-			$context['preview_message'] = ILA_Invalid_Tags($context['preview_message']);
-]]></add>
+			$context['preview_message'] = ILA_Invalid_Tags($context['preview_message'], $msg_id);]]></add>
 	</operation>
 	<operation>
 		<search position="after"><![CDATA[$attachIDs[] = $attachmentOptions['id'];]]></search>
@@ -99,6 +99,7 @@
 	{
 		// Create the poll.]]></search>
 		<add><![CDATA[// Check if they are trying to delete any current attachments....
+	ILA_Fix_Param_Order($_POST['message']);
 	if (isset($_REQUEST['msg'], $_POST['attach_del']) && (allowedTo('post_attachment') || ($modSettings['postmod_active'] && allowedTo('post_unapproved_attachments'))))
 	{
 		$del_temp = array();
@@ -118,10 +119,14 @@
 	]]></add>
 	</operation>
 	<operation>
-		<search position="before"><![CDATA[// Collect all parameters for the creation or modification of a post.]]></search>
-		<add><![CDATA[
-	ILA_Fix_Param_Order($_POST['message']);
-	ILA_Process_Quotes($_POST['message']);]]></add>
+		<search position="replace"><![CDATA[// Collect all parameters for the creation or modification of a post.
+	$msgOptions = array(
+		'id' => empty($_REQUEST['msg']) ? 0 : (int) $_REQUEST['msg'],]]></search>
+		<add><![CDATA[// Collect all parameters for the creation or modification of a post.
+	$msg_id = (empty($_REQUEST['msg']) ? 0 : (int) $_REQUEST['msg']);
+	ILA_Process_Quotes($_POST['message'], $msg_id);
+	$msgOptions = array(
+		'id' => empty($_REQUEST['msg']) ? 0 : (int) $_REQUEST['msg'],]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA[$form_message = '[quote author=' . $mname . ' link=topic=' . $topic . '.msg' . (int) $_REQUEST['quote'] . '#msg' . (int) $_REQUEST['quote'] . ' date=' . $mdate . ']' . "\n" . rtrim($form_message) . "\n" . '[/quote]';]]></search>
@@ -135,6 +140,20 @@
 		if ($body_temp != $msgOptions['body'])
 			modifyPost($msgOptions, $topicOptions, $posterOptions);]]></add>
 	</operation>
+	<operation>
+		<search position="replace"><![CDATA[AND m.id_topic = {int:current_topic}',
+				array(]]></search>
+		<add><![CDATA[AND m.id_topic = {int:current_topic}
+				ORDER BY a.id_attach',
+				array(]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[AND m.id_topic = {int:current_topic}',
+			array(]]></search>
+		<add><![CDATA[AND m.id_topic = {int:current_topic}
+			ORDER BY a.id_attach',
+			array(]]></add>
+	</operation>
 </file>
 <file name="$sourcedir/Profile-View.php">
 	<operation>
@@ -142,7 +161,7 @@
 		<add><![CDATA[
 
 		// Show attachment string or error message in topic history
-		$row['body'] = ILA_Invalid_Tags($row['body']);]]></add>
+		$row['body'] = ILA_Invalid_Tags($row['body'], $row['id_msg']);]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Recent.php">
@@ -151,7 +170,7 @@
 		<add><![CDATA[
 
 		// Show attachment string or error message in topic history
-		$row['body'] = ILA_Invalid_Tags($row['body']);]]></add>
+		$row['body'] = ILA_Invalid_Tags($row['body'], $row['id_msg']);]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Subs.php">
@@ -281,8 +300,8 @@
 										}
 										function insertAttachment(id)
 										{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
-											$(smfmod_editor).data(\'sceditor\').insertText(\'[attachment=\' + id + \']\');' : '
-											replaceText(\'[attachment=\' + id + \']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
+											$(smfmod_editor).data(\'sceditor\').insertText(\'[' . (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment') . ' id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . '\');' : '
+											replaceText(\'[' . (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment') . ' id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . ']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
 										}
 ]]></add>
 	</operation>
@@ -293,8 +312,8 @@
 		<add><![CDATA[<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
 							function insertAttachment(id)
 							{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
-								$(smfmod_editor).data(\'sceditor\').insertText(\'[attachment=\' + id + \']\');' : '
-								replaceText(\'[attachment=\' + id + \']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
+								$(smfmod_editor).data(\'sceditor\').insertText(\'[' . (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment') . ' id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . '\');' : '
+								replaceText(\'[' . (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment') . ' id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . ']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
 							}
 						// ]]]]><![CDATA[></script>
 						]]></add>
@@ -358,8 +377,8 @@
 		<add><![CDATA[<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
 							function insertAttachment(id)
 							{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
-								$(smfmod_editor).data(\'sceditor\').insertText(\'[attachment id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . ']\');' : '
-								replaceText(\'[attachment id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . ']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
+								$(smfmod_editor).data(\'sceditor\').insertText(\'[' . (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment') . ' id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . '\');' : '
+								replaceText(\'[' . (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment') . ' id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . ']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
 							}
 						// ]]]]><![CDATA[></script>
 						]]></add>

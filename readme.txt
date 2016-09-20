@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v3.14[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v3.15[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -36,8 +36,8 @@ This mod adds the ability to position your attachments in either your forum post
 [b]Version 2.1[/b] keeps the version 1.0 and 2.0 forms, plus introduces more BBCodes:
 [quote]
 [b]attach[/b] => Shows the attachment as a thumbnail, expandable to full size.
-[b]attachthumb[/b] => Shows only the thumbnail of the attachment.
-[b]attachmini[/b] => Shows the attachment, omitting the download count and filename beneath.
+[b]attachthumb[/b] => Shows NON-EXPANDABLE thumbnail of the attachment.
+[b]attachmini[/b] => Shows the attachment as a thumbnail, expandable to full size.  Download count and filename omitted beneath (regardless of ILA settings).
 [/quote]
 [b]Version 2.2[/b] introduces one more BBCode:
 [quote]

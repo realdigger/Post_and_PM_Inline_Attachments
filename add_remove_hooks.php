@@ -43,6 +43,7 @@ else
 		'ila_display_exif' => 0,
 		'ila_dont_process_quotes' => 0,
 		'ila_allow_playing_videos' => 0,
+		'ila_insert_tag' => 'attachment',
 	);
 
 	// Capture mod version number during the run of this script:
