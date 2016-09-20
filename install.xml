@@ -5,26 +5,12 @@
 <id>Dougiefresh:ILA</id>
 <version>1.5</version>
 
-<!-------------------------------------------------------------------------->
-<!-- Source file edits                                                    -->
-<!-------------------------------------------------------------------------->
+<!---------------------------------------------------------------------------->
+<!-- Source file edits														-->
+<!---------------------------------------------------------------------------->
 <file name="$sourcedir/Display.php">
 	<operation>
 		<search position="replace"><![CDATA[loadAttachmentContext($message['id_msg']),]]></search>
-		<add><![CDATA[$context['ila_attachments'],]]></add>
-	</operation>
-</file>
-<file name="$sourcedir/PersonalMessage.php">
-	<operation>
-		<search position="replace"><![CDATA[loadLanguage('PersonalMessage');
-
-	if (WIRELESS && WIRELESS_PROTOCOL == 'wap')]]></search>
-		<add><![CDATA[loadLanguage('PersonalMessage+Modifications');
-
-	if (WIRELESS && WIRELESS_PROTOCOL == 'wap')]]></add>
-	</operation>
-	<operation error="ignore">
-		<search position="replace"><![CDATA[loadPMAttachmentContext($message['id_pm']),]]></search>
 		<add><![CDATA[$context['ila_attachments'],]]></add>
 	</operation>
 </file>
@@ -47,10 +33,9 @@
 ]]></add>
 	</operation>
 	<operation>
-		<search position="before"><![CDATA[
-			$context['preview_message'] = parse_bbc($context['preview_message'], isset($_REQUEST['ns']) ? 0 : 1);
-]]></search>
-		<add><![CDATA[
+		<search position="replace"><![CDATA[$context['preview_message'] = parse_bbc($context['preview_message'], isset($_REQUEST['ns']) ? 0 : 1);]]></search>
+		<add><![CDATA[$context['preview_message'] = parse_bbc($context['preview_message'], isset($_REQUEST['ns']) ? 0 : 1, 'pre' . ((isset($_REQUEST['msg']) ? $_REQUEST['msg'] : '')));
+
 			// Show attachment string or error message in topic history
 			$context['preview_message'] = ILA_Remove_Tags($context['preview_message']);
 ]]></add>
@@ -91,10 +76,33 @@
 		<add><![CDATA[if (empty($context['dontshowattachment'][$attachment['id']]) && ((!isset($context['ila_dont_show_attach_below']) || !array_key_exists($attachment['id'], $context['ila_dont_show_attach_below']))))]]></add>
 	</operation>
 </file>
+<file name="$sourcedir/hs4smf-Subs.php" error="skip">
+	<operation>
+		<search position="replace"><![CDATA[			elseif (stripos($image['img_tag'], 'index.php?action=dlattach;'))
+				continue;]]></search>
+		<add><![CDATA[// Inline Attachments (ILA) commented these out...
+//			elseif (stripos($image['img_tag'], 'index.php?action=dlattach;'))
+//				continue;]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/PersonalMessage.php">
+	<operation>
+		<search position="replace"><![CDATA[loadLanguage('PersonalMessage');
 
-<!-------------------------------------------------------------------------->
-<!-- Curve theme Post Display Template file edits                         -->
-<!-------------------------------------------------------------------------->
+	if (WIRELESS && WIRELESS_PROTOCOL == 'wap')]]></search>
+		<add><![CDATA[loadLanguage('PersonalMessage+Modifications');
+
+	if (WIRELESS && WIRELESS_PROTOCOL == 'wap')]]></add>
+	</operation>
+	<operation error="ignore">
+		<search position="replace"><![CDATA[loadPMAttachmentContext($message['id_pm']),]]></search>
+		<add><![CDATA[$context['ila_attachments'],]]></add>
+	</operation>
+</file>
+
+<!---------------------------------------------------------------------------->
+<!-- Template file edits													-->
+<!---------------------------------------------------------------------------->
 <file name="$themedir/Display.template.php">
 	<operation>
 		<search position="replace"><![CDATA[if ($attachment['is_image'])]]></search>
@@ -114,10 +122,6 @@
 				]]></add>
 	</operation>
 </file>
-
-<!-------------------------------------------------------------------------->
-<!-- Curve theme Personal Message Template file edits                     -->
-<!-------------------------------------------------------------------------->
 <file name="$themedir/PersonalMessage.template.php">
 	<!-- PM Display code -->
 	<operation error="ignore">
@@ -189,10 +193,6 @@
 ]]></add>
 	</operation>
 </file>
-
-<!-------------------------------------------------------------------------->
-<!-- Post Editing Template file edits                                     -->
-<!-------------------------------------------------------------------------->
 <file name="$themedir/Post.template.php">
 	<operation>
 		<search position="replace"><![CDATA[
@@ -243,10 +243,6 @@
 ]]></add>
 	</operation>
 </file>
-
-<!-------------------------------------------------------------------------->
-<!-- Core theme Post Display Template file edits                          -->
-<!-------------------------------------------------------------------------->
 <file name="$boarddir/Themes/core/Display.template.php" error="skip">
 	<operation>
 		<search position="replace"><![CDATA[if ($attachment['is_image'])]]></search>
@@ -266,19 +262,6 @@
 		<add><![CDATA[if (!isset($context['dontshowattachment'][$attachment['id']]))
 					echo '
 										(', $attachment['size'], ($attachment['is_image'] ? ', ' . $attachment['real_width'] . 'x' . $attachment['real_height'] . ' - ' . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . '.)<br />';]]></add>
-	</operation>
-</file>
-
-<!-------------------------------------------------------------------------->
-<!-- Highslide4SMF v0.8.1 support file edit                               -->
-<!-------------------------------------------------------------------------->
-<file name="$sourcedir/hs4smf-Subs.php" error="skip">
-	<operation>
-		<search position="replace"><![CDATA[			elseif (stripos($image['img_tag'], 'index.php?action=dlattach;'))
-				continue;]]></search>
-		<add><![CDATA[// Inline Attachments (ILA) commented these out...
-//			elseif (stripos($image['img_tag'], 'index.php?action=dlattach;'))
-//				continue;]]></add>
 	</operation>
 </file>
 </modification>
