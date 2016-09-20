@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>4.1</version>
+<version>4.2</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -188,7 +188,7 @@
 		
 	]]></add>
 	</operation>
-	<operation>
+	<operation error="ignore">
 		<search position="after"><![CDATA[$orders = permute($preg);]]></search>
 		<add><![CDATA[if (in_array($possible['tag'], ILA_tags()))
 					$orders = array($preg);

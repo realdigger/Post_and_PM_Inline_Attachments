@@ -1,3 +1,6 @@
+v4.2 - September 4th, 2015
+o Operation that calls "fix parameter order" function now skipped for nightly SMF 2.1 Beta 2.
+
 v4.1 - August 29th, 2015
 o Added option to switch between using HTML5 video tags with flash fallback and using flash only.
 o Fixed minor issue where the forum crashes on the Post page.
