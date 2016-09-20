@@ -1,15 +1,15 @@
 <?php
 /**********************************************************************************
 * InlineAttachments.english.php - English language file
-*********************************************************************************
-* This program is distributed in the hope that it is and will be useful, but
-* WITHOUT ANY WARRANTIES; without even any implied warranty of MERCHANTABILITY
-* or FITNESS FOR A PARTICULAR PURPOSE.
-*********************************************************************************
-* This work is licensed under a Creative Commons Attribution 3.0 Unported License
+***********************************************************************************
+* This mod is licensed under the 2-clause BSD License, which can be found here:
+*	http://opensource.org/licenses/BSD-2-Clause
+***********************************************************************************
+* This program is distributed in the hope that it is and will be useful, but      *
+* WITHOUT ANY WARRANTIES; without even any implied warranty of MERCHANTABILITY    *
+* or FITNESS FOR A PARTICULAR PURPOSE.                                            *
 **********************************************************************************/
-
-if (!defined('SMF'))
+if (!defined('SMF')) 
 	die('Hacking attempt...');
 
 // Post and Display language strings:
@@ -17,13 +17,13 @@ $txt['ila_insert'] = 'Insert Attachment';
 $txt['ila_attachment'] = ' [ Attachment ] ';
 $txt['ila_nopermission'] = ' [ You are not allowed to view attachments ] ';
 $txt['ila_invalid'] = ' [ Invalid Attachment ] ';
-$txt['ila_disabled'] = ' [ Attachments Disabled ] ';
 $txt['ila_unapproved'] = ' [ Attachments has not been approved yet ] ';
 
 // MOD Configuration options strings:
 $txt['ila_admin_settings'] = 'ILA';
 $txt['ila_new_version'] = 'Post and PM Inline Attachments mod version %s is available for download!';
 $txt['ila_no_update'] = 'Your install of Post and PM Inline Attachments is up to date!';
+$txt['ila_mod_settings'] = 'MOD Settings';
 $txt['ila_title'] = 'Post and PM Inline Attachments';
 $txt['ila_duplicate'] = 'Remove attachment image under post after in-post use?';
 $txt['ila_download_count'] = 'Show download link and counter under inline attachment?';
@@ -33,5 +33,7 @@ $txt['ila_attach_same_as_attachment'] = '&quot;attach&quot; bbcode same as &quot
 $txt['ila_allow_quoted_images'] = 'Allow quoted attachment images from another post?';
 $txt['ila_highslide'] = 'Enable Highslide effects for inline attachment?';
 $txt['ila_display_exif'] = 'Display EXIF information below image?';
+$txt['ila_dont_process_quotes'] = 'Don\'t add message ID to quoted inline attachment?';
+$txt['ila_allow_playing_videos'] = 'Allow attached videos to be played in the post?';
 
 ?>

@@ -41,6 +41,8 @@ else
 		'ila_attach_same_as_attachment' => 0,
 		'ila_allow_quoted_images' => 1,
 		'ila_display_exif' => 0,
+		'ila_dont_process_quotes' => 0,
+		'ila_allow_playing_videos' => 0,
 	);
 
 	// Capture mod version number during the run of this script:

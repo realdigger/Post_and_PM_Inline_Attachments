@@ -1,3 +1,13 @@
+v3.8 - July 3th, 2015
+o Fixed issue with post preview reporting not allowed to view attachments.
+o Added override of "Display attachments as pictures under post" option to show pictures when disabled.
+o Added an option to stop adding message ID to quoted inline attachments.
+o Added an option to allow playing attached videos within the post.
+o Added support for playing attached MP4, OGG and WebM video files (requires HTML5 browser or QuickTime).
+o Added support for playing attached WMV files (requires Windows Media Player).
+o Added support for playing attached AVI and DivX video files (requires DivX codec to be installed).
+o Fixed undefined variable errors when certain mod settings don't get set during install.
+
 v3.7 - June 6th, 2015
 o Fixed syntax error in PersonalMessage.template.php.
 o Fixed undefined index error within Subs-InlineAttachments.php
