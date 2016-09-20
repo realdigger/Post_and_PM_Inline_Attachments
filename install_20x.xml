@@ -54,17 +54,34 @@
 		]]></add>
 	</operation>
 </file>
-<file name="$sourcedir/Recent.php">
+<file name="$sourcedir/Profile-View.php">
 	<operation>
-		<search position="before"><![CDATA[
+		<search position="before"><![CDATA[function showPosts($memID)
+{
+	global $txt, $user_info, $scripturl, $modSettings]]></search>
+		<add><![CDATA[, $topic]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);]]></search>
+		<add><![CDATA[$topic = $row['id_topic'];
 		$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
-]]></search>
-		<add><![CDATA[
 
 		// Show attachment string or error message in topic history
-		$row['body'] = ILA_Remove_Tags($row['body']);
+		$row['body'] = ILA_Remove_Tags($row['body']);]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Recent.php">
+	<operation>
+		<search position="before"><![CDATA[global $txt, $scripturl, $user_info, $context, $modSettings, $sourcedir, $board, $smcFunc]]></search>
+		<add><![CDATA[, $topic]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);]]></search>
+		<add><![CDATA[$topic = $row['id_topic'];
+		$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
 
-]]></add>
+		// Show attachment string or error message in topic history
+		$row['body'] = ILA_Remove_Tags($row['body']);]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Subs.php">

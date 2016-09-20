@@ -1,8 +1,12 @@
-v2.8 - April 6th, 2015
-o Updated for SMF 2.1 Beta 1
-o Dropped support for SMF 1.1 line
-o Fixed some visual bugs for SMF 2.0 installs.
+v2.8beta3 - April 13th, 2015
+o Fixed display code in unread and unreadreplies action, as well as show posts in profile area.
+
+v2.8beta2 - April 6th, 2015
 o Added BBC button to the editor to make attachments inline.
+
+v2.8beta1 - April 6th, 2015
+o Updated for SMF 2.1 Beta 1
+o Fixed some visual bugs for SMF 2.0 installs.
 
 v2.7 - March 12th, 2015
 o Changed some code to correctly count the number of existing attachments.
