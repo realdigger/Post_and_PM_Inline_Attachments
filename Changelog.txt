@@ -1,0 +1,64 @@
+v2.8 - April 4th, 2015
+o Added support for SMF 2.1 Beta 1
+o Dropped support for SMF 1.1 line
+o Fixed some visual bugs for SMF 2.0 installs.
+
+v2.7 - March 12th, 2015
+o Changed some code to correctly count the number of existing attachments.
+
+v2.6 - February 13th, 2014
+o Added an option to disable the nosniff header until a better solution is found....
+o Fixed a bug in the Post.template.php and PersonalMessage.template.php templates regarding adding more attachments.
+o Fixed a bug that added "Insert Attachment 1" where "Insert Attachment 2" should have been.
+
+v2.5 - January 19th, 2015
+o License change to Simplified BSD.  No functionality change.
+
+v2.4 - January 11th, 2015
+o Fixed undefined index error within Subs-InlineAttachments.php...
+
+v2.3 - December 28th, 2014
+o Performance enhancement due to storing permission check after first check.
+o Fixed spacing issues between picture and download counter/link.  Thanks, RSI!
+
+v2.2 - December 22th, 2014
+o New BBCode added: attachurl
+o margin parameter allowed to be used seperate from the float parameter.
+o Fixed the code creating the float parameter so that it works (again)
+o Fixed attachmini bbcode to return a blank string if attachment is not an image.
+o Added scale parameter to v2.x bbcodes, accepting false, true, yes, and no.
+
+v2.1 - December 19th, 2014
+o New BBCodes added: attach, attachthumb, and attachmini.
+o Some reorganization of the code to accommodate the new BBCodes.
+o Image not scaled if both width and height are specified.
+o Parameter validation functions fixed to prevent negative values from being passed.
+o No highslide features if image size is smaller than specified max image dimensions.
+o Fixed image placement code by removing "block_level" requirements from all BBcodes...
+
+v2.0 - December 7th, 2014
+o Added new form of the attachment bbcode, as explained above.
+o Fixed preview capability in non-WYSIWYG mode for already saved attachments in posts...
+o Changed code that scales image to use global settings only if no size is specified by the user.
+o Modified link building code for HS4SMF so that it properly groups the attachments.
+o Added support for Highslide Image Viewer.
+o Added support for JQLightBox.
+
+v1.5 - December 6th, 2014
+o Fixed attachments not being hidden after use in post with Custom View of Attachments installed.
+
+v1.4 - August 23th, 2014
+o Fixed multiple issues in the inline attachment validation function.
+
+v1.3 - August 17th, 2014
+o Fixed javascript code for issue with pressing "More Attachments" in Posts.
+
+v1.2 - August 11th, 2014
+o Fixed some undefined language string errors found in mod
+o Modified code to insert attachments after pressing "More Attachments" in Posts and PMs
+
+v1.1 - July 28th, 2014
+o Fixed two undeclared array element errors in PersonalMessage.template.php...
+
+v1.0 - July 21th, 2014
+o Initial Release of the mod

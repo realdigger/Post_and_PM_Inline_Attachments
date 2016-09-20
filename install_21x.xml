@@ -1,0 +1,154 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<name>Post and PM Inline Attachments</name>
+<id>Dougiefresh:ILA</id>
+<version>2.8</version>
+
+<!---------------------------------------------------------------------------->
+<!-- Source file edits														-->
+<!---------------------------------------------------------------------------->
+<file name="$sourcedir/Display.php">
+	<operation>
+		<search position="replace"><![CDATA[loadAttachmentContext($message['id_msg']),]]></search>
+		<add><![CDATA[$context['ila_attachments'],]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Post.php">
+	<operation>
+		<search position="replace"><![CDATA[loadLanguage('Post');
+
+	// You can't reply with a poll... hacker.]]></search>
+		<add><![CDATA[loadLanguage('Post+Modifications');
+
+	// You can't reply with a poll... hacker.]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[
+		$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
+]]></search>
+		<add><![CDATA[
+		// Show attachment string or error message in topic history
+		$row['body'] = ILA_Remove_Tags($row['body']);
+]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$context['preview_message'] = parse_bbc($context['preview_message'], isset($_REQUEST['ns']) ? 0 : 1);]]></search>
+		<add><![CDATA[$context['preview_message'] = parse_bbc($context['preview_message'], isset($_REQUEST['ns']) ? 0 : 1, 'pre' . ((isset($_REQUEST['msg']) ? $_REQUEST['msg'] : '')));
+
+			// Show attachment string or error message in topic history
+			$context['preview_message'] = ILA_Remove_Tags($context['preview_message']);
+]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[removeAttachments($attachmentQuery);
+]]></search>
+		<add><![CDATA[$_POST['message'] = ILA_Remove_Attachment($_POST['message'], $attachmentQuery);
+		]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Recent.php">
+	<operation>
+		<search position="before"><![CDATA[
+		$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
+]]></search>
+		<add><![CDATA[
+
+		// Show attachment string or error message in topic history
+		$row['body'] = ILA_Remove_Tags($row['body']);
+
+]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs.php">
+	<operation>
+		<search position="after"><![CDATA[// Shall we take the time to cache this?
+]]></search>
+		<add><![CDATA[// Setup for Inline Attachments
+	$message = ILA_Setup($cache_id, $message);
+		
+	]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-CustomView.php" error="skip">
+	<operation>
+		<search position="replace"><![CDATA[if (!isset($context['ila_dont_show_attach_below']) || !array_key_exists($attachment['id'], $context['ila_dont_show_attach_below']))]]></search>
+		<add><![CDATA[if (empty($context['dontshowattachment'][$attachment['id']]) && ((!isset($context['ila_dont_show_attach_below']) || !array_key_exists($attachment['id'], $context['ila_dont_show_attach_below']))))]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/hs4smf-Subs.php" error="skip">
+	<operation>
+		<search position="replace"><![CDATA[			elseif (stripos($image['img_tag'], 'index.php?action=dlattach;'))
+				continue;]]></search>
+		<add><![CDATA[// Inline Attachments (ILA) commented these out...
+//			elseif (stripos($image['img_tag'], 'index.php?action=dlattach;'))
+//				continue;]]></add>
+	</operation>
+</file>
+
+<!---------------------------------------------------------------------------->
+<!-- Template file edits													-->
+<!---------------------------------------------------------------------------->
+<file name="$themedir/Display.template.php">
+	<operation>
+		<search position="after"><![CDATA[// Assuming there are attachments...]]></search>
+		<add><![CDATA[// If the user has requested so, then remove any attachments that are already displayed...
+	if (!empty($message['attachment']))
+	{
+		foreach ($message['attachment'] as $id => $attachment)
+		{
+			if (isset($context['dontshowattachment'][$attachment['id']]))
+				unset($message['attachment'][$id]);
+		}
+	}
+
+	]]></add>
+	</operation>
+</file>
+<file name="$themedir/Post.template.php">
+	<operation>
+		<search position="replace"><![CDATA[foreach ($context['current_attachments'] as $attachment)
+			echo '
+							<dd class="smalltext">
+								<label for="attachment_', $attachment['id'], '"><input type="checkbox" id="attachment_', $attachment['id'], '" name="attach_del[]" value="', $attachment['id'], '"', empty($attachment['unchecked']) ? ' checked' : '', ' class="input_check"> ', $attachment['name'], (empty($attachment['approved']) ? ' (' . $txt['awaiting_approval'] . ')' : ''),
+								!empty($modSettings['attachmentPostLimit']) || !empty($modSettings['attachmentSizeLimit']) ? sprintf($txt['attach_kb'], comma_format(round(max($attachment['size'], 1028) / 1028), 0)) : '', '</label>]]></search>
+		<add><![CDATA[foreach ($context['current_attachments'] as $attachment)
+			echo '
+							<dd class="smalltext">
+								<label for="attachment_', $attachment['id'], '"><input type="checkbox" id="attachment_', $attachment['id'], '" name="attach_del[]" value="', $attachment['id'], '"', empty($attachment['unchecked']) ? ' checked' : '', ' class="input_check"> ', $attachment['name'], (empty($attachment['approved']) ? ' (' . $txt['awaiting_approval'] . ')' : ''),
+								!empty($modSettings['attachmentPostLimit']) || !empty($modSettings['attachmentSizeLimit']) ? sprintf($txt['attach_kb'], comma_format(round(max($attachment['size'], 1028) / 1028), 0)) : '', ' <a href="javascript:void(0);" onclick="replaceText(\'[attachment=',$attid,'][/attachment]\', document.forms.postmodify.', $context['post_box_name'], '); return false;">(', $txt['ila_insert'] ,' ', $attid,')</a></label>]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<input type="file" multiple="multiple" name="attachment[]" id="attachment1" class="input_file">]]></search>
+		<add><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a href="javascript:void(0);" onclick="replaceText(\'[attachment=', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,'][/attachment]\', document.forms.postmodify.', $context['post_box_name'], '); return false;">', $txt['ila_insert'] ,' ', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,'</a>)]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[var current_attachment = 1;
+
+									function addAttachment()
+									{
+										allowed_attachments = allowed_attachments - 1;
+										current_attachment = current_attachment + 1;
+										if (allowed_attachments <= 0)
+											return alert("', $txt['more_attachments_error'], '");
+
+										setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file"> (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '<\/a>)\' + \'<\/dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(', $txt['more_attachments'], ')<\' + \'/a><\' + \'/dd>\');
+
+										return true;
+									}]]></search>
+		<add><![CDATA[var current_attachment = ', count($context['current_attachments']), ';
+
+									function addAttachment()
+									{
+										allowed_attachments = allowed_attachments - 1;
+										current_attachment = current_attachment + 1;
+										if (allowed_attachments <= 0)
+											return alert("', $txt['more_attachments_error'], '");
+
+										setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="replaceText(\\\'[attachment=\' + current_attachment + \'][/attachment]\\\', document.forms.postmodify.', $context['post_box_name'], '); return false;">', $txt['ila_insert'] ,' \' + current_attachment + \')</a> (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
+
+										return true;
+									}]]></add>
+	</operation>
+</file>
+</modification>
