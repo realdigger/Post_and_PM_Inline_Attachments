@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>4.7</version>
+<version>4.8</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -355,8 +355,7 @@
 									setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(', $txt['more_attachments'], ')<\' + \'/a><\' + \'/dd>\');
 
 									return true;
-								}
-]]></search>
+								}]]></search>
 		<add><![CDATA[var current_attachment = ', (count($context['current_attachments']) + !empty($modSettings['ila_one_based_numbering'])), ';
 
 								function addAttachment()
@@ -371,13 +370,24 @@
 									setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="insertAttachment(\' + current_attachment + \'); return false;">\' + temp + \'</a>) (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
 
 									return true;
-								}
+								}]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[echo '
+						<dd class="smalltext">';
+
+		// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.]]></search>
+		<add><![CDATA[echo '
+						<dd class="smalltext">
+							<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
 								function insertAttachment(id)
 								{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
 									$(smfmod_editor).data(\'sceditor\').insertText(\'[' . (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment') . ' id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . '\');' : '
 									replaceText(\'[' . (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment') . ' id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . ']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
 								}
-]]></add>
+							// ]]]]><![CDATA[></script>';
+
+		// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[sendXMLDocument(smf_prepareScriptUrl(smf_scripturl) + \'action=post2\' + (current_board ? \';board=\' + current_board : \'\') + (make_poll ? \';poll\' : \'\') + \';preview;xml\', x.join(\'&\'), onDocSent);]]></search>

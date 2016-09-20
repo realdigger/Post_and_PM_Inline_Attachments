@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>4.7</version>
+<version>4.8</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -228,6 +228,22 @@
 									{
 										$(\'#', $context['post_box_name'], '\').data(\'sceditor\').sourceEditorInsertText(\'[attachment id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . ']\', 0);
 									}]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[echo '
+							<dd class="smalltext">';
+
+		// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.]]></search>
+		<add><![CDATA[echo '
+							<dd class="smalltext">';
+								<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+									function insertAttachment(id)
+									{
+										$(\'#', $context['post_box_name'], '\').data(\'sceditor\').sourceEditorInsertText(\'[attachment id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . ']\', 0);
+									}
+								// ]]]]><![CDATA[></script>';
+
+		// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[sendXMLDocument(smf_prepareScriptUrl(smf_scripturl) + \'action=post2\' + (current_board ? \';board=\' + current_board : \'\') + (make_poll ? \';poll\' : \'\') + \';preview;xml\', x.join(\'&\'), onDocSent);]]></search>

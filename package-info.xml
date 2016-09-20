@@ -4,7 +4,7 @@
 	<name>Post and PM Inline Attachments</name>
 	<id>Dougiefresh:ILA</id>
 	<type>modification</type>
-	<version>4.7</version>
+	<version>4.8</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme type="file" parsebbc="true">readme.txt</readme>

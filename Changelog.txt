@@ -1,3 +1,6 @@
+v4.8 - October 24th, 2015
+o Fixed issue where Javascript not inserted when no or only one more attachment is allowed in post.
+
 v4.7 - October 17th, 2015
 o SMF 2.1: Fixed two undefined errors within install_21.xml.
 o SMF 2.1: Fixed issue where additional attachments couldn't be added during post edit.
