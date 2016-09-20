@@ -1,5 +1,10 @@
-v3.16 - July 29th, 2015
-o Modified parse_bbc function to deal with major memory issue found by dcmouser.
+v3.17 - August 10th, 2015
+o Fixed issue with the post preview display of inline attachments.
+o Fixed issue with download counter being display with image styles being applied.
+o Modified code to make "Inline Attachment" string more language-friendly....
+
+v3.16 - July 30th, 2015
+o Performance increase due to modification of parse_bbc function to deal with memory issue found.
 o Rewrote to make "border-style" mandatory for use with "border-width" and "border-color".
 o Added ILA tags without "border-style", "border-width", or "border-color" parameters.
 o Fixed issue where that borders weren't displayed correctly without float/margin paramters.

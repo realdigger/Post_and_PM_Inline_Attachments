@@ -13,7 +13,7 @@ if (!defined('SMF'))
 	die('Hacking attempt...');
 
 // Post and Display language strings:
-$txt['ila_insert'] = 'Insert Attachment';
+$txt['ila_insert'] = 'Insert Attachment %d';
 $txt['ila_attachment'] = ' [ Attachment ] ';
 $txt['ila_nopermission'] = ' [ You are not allowed to view attachments ] ';
 $txt['ila_invalid'] = ' [ Invalid Attachment ] ';

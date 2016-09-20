@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>3.15</version>
+<version>3.17</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -262,11 +262,11 @@
 			echo '
 							<dd class="smalltext">
 								<label for="attachment_', $attachment['id'], '"><input type="checkbox" id="attachment_', $attachment['id'], '" name="attach_del[]" value="', $attachment['id'], '"', empty($attachment['unchecked']) ? ' checked' : '', ' class="input_check"> ', $attachment['name'], (empty($attachment['approved']) ? ' (' . $txt['awaiting_approval'] . ')' : ''),
-								!empty($modSettings['attachmentPostLimit']) || !empty($modSettings['attachmentSizeLimit']) ? sprintf($txt['attach_kb'], comma_format(round(max($attachment['size'], 1028) / 1028), 0)) : '', ' <a href="javascript:void(0);" onclick="insertAttachment(', ($attid + !empty($modSettings['ila_one_based_numbering'])), '); return false;">(', $txt['ila_insert'] ,' ', ($attid + !empty($modSettings['ila_one_based_numbering'])),')</a></label>]]></add>
+								!empty($modSettings['attachmentPostLimit']) || !empty($modSettings['attachmentSizeLimit']) ? sprintf($txt['attach_kb'], comma_format(round(max($attachment['size'], 1028) / 1028), 0)) : '', ' <a href="javascript:void(0);" onclick="insertAttachment(', ($attid + !empty($modSettings['ila_one_based_numbering'])), '); return false;">(', sprintf($txt['ila_insert'], ($attid + !empty($modSettings['ila_one_based_numbering']))), ')</a></label>]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[<input type="file" multiple="multiple" name="attachment[]" id="attachment1" class="input_file">]]></search>
-		<add><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a href="javascript:void(0);" onclick="insertAttachment(', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + !empty($modSettings['ila_one_based_numbering'])), '); return false;">', $txt['ila_insert'] ,' ', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + !empty($modSettings['ila_one_based_numbering'])),'</a>)]]></add>
+		<add><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a href="javascript:void(0);" onclick="insertAttachment(', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + !empty($modSettings['ila_one_based_numbering'])), '); return false;">', sprintf($txt['ila_insert'], ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + !empty($modSettings['ila_one_based_numbering']))), '</a>)]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[var current_attachment = 1;
@@ -291,7 +291,9 @@
 										if (allowed_attachments <= 0)
 											return alert("', $txt['more_attachments_error'], '");
 
-										setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="insertAttachment(\' + current_attachment + \');">', $txt['ila_insert'] ,' \' + current_attachment + \')</a> (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
+										var temp = "', $txt['ila_insert'], '";
+										temp = temp.replace("\%d", current_attachment);
+										setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="insertAttachment(\' + current_attachment + \'); return false;">\' + temp + \'</a>) (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
 
 										return true;
 									}

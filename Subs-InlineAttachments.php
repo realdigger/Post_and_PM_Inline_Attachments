@@ -781,7 +781,6 @@ function ILA_Build_HTML(&$tag, &$id)
 		$dim = ' width="' . $context['ila_params']['width'] . '" height="' . $context['ila_params']['height'] . '"';
 
 		// Start assembling the HTML string to return to the caller:
-		$html = '';
 		if (!empty($modSettings['ila_allow_playing_videos']))
 		{
 			if ($ext == 'avi' || $ext == 'divx')
@@ -830,7 +829,12 @@ function ILA_Build_HTML(&$tag, &$id)
 		elseif (isset($context['ila_params']['float']))
 			$html = '<div style="float: ' . $context['ila_params']['float'] . ';' . (!empty($style) ? $style : '') . '">' . $html . '</div>';
 		elseif (!empty($style))
-			$html = str_replace('<img src="', '<img style="' . $style . '" src="', $html);
+		{
+			if ((!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini') || $tag['tag'] == 'attachurl')
+				$html = '<div style="' . (!empty($style) ? $style : '') . '">' . $html . '</div>';
+			else
+				$html = str_replace('<img src="', '<img style="' . $style . '" src="', $html);
+		}
 	}
 	return $html;
 }
