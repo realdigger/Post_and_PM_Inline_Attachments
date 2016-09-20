@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>2.6</version>
+<version>2.7</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -183,7 +183,7 @@
 											return true;
 										}
 ]]></search>
-		<add><![CDATA[										var current_attachment = 1;
+		<add><![CDATA[										var current_attachment = ', count($context['current_attachments']), ';
 
 										function addAttachment()
 										{
@@ -222,7 +222,8 @@
 							<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a href="javascript:void(0);" onclick="replaceText(\'[attachment=', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,'][/attachment]\', document.forms.postmodify.', $context['post_box_name'], '); return false;">', $txt['ila_insert'] ,' ', (empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) ,'</a>)]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[
+		<search position="replace"><![CDATA[var current_attachment = 1;
+
 								function addAttachment()
 								{
 									allowed_attachments = allowed_attachments - 1;
@@ -235,7 +236,8 @@
 									return true;
 								}
 ]]></search>
-		<add><![CDATA[
+		<add><![CDATA[var current_attachment = ', count($context['current_attachments']), ';
+
 								function addAttachment()
 								{
 									allowed_attachments = allowed_attachments - 1;
