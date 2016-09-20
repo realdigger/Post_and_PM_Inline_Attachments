@@ -1,3 +1,9 @@
+v3.16 - July 29th, 2015
+o Modified parse_bbc function to deal with major memory issue found by dcmouser.
+o Rewrote to make "border-style" mandatory for use with "border-width" and "border-color".
+o Added ILA tags without "border-style", "border-width", or "border-color" parameters.
+o Fixed issue where that borders weren't displayed correctly without float/margin paramters.
+
 v3.15 - July 26th, 2015
 o Added "border-style", "border-width" and "border-color" ILA parameters.
 o Rewrote code that controls which image is shown to the user using the ILA tags.

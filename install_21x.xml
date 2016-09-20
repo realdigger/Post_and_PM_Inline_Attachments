@@ -205,6 +205,13 @@
 		
 	]]></add>
 	</operation>
+	<operation>
+		<search position="after"><![CDATA[$orders = permute($preg);]]></search>
+		<add><![CDATA[if (in_array($possible['tag'], ILA_tags()))
+					$orders = array($preg);
+				else
+					]]></add>
+	</operation>
 </file>
 <file name="$sourcedir/Subs-CustomView.php" error="skip">
 	<operation>

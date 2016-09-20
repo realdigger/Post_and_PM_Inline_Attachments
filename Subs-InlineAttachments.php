@@ -20,9 +20,11 @@ function ILA_tags()
 	return array('attach', 'attachment', 'attachmini', 'attachthumb', 'attachurl');
 }
 
-function ILA_parameters()
+function ILA_parameters(&$params1, &$params2)
 {
-	return array(
+	global $sourcedir;
+	
+	$params1 = array(
 		'id' => array('match' => '(\d+)', 'validate' => 'ILA_Param_ID'),
 		'width' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Width'),
 		'height' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Height'),
@@ -32,17 +34,23 @@ function ILA_parameters()
 		'margin-right' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Margin_Right'),
 		'margin-top' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Margin_Top'),
 		'margin-bottom' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Margin_Bottom'),
-		'border-style' => array('optional' => true, 'match' => '(dotted|dashed|solid|double|groove|ridge|inset|outset)', 'validate' => 'ILA_Param_Border_Style'),
+	);
+	$params2 = array_merge($params1, array(
+		'border-style' => array('match' => '(dotted|dashed|solid|double|groove|ridge|inset|outset)', 'validate' => 'ILA_Param_Border_Style'),
 		'border-width' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Border_Width'),
 		'border-color' => array('optional' => true, 'match' => '(#[\da-fA-F]{3}|#[\da-fA-F]{6}|[A-Za-z]{1,20}|rgb\(\d{1,3}, ?\d{1,3}, ?\d{1,3}\))', 'validate' => 'ILA_Param_Border_Color'),
+	));
+	$more = array(
 		'scale' => array('optional' => true, 'match' => '(true|false|yes|no)', 'validate' => 'ILA_Param_Scale'),
 		'msg' => array('optional' => true, 'match' => '(new|\d+)', 'validate' => 'ILA_Param_Msg'),
 	);
+	$params1 = array_merge($params1, $more);
+	$params2 = array_merge($params2, $more);
 }
 
 function ILA_BBCode(&$codes)
 {
-	$ila_params = ILA_parameters();
+	ILA_parameters($params1, $params2);
 	foreach (ILA_tags() as $tag)
 	{
 		// BBCode Usage: [attach=id,width,height]content ignored[/attach]
@@ -50,17 +58,25 @@ function ILA_BBCode(&$codes)
 			'tag' => $tag,
 			'type' => 'unparsed_commas_content',
 			'test' => '(\d+|\d+,\d+|\d+,\d+,\d+|\d+,msg\d+|\d+,\d+,msg\d+|\d+,\d+,\d+,msg\d+)\]',
-			'content' => '$1',
+			'content' => '',
 			'validate' => 'ILA_Start_v1x',
 			'disabled_content' => '',
 		);
 
-		// BBCode Usage: [attach id=n width=x height=y float=mode margin=m scale=yes]content ignored[/attach]
+		// BBCode Usage: [attach {params}]content ignored[/attach]
 		$codes[] = array(
 			'tag' => $tag,
 			'type' => 'unparsed_content',
-			'parameters' => $ila_params,
-			'content' => '$1',
+			'parameters' => $params2,
+			'content' => '',
+			'validate' => 'ILA_Start_v20',
+			'disabled_content' => '',
+		);
+		$codes[] = array(
+			'tag' => $tag,
+			'type' => 'unparsed_content',
+			'parameters' => $params1,
+			'content' => '',
 			'validate' => 'ILA_Start_v20',
 			'disabled_content' => '',
 		);
@@ -154,6 +170,7 @@ function ILA_Setup($msg_id, &$message)
 	}
 
 	// Process the inline attachments in the quotes, then pass the result back:
+	ILA_Fix_Param_Order($message);
 	ILA_Process_Quotes($message);
 }
 
@@ -476,7 +493,7 @@ function ILA_Fix_Param_Order(&$message)
 {
 	global $context;
 
-	$ila_params = ILA_parameters();
+	ILA_parameters($dummy, $ila_params);
 	foreach (ILA_tags() as $tag)
 	{
 		$pattern = '#\[' . $tag . ' (.+?)\]#i' . ($context['utf8'] ? 'u' : '');
@@ -575,7 +592,7 @@ function ILA_Param_Border_Width($width)
 function ILA_Param_Border_Color($color)
 {
 	global $context;
-	$context['ila_params']['margin-bottom'] = $color;
+	$context['ila_params']['border-color'] = $color;
 }
 
 function ILA_Param_Scale($answer)
@@ -616,7 +633,7 @@ function ILA_Start_v1x(&$tag, &$data, &$disabled)
 		);
 		if (substr($data[ count($data) - 1 ], 0, 3) == 'msg')
 			ILA_Param_Msg( substr($data[ count($data) - 1 ], 3) );
-		$data[0] = ILA_Build_HTML($tag, $context['ila_params']['id']);
+		$tag['content'] = ILA_Build_HTML($tag, $context['ila_params']['id']);
 	}
 	unset($context['ila_params']);
 }
@@ -626,9 +643,9 @@ function ILA_Start_v20(&$tag, &$data, &$disabled)
 	global $context, $txt;
 
 	if (!isset($context['ila_params']['id']))
-		$data = $txt['ila_invalid'];
+		$tag['content'] = $txt['ila_invalid'];
 	else
-		$data = ILA_Build_HTML($tag, $context['ila_params']['id']);
+		$tag['content'] = ILA_Build_HTML($tag, $context['ila_params']['id']);
 	unset($context['ila_params']);
 }
 
@@ -812,8 +829,8 @@ function ILA_Build_HTML(&$tag, &$id)
 			$html = '<div style="margin-left: auto; margin-right: auto; display: block;">' . $html . '</div>';
 		elseif (isset($context['ila_params']['float']))
 			$html = '<div style="float: ' . $context['ila_params']['float'] . ';' . (!empty($style) ? $style : '') . '">' . $html . '</div>';
-		elseif (!empty($margin))
-			$html = '<div style="' . $style . '">' . $html . '</div>';
+		elseif (!empty($style))
+			$html = str_replace('<img src="', '<img style="' . $style . '" src="', $html);
 	}
 	return $html;
 }
