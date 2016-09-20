@@ -506,7 +506,7 @@ function ILA_Fix_Param_Order(&$message)
 			$params = explode(' ', $match);
 			unset($params[0]);
 			$order = array();
-			$replace_str = $old = '';
+			$replace_str = $old = $order[''] = '';
 			foreach ($params as $param)
 			{
 				if (strpos($param, '=') === false)
@@ -722,8 +722,8 @@ function ILA_Build_HTML(&$tag, &$id)
 			$image = $thumb = (($use_thumbnail = !empty($attachment['thumbnail']['has_thumb'])) ? $attachment['thumbnail']['href'] : $attachment['href']);
 		$pic_width = $attachment['real_width'];
 		$pic_height = $attachment['real_height'];
-		$real_width = ($use_thumbnail ? $attachment['thumb_width'] : $attachment['real_width']);
-		$real_height = ($use_thumbnail ? $attachment['thumb_height'] : $attachment['real_height']);
+		$real_width = ($use_thumbnail && isset($attachment['thumb_width']) ? $attachment['thumb_width'] : $attachment['real_width']);
+		$real_height = ($use_thumbnail && isset($attachment['thumb_height']) ? $attachment['thumb_height'] : $attachment['real_height']);
 
 		// Did the user request no scaling activities?
 		$shrunk = false;

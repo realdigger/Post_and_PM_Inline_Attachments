@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>4.6</version>
+<version>4.7</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -65,95 +65,16 @@
 		<add><![CDATA[$_POST['attach_del'][] = ]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[// First check to see if they are trying to delete any current attachments.
-	if (isset($_POST['attach_del']))
-	{
-		$keep_temp = array();
-		$keep_ids = array();
-		foreach ($_POST['attach_del'] as $dummy)
-			if (strpos($dummy, 'post_tmp_' . $user_info['id']) !== false)
-				$keep_temp[] = $dummy;
-			else
-				$keep_ids[] = (int) $dummy;
-
-		if (isset($_SESSION['temp_attachments']))
-			foreach ($_SESSION['temp_attachments'] as $attachID => $attachment)
-			{
-				if ((isset($_SESSION['temp_attachments']['post']['files'], $attachment['name']) && in_array($attachment['name'], $_SESSION['temp_attachments']['post']['files'])) || in_array($attachID, $keep_temp) || strpos($attachID, 'post_tmp_' . $user_info['id']) === false)
-					continue;
-
-				unset($_SESSION['temp_attachments'][$attachID]);
-				unlink($attachment['tmp_name']);
-			}
-
-		if (!empty($_REQUEST['msg']))
-		{
-			require_once($sourcedir . '/ManageAttachments.php');
-			$attachmentQuery = array(
-				'attachment_type' => 0,
-				'id_msg' => (int) $_REQUEST['msg'],
-				'not_id_attach' => $keep_ids,
-			);
-			removeAttachments($attachmentQuery);
-		}
-	}
-
-	// Then try to upload any attachments.
-	$context['can_post_attachment'] = !empty($modSettings['attachmentEnable']) && $modSettings['attachmentEnable'] == 1 && (allowedTo('post_attachment') || ($modSettings['postmod_active'] && allowedTo('post_unapproved_attachments')));
-	if ($context['can_post_attachment'] && empty($_POST['from_qr']))
-	{
-		 require_once($sourcedir . '/Subs-Attachments.php');
-		 processAttachments();
-	}]]></search>
-		<add><![CDATA[// SWAPPED: Then try to upload any attachments.
-	$context['can_post_attachment'] = !empty($modSettings['attachmentEnable']) && $modSettings['attachmentEnable'] == 1 && (allowedTo('post_attachment') || ($modSettings['postmod_active'] && allowedTo('post_unapproved_attachments')));
-	if ($context['can_post_attachment'] && empty($_POST['from_qr']))
-	{
-		 require_once($sourcedir . '/Subs-Attachments.php');
-		 processAttachments();
-	}
-
-	// SWAPPED: First check to see if they are trying to delete any current attachments.
-	ILA_Fix_Param_Order($_POST['message']);
-	if (isset($_POST['attach_del']))
-	{
-		$keep_temp = array();
-		$keep_ids = array();
-		foreach ($_POST['attach_del'] as $dummy)
-			if (strpos($dummy, 'post_tmp_' . $user_info['id']) !== false)
-				$keep_temp[] = $dummy;
-			else
-				$keep_ids[] = (int) $dummy;
-
-		if (isset($_SESSION['temp_attachments']))
-			foreach ($_SESSION['temp_attachments'] as $attachID => $attachment)
-			{
-				if ((isset($_SESSION['temp_attachments']['post']['files'], $attachment['name']) && in_array($attachment['name'], $_SESSION['temp_attachments']['post']['files'])) || in_array($attachID, $keep_temp) || strpos($attachID, 'post_tmp_' . $user_info['id']) === false)
-					continue;
-
-				unset($_SESSION['temp_attachments'][$attachID]);
-				unlink($attachment['tmp_name']);
-			}
-
-		if (!empty($_REQUEST['msg']))
-		{
-			require_once($sourcedir . '/ManageAttachments.php');
-			$attachmentQuery = array(
-				'attachment_type' => 0,
-				'id_msg' => (int) $_REQUEST['msg'],
-				'not_id_attach' => $keep_ids,
-			);
-			ILA_Reorganize_Tags($_POST['message'], $attachmentQuery);
-			removeAttachments($attachmentQuery);
-		}
-	}]]></add>
+		<search position="replace"><![CDATA[removeAttachments($attachmentQuery);]]></search>
+		<add><![CDATA[ILA_Reorganize_Tags($_POST['message'], $attachmentQuery);
+			removeAttachments($attachmentQuery);]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[// Collect all parameters for the creation or modification of a post.
 	$msgOptions = array(
 		'id' => empty($_REQUEST['msg']) ? 0 : (int) $_REQUEST['msg'],]]></search>
 		<add><![CDATA[// Collect all parameters for the creation or modification of a post.
-	ILA_Process_Quotes($_POST['message'], $msg_id);
+	ILA_Process_Quotes($_POST['message'], (empty($_REQUEST['msg']) ? 0 : (int) $_REQUEST['msg']) );
 	$msgOptions = array(
 		'id' => empty($_REQUEST['msg']) ? 0 : (int) $_REQUEST['msg'],]]></add>
 	</operation>
@@ -264,7 +185,7 @@
 							<dd class="smalltext">
 								<label for="attachment_', $attachment['id'], '"><input type="checkbox" id="attachment_', $attachment['id'], '" name="attach_del[]" value="', $attachment['id'], '"', empty($attachment['unchecked']) ? ' checked' : '', ' class="input_check"> ', $attachment['name'], (empty($attachment['approved']) ? ' (' . $txt['awaiting_approval'] . ')' : ''),
 								!empty($modSettings['attachmentPostLimit']) || !empty($modSettings['attachmentSizeLimit']) ? sprintf($txt['attach_kb'], comma_format(round(max($attachment['size'], 1028) / 1028), 0)) : '', '</label>]]></search>
-		<add><![CDATA[foreach ($context['current_attachments'] as $attachment)
+		<add><![CDATA[foreach ($context['current_attachments'] as $attid => $attachment)
 			echo '
 							<dd class="smalltext">
 								<label for="attachment_', $attachment['id'], '"><input type="checkbox" id="attachment_', $attachment['id'], '" name="attach_del[]" value="', $attachment['id'], '"', empty($attachment['unchecked']) ? ' checked' : '', ' class="input_check"> ', $attachment['name'], (empty($attachment['approved']) ? ' (' . $txt['awaiting_approval'] . ')' : ''),

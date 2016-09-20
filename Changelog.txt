@@ -1,3 +1,8 @@
+v4.7 - October 17th, 2015
+o SMF 2.1: Fixed two undefined errors within install_21.xml.
+o SMF 2.1: Fixed issue where additional attachments couldn't be added during post edit.
+o Fixed several undefined errors within Subs-InlineAttachments.php.
+
 v4.6 - October 4th, 2015
 o Fixed erroneous v4.5 update where ILA tag parameters were removed.
 
