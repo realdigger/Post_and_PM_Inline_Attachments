@@ -1,3 +1,9 @@
+v3.10 - July 5th, 2015
+o Fixed issue where msg parameter was added twice to ILA tags in new posts.
+o Fixed ILA_Fix_Param_Order so that extraneous "&nbsp;" weren't added to the created link.
+o Fixed ILA_Fix_Param_Order so that it doesn't reuse parameters from another ILA tag.
+o Altered [b]msg[/b] parameter to accept "new" as an acceptable parameter input for preview purposes.
+
 v3.9 - July 4th, 2015
 o Fixed the ILA float parameter so that [b]float=center[/b] works as expected.
 o Added code to make sure ILA tag parameters are in the correct order.
