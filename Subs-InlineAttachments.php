@@ -34,6 +34,7 @@ function ILA_BBCode(&$codes)
 			'height' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Height'),
 			'float' => array('optional' => true, 'match' => '(left|right|center)', 'validate' => 'ILA_Param_Float'),
 			'margin' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Margin'),
+			'scale' => array('optional' => true, 'match' => '(true|false|yes|no)', 'validate' => 'ILA_Param_Scale'),
 		),
 		'content' => '$1',
 		'validate' => 'ILA_Validate_v20',
@@ -60,6 +61,7 @@ function ILA_BBCode(&$codes)
 			'height' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Height'),
 			'float' => array('optional' => true, 'match' => '(left|right|center)', 'validate' => 'ILA_Param_Float'),
 			'margin' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Margin'),
+			'scale' => array('optional' => true, 'match' => '(true|false|yes|no)', 'validate' => 'ILA_Param_Scale'),
 		),
 		'content' => '$1',
 		'validate' => 'ILA_Validate_v20',
@@ -86,6 +88,7 @@ function ILA_BBCode(&$codes)
 			'height' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Height'),
 			'float' => array('optional' => true, 'match' => '(left|right|center)', 'validate' => 'ILA_Param_Float'),
 			'margin' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Margin'),
+			'scale' => array('optional' => true, 'match' => '(true|false|yes|no)', 'validate' => 'ILA_Param_Scale'),
 		),
 		'content' => '$1',
 		'validate' => 'ILA_Validate_v20',
@@ -112,6 +115,34 @@ function ILA_BBCode(&$codes)
 			'height' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Height'),
 			'float' => array('optional' => true, 'match' => '(left|right|center)', 'validate' => 'ILA_Param_Float'),
 			'margin' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Margin'),
+			'scale' => array('optional' => true, 'match' => '(true|false|yes|no)', 'validate' => 'ILA_Param_Scale'),
+		),
+		'content' => '$1',
+		'validate' => 'ILA_Validate_v20',
+		'disabled_content' => '',
+	);
+
+	// BBCode Usage: [attachurl=id,width,height]content ignored[/attachurl]
+	$codes[] = array(
+		'tag' => 'attachurl',
+		'type' => 'unparsed_commas_content',
+		'test' => '(\d+|\d+,\d+|\d+,\d+,\d+)\]',
+		'content' => '$1',
+		'validate' => 'ILA_Validate_v1x',
+		'disabled_content' => '',
+	);
+
+	// BBCode Usage: [attachurl id=n width=x height=y float=mode]content ignored[/attachurl]
+	$codes[] = array(
+		'tag' => 'attachurl',
+		'type' => 'unparsed_content',
+		'parameters' => array(
+			'id' => array('match' => '(\d+)', 'validate' => 'ILA_Param_ID'),
+			'width' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Width'),
+			'height' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Height'),
+			'float' => array('optional' => true, 'match' => '(left|right|center)', 'validate' => 'ILA_Param_Float'),
+			'margin' => array('optional' => true, 'match' => '(\d+)', 'validate' => 'ILA_Param_Margin'),
+			'scale' => array('optional' => true, 'match' => '(true|false|yes|no)', 'validate' => 'ILA_Param_Scale'),
 		),
 		'content' => '$1',
 		'validate' => 'ILA_Validate_v20',
@@ -147,6 +178,12 @@ function ILA_Validate_v20(&$tag, &$data, $disabled)
 	else
 		$data = ILA_Validate($tag, $context["ila_params"]["id"], $data);
 	unset($context["ila_params"]);
+}
+
+function ILA_Param_Scale($answer)
+{
+	global $context;
+	$context['ila_params']['scale'] = ($answer == false || $answer == 'no');
 }
 
 function ILA_Param_ID($id)
@@ -412,8 +449,10 @@ function ILA_Validate(&$tag, $id, $content)
 		$context['dontshowattachment'][$attachment['id']] = true;
 
 	// Return empty string if a non-image attachment was requested:
-	if (!$attachment['is_image'])
+	if (!$attachment['is_image'] && $tag['tag'] != 'attachmini')
 		return '<div class="smalltext"><a href="' . $attachment['href'] . '"><img src="' . $settings['images_url'] . '/icons/clip.gif" align="middle" alt="*" border="0" />&nbsp;' . $attachment['name'] . '</a> ('. $attachment['size']. ($attachment['is_image'] ? '. ' . $attachment['real_width'] . 'x' . $attachment['real_height'] . ' - ' . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . '.)</div>';
+	elseif (!$attachment['is_image'])
+		return '';
 
 	// If neither width nor height is set, use the global max image size settings:
 	$max_width = &$context["ila_params"]['width'];
@@ -431,17 +470,23 @@ function ILA_Validate(&$tag, $id, $content)
 	$thumb = ($use_thumbnail && !empty($attachment['thumbnail']['has_thumb']) ? $attachment['thumbnail']['href'] : $attachment['href']);
 	$image = ($tag['tag'] == 'attachthumb' ? $thumb : $attachment['href']);
 
-	// Scale the image if desired dimensions are specified by user OR maximum image size is set by admin:
+	// Did the user request no scaling activities?
 	$shrunk = false;
-	if (!empty($max_width) || !empty($max_height))
+	if (!empty($context['ila_params']['scale']))
 	{
-		if (!empty($max_width) && empty($max_height) && $src_width > $max_width)
+		$src_width = $max_width;
+		$src_height = $max_height;
+	}
+	// Scale the image if desired dimensions are specified by user OR maximum image size is set by admin:
+	elseif ((!empty($max_width) || !empty($max_height)))
+	{
+		if (!empty($max_width) && $src_width > $max_width)
 		{
 			$src_height = floor($src_height * $max_width / $src_width);
 			$src_width = $max_width;
 			$shrunk = true;
 		}
-		elseif (!empty($max_height) && $src_height > $max_height)
+		if (!empty($max_height) && $src_height > $max_height)
 		{
 			$src_width = floor($src_width * $max_height / $src_height);
 			$src_height = $max_height;
@@ -452,31 +497,32 @@ function ILA_Validate(&$tag, $id, $content)
 	// Process the remaining bbcode parameters:
 	$width = (!empty($src_width) ? ' width="' . $src_width .'"' : '');
 	$height = (!empty($src_height) ? ' height="' . $src_height .'"' : '');
-	$float = isset($context["ila_params"]['float']) ? ' style="float:' . $context["ila_params"]['float'] . (isset($context["ila_params"]['margin']) ? '; margin:' . $context["ila_params"]['margin'] . 'px' : '') : '"';
+	$float = (isset($context["ila_params"]['float']) ? ' style="float:' . $context["ila_params"]['float'] . (isset($context["ila_params"]['margin']) ? '; margin:' . $context["ila_params"]['margin'] . 'px' : '') . '"' : '');
+	$margin = (!isset($context["ila_params"]['float']) && isset($context["ila_params"]['margin']) ? ' style="margin:' . $context["ila_params"]['margin'] . 'px"' : '');
 
 	// Build the replacement string for the caller:
-	if ($shrunk && $modSettings['ila_highslide'])
+	if ($shrunk && $modSettings['ila_highslide'] && $tag['tag'] != 'attachurl')
 	{
 		if (!empty($modSettings['hs4smf_enabled']) && function_exists('hs4smf_get_slidegroup'))
 		{
 			$settings['hs4smf_img_count'] = (isset($settings['hs4smf_img_count'])) ? $settings['hs4smf_img_count'] + 1 : 1;
-			$slidegroup = hs4smf_get_slidegroup($message['id']);
+			$slidegroup = hs4smf_get_slidegroup($id);
 			if (!isset($settings['hs4smf_slideshow']) && $settings['hs4smf_img_count'] > 1) 
 				$settings['hs4smf_slideshow'] = 1;
-			$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" onclick="return hs.expand(this, ' . $slidegroup . ')"><img src="' . $thumb . '" ' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . ' id="thumb_' . $id . '" /></a>';
+			$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" onclick="return hs.expand(this, ' . $slidegroup . ')"><img src="' . $thumb . '" ' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' id="thumb_' . $id . '" /></a>';
 		}
 		// Highslide Image Viewer Installed?
 		elseif (function_exists('highslide_images'))
-			$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" rel="highslide"><img src="' . $thumb . '" ' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . ' id="thumb_' . $id . '" /></a><br /><span class="highslide-heading">' . $context['subject'] . '</span>';
+			$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" rel="highslide"><img src="' . $thumb . '" ' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' id="thumb_' . $id . '" /></a><br /><span class="highslide-heading">' . $context['subject'] . '</span>';
 		// jQLightbox
 		elseif (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css'))
-			$html = '<a href="' . $image . ';image" id="link_' . $id . '" rel="lightbox[gallery]"><img src="' . $thumb . '" ' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . ' id="thumb_' . $id . '" /></a>';
+			$html = '<a href="' . $image . ';image" id="link_' . $id . '" rel="lightbox[gallery]"><img src="' . $thumb . '" ' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' id="thumb_' . $id . '" /></a>';
 		// Simple Mode
 		else
-			$html = '<img src="' . $thumb . ';image" alt=""' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . ' class="bbc_img resized" />';
+			$html = '<img src="' . $thumb . ';image" alt=""' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' class="bbc_img resized" />';
 	}
 	else
-		$html = '<img src="' . $thumb . ';image" alt=""' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . ' class="bbc_img resized" />';
+		$html = '<img src="' . $thumb . ';image" alt=""' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' class="bbc_img resized" />';
 
 	// Add the download count to the image tag if requested:
 	if (!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini')

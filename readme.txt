@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v2.1[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v2.2[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -39,6 +39,10 @@ Version 2.1 keeps the version 1.0 and 2.0 forms, plus introduces more BBCodes:
 [b]attachthumb[/b] => Shows only the thumbnail of the attachment.
 [b]attachmini[/b] => Shows the attachment, omitting the download count and filename beneath.
 [/quote]
+Version 2.2 introduces one more BBCode:
+[quote]
+[b]attachurl[/b] => Shows the attachment like you used an [b]img[/b] tag instead of this tag.
+[/quote]
 Each of these new BBCodes uses the same format as the [b][nobbc][attachment][/nobbc][/b] BBCodes.
 
 In each case, [b]{id}[/b] is the attachment number relative to the topic, [b]{width}[/b] is the max desired width, [b]{height}[/b] is the max desired height, [b]{pixels}[/b] is the number of pixels surrounding the image, and [b]{float}[/b] can be either [b]left[/b], [b]right[/b], or [b]center[/b].  All text between the opening and closing attachment tags is discarded.
@@ -76,6 +80,13 @@ o [url=http://custom.simplemachines.org/mods/index.php?mod=2758]Custom View of A
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
+[b][u]v2.2 - December 22th, 2014[/u][/b]
+o New BBCode added: [b]attachurl[/b]
+o [b]margin[/b] parameter allowed to be used seperate from the [b]float[/b] parameter.
+o Fixed the code creating the float parameter so that it works (again)
+o Fixed [b]attachmini[/b] bbcode to return a blank string if attachment is not an image.
+o Added [b]scale[/b] parameter to v2.x bbcodes, accepting [b]false[/b], [b]true[/b], [b]yes[/b], and [b]no[/b].
+
 [b][u]v2.1 - December 19th, 2014[/u][/b]
 o New BBCodes added: [b]attach[/b], [b]attachthumb[/b], and [b]attachmini[/b].
 o Some reorganization of the code to accommodate the new BBCodes.
