@@ -620,7 +620,7 @@ function ILA_Admin_Settings_Hook(&$sub)
 
 function ILA_Admin_Settings($return_config = false)
 {
-	global $context, $modSettings, $txt;
+	global $context, $modSettings, $txt, $scripturl;
 
 	// Get latest version of the mod and display whether current mod is up-to-date:
 	if (($file = cache_get_data('ila_mod_version', 86400)) == null)

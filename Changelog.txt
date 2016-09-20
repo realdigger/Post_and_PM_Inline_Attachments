@@ -1,3 +1,6 @@
+v3.1.2 - April 27th, 2015
+o Fixed missing variable declaration on ILA settings page.
+
 v3.1.1 - April 25th, 2015
 o Added code to cache the mod version check for 1 day between checks.
 o Fixed code regarding times download and download link without float/margin parameter.
