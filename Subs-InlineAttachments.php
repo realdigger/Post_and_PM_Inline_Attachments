@@ -189,12 +189,11 @@ function ILA_Validate($data)
 		return $txt['ila_nopermission'];
 
 	// Does the specified attachment exist?  If not, return attachment invalid message:
-	$attach = &$context['ila_attachments'];
-	if (!isset($attach[$data[1]]))
+	if (!isset($context['ila_attachments'][$data[1]]))
 		return $txt['ila_invalid'];
 
 	// Mark attachment as "don't show" if admin has checked that option:
-	$attachment = $attach[$data[1]];
+	$attachment = &$context['ila_attachments'][$data[1]];
 	if (!empty($modSettings['ila_duplicate']))
 		$context['dontshowattachment'][$attachment['id']] = true;
 
@@ -207,19 +206,17 @@ function ILA_Validate($data)
 	$data[3] = isset($data[3]) ? $data[3] : $modSettings['max_image_height'];
 	if (!empty($data[2]) && $attachment['real_width'] > $data[2])
 	{
-		$attachment['real_height'] = (int) (($data[2] * $attachment['real_height']) / $attachment['real_width']);
-		$attachment['real_width'] = $data[2];
+		$attachment['real_height'] = (int) ($data[2] * ($attachment['real_height'] / $attachment['real_width']));
+		$attachment['real_width'] = (int) $data[2];
 	}
 	if (!empty($data[3]) && $attachment['real_height'] > $data[3])
 	{
-		$attachment['real_width'] = (int) (($data[3] * $attachment['real_width']) / $attachment['real_height']);
-		$attachment['real_height'] = $data[3];
+		$attachment['real_width'] = (int) ($data[3] * ($attachment['real_width'] / $attachment['real_height']));
+		$attachment['real_height'] = (int) $data[3];
 	}
 
 	// Build the replacement string for the caller:
-	$html = (!empty($data[2]) ? ' width="' . $attachment['real_width'] . '"' : '');
-	$html .=  (!empty($data[3]) ? ' height="'. $attachment['real_height'] .'"' : '');
-	$html = '<img src="' . $attachment['href'] . ';image" alt=""' . $html . ' class="bbc_img resized" />';
+	$html = '<img src="' . $attachment['href'] . ';image" alt="" width="' . $attachment['real_width'] . '" height="'. $attachment['real_height'] .'" class="bbc_img resized" />';
 	if (!empty($modSettings['ila_highslide']) && function_exists('hs4smf'))
 		$html = '<a href="' . $attachment['href'] . ';image" id="link_' . $attachment['id'] . '" class="highslide" onclick="return hs.expand(this, { slideshowGroup: \'' . $context['ila_message'] . '\' })">' . str_replace('bbc_img resized', 'bbc_img', $html) . '</a>';
 	if (!empty($modSettings['ila_download_count']))
