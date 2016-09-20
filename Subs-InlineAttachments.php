@@ -226,6 +226,7 @@ function ILA_Mod_Settings(&$vars)
 		$vars[] = array('check', 'ila_highslide');
 	$vars[] = array('check', 'ila_duplicate');
 	$vars[] = array('check', 'ila_download_count');
+	$vars[] = array('check', 'ila_turn_nosniff_off');
 }
 
 //================================================================================

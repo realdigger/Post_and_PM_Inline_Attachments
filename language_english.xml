@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>1.2</version>
+<version>2.5</version>
 
 <!-------------------------------------------------------------------------->
 <!-- Language file edits (English - Modifications)                        -->
@@ -22,6 +22,7 @@ $txt['ila_nopermission'] = ' [ You are not allowed to view attachments ] ';
 $txt['ila_invalid'] = ' [ Invalid Attachment ] ';
 $txt['ila_disabled'] = ' [ Attachments Disabled ] ';
 $txt['ila_insert'] = 'Insert Attachment';
+$txt['ila_turn_nosniff_off'] = 'Turns &quot;nosniff&quot; option off for IE and Chrome';
 // END MOD Inline Attachments
 
 ]]></add>

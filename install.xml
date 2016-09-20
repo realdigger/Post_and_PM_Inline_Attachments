@@ -3,11 +3,18 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>2.1</version>
+<version>2.5</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
 <!---------------------------------------------------------------------------->
+<file name="$boarddir/index.php">
+	<operation>
+		<search position="replace"><![CDATA[header('X-Content-Type-Options: nosniff');]]></search>
+		<add><![CDATA[if (empty($modSettings['ila_turn_nosniff_off']))
+		header('X-Content-Type-Options: nosniff');]]></add>
+	</operation>
+</file>
 <file name="$sourcedir/Display.php">
 	<operation>
 		<search position="replace"><![CDATA[loadAttachmentContext($message['id_msg']),]]></search>

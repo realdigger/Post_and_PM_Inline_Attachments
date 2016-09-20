@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v2.4[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v2.5[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -79,57 +79,16 @@ o [url=http://custom.simplemachines.org/mods/index.php?mod=1974]PM Attachments[/
 o [url=http://custom.simplemachines.org/mods/index.php?mod=2758]Custom View of Attachments[/url]
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
-[quote]
-[b][u]v2.4 - January 11th, 2015[/u][/b]
-o Fixed undefined index error within [b]Subs-InlineAttachments.php[/b]...
+The changelog has been removed and can be seen at [url=http://www.xptsp.com/board/index.php?topic=12.msg137#msg137]XPtsp.com[/url].
 
-[b][u]v2.3 - December 28th, 2014[/u][/b]
-o Performance enhancement due to storing permission check after first check.
-o Fixed spacing issues between picture and download counter/link.  Thanks, [url=http://www.simplemachines.org/community/index.php?action=profile;u=399264]RSI[/url]!
+[color=blue][b][size=12pt][u]License[/u][/size][/b][/color]
+Copyright (c) 2015, Douglas Orend
+All rights reserved.
 
-[b][u]v2.2 - December 22th, 2014[/u][/b]
-o New BBCode added: [b]attachurl[/b]
-o [b]margin[/b] parameter allowed to be used seperate from the [b]float[/b] parameter.
-o Fixed the code creating the float parameter so that it works (again)
-o Fixed [b]attachmini[/b] bbcode to return a blank string if attachment is not an image.
-o Added [b]scale[/b] parameter to v2.x bbcodes, accepting [b]false[/b], [b]true[/b], [b]yes[/b], and [b]no[/b].
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-[b][u]v2.1 - December 19th, 2014[/u][/b]
-o New BBCodes added: [b]attach[/b], [b]attachthumb[/b], and [b]attachmini[/b].
-o Some reorganization of the code to accommodate the new BBCodes.
-o Image not scaled if both width and height are specified.
-o Parameter validation functions fixed to prevent negative values from being passed.
-o No highslide features if image size is smaller than specified max image dimensions.
-o Fixed image placement code by removing "block_level" requirements from all BBcodes...
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 
-[b][u]v2.0 - December 7th, 2014[/u][/b]
-o Added new form of the [b]attachment[/b] bbcode, as explained above.
-o Fixed preview capability in non-WYSIWYG mode for already saved attachments in posts...
-o Changed code that scales image to use global settings only if no size is specified by the user.
-o Modified link building code for HS4SMF so that it properly groups the attachments.
-o Added support for [url=http://custom.simplemachines.org/mods/index.php?mod=1450]Highslide Image Viewer[/url].
-o Added support for [url=http://custom.simplemachines.org/mods/index.php?mod=1605]JQLightBox[/url].
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 
-[b][u]v1.5 - December 6th, 2014[/u][/b]
-o Fixed attachments not being hidden after use in post with [url=http://custom.simplemachines.org/mods/index.php?mod=2758]Custom View of Attachments[/url] installed.
-
-[b][u]v1.4 - August 23th, 2014[/u][/b]
-o Fixed multiple issues in the inline attachment validation function.
-
-[b][u]v1.3 - August 17th, 2014[/u][/b]
-o Fixed javascript code for issue with pressing "More Attachments" in Posts.
-
-[b][u]v1.2 - August 11th, 2014[/u][/b]
-o Fixed some undefined language string errors found in mod
-o Modified code to insert attachments after pressing "More Attachments" in Posts and PMs
-
-[b][u]v1.1 - July 28th, 2014[/u][/b]
-o Fixed two undeclared array element errors in [b]PersonalMessage.template.php[/b]...
-
-[b][u]v1.0 - July 21th, 2014[/u][/b]
-o Initial Release of the mod
-[/quote]
-
-[hr]
-[url=http://creativecommons.org/licenses/by/3.0][img]http://i.creativecommons.org/l/by/3.0/80x15.png[/img][/url]
-This work is licensed under a [url=http://creativecommons.org/licenses/by/3.0]Creative Commons Attribution 3.0 Unported License[/url]
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
