@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Enhanced_PM_System</id>
+<version>1.4</version>
+
+<!-------------------------------------------------------------------------->
+<!-- Language file edits (English - Modifications)                        -->
+<!-------------------------------------------------------------------------->
+<file name="$themedir/languages/Modifications.english.php">
+	<operation>
+		<search position="end" />
+		<add><![CDATA[
+// BEGIN MOD Inline Attachments
+$txt['ila_title'] = 'Inline Attachments';
+$txt['ila_highslide'] = 'Enable Highslide effects for inline attachment';
+$txt['ila_duplicate'] = 'Remove attachment image under post after in-post use';
+$txt['ila_download_count'] = 'Show download link and counter under inline attachment';
+$txt['ila_attachment'] = ' [ Attachment ] ';
+$txt['ila_nopermission'] = ' [ You are not allowed to view attachments ] ';
+$txt['ila_invalid'] = ' [ Invalid Attachment ] ';
+$txt['ila_disabled'] = ' [ Attachments Disabled ] ';
+$txt['ila_insert'] = 'Insert Attachment';
+// END MOD Inline Attachments
+
+]]></add>
+	</operation>
+</file>
+
+</modification>
