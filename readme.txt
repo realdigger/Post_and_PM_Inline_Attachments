@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v1.4[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v1.5[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -41,8 +41,13 @@ If you use [url=http://custom.simplemachines.org/mods/index.php?mod=1974]PM Atta
 
 If you want to use the [url=http://www.simplemachines.org/community/index.php?topic=379200]Highslide4SMF v0.8.1[/url] mod (which has been removed from SMF's Modifications area), it can be found at [url=https://github.com/Spuds/SMF-HS4SMF]GitHub.com[/url].
 
+If you use the [url=http://custom.simplemachines.org/mods/index.php?mod=2758]Custom View of Attachments[/url] mod, it should be installed before this mod.
+
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
+[b][u]v1.5 - December 6th, 2014[/u][/b]
+o Fixed attachments not being hidden after use in post with [url=http://custom.simplemachines.org/mods/index.php?mod=2758]Custom View of Attachments[/url] installed.
+
 [b][u]v1.4 - August 23th, 2014[/u][/b]
 o Fixed multiple issues in the inline attachment validation function.
 

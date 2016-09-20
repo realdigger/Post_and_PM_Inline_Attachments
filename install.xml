@@ -1,26 +1,30 @@
 <?xml version="1.0"?>
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
-	<name>Post and PM Inline Attachments</name>
-	<id>Dougiefresh:ILA</id>
-	<version>1.4</version>
+<name>Post and PM Inline Attachments</name>
+<id>Dougiefresh:ILA</id>
+<version>1.5</version>
 
 <!-------------------------------------------------------------------------->
 <!-- Source file edits                                                    -->
 <!-------------------------------------------------------------------------->
-<file name="$sourcedir/Subs.php">
-	<operation>
-		<search position="after"><![CDATA[// Shall we take the time to cache this?
-]]></search>
-		<add><![CDATA[// Setup for Inline Attachments
-	$message = ILA_Setup($cache_id, $message);
-		
-	]]></add>
-	</operation>
-</file>
 <file name="$sourcedir/Display.php">
 	<operation>
 		<search position="replace"><![CDATA[loadAttachmentContext($message['id_msg']),]]></search>
+		<add><![CDATA[$context['ila_attachments'],]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/PersonalMessage.php">
+	<operation>
+		<search position="replace"><![CDATA[loadLanguage('PersonalMessage');
+
+	if (WIRELESS && WIRELESS_PROTOCOL == 'wap')]]></search>
+		<add><![CDATA[loadLanguage('PersonalMessage+Modifications');
+
+	if (WIRELESS && WIRELESS_PROTOCOL == 'wap')]]></add>
+	</operation>
+	<operation error="ignore">
+		<search position="replace"><![CDATA[loadPMAttachmentContext($message['id_pm']),]]></search>
 		<add><![CDATA[$context['ila_attachments'],]]></add>
 	</operation>
 </file>
@@ -71,18 +75,20 @@
 ]]></add>
 	</operation>
 </file>
-<file name="$sourcedir/PersonalMessage.php">
+<file name="$sourcedir/Subs.php">
 	<operation>
-		<search position="replace"><![CDATA[loadLanguage('PersonalMessage');
-
-	if (WIRELESS && WIRELESS_PROTOCOL == 'wap')]]></search>
-		<add><![CDATA[loadLanguage('PersonalMessage+Modifications');
-
-	if (WIRELESS && WIRELESS_PROTOCOL == 'wap')]]></add>
+		<search position="after"><![CDATA[// Shall we take the time to cache this?
+]]></search>
+		<add><![CDATA[// Setup for Inline Attachments
+	$message = ILA_Setup($cache_id, $message);
+		
+	]]></add>
 	</operation>
-	<operation error="ignore">
-		<search position="replace"><![CDATA[loadPMAttachmentContext($message['id_pm']),]]></search>
-		<add><![CDATA[$context['ila_attachments'],]]></add>
+</file>
+<file name="$sourcedir/Subs-CustomView.php" error="skip">
+	<operation>
+		<search position="replace"><![CDATA[if (!isset($context['ila_dont_show_attach_below']) || !array_key_exists($attachment['id'], $context['ila_dont_show_attach_below']))]]></search>
+		<add><![CDATA[if (empty($context['dontshowattachment'][$attachment['id']]) && ((!isset($context['ila_dont_show_attach_below']) || !array_key_exists($attachment['id'], $context['ila_dont_show_attach_below']))))]]></add>
 	</operation>
 </file>
 
