@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v2.2[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v2.3[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -80,6 +80,10 @@ o [url=http://custom.simplemachines.org/mods/index.php?mod=2758]Custom View of A
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
+[b][u]v2.3 - December 28th, 2014[/u][/b]
+o Performance enhancement due to storing permission check after first check.
+o Fixed spacing issues between picture and download counter/link.  Thanks, [url=http://www.simplemachines.org/community/index.php?action=profile;u=399264]RSI[/url]!
+
 [b][u]v2.2 - December 22th, 2014[/u][/b]
 o New BBCode added: [b]attachurl[/b]
 o [b]margin[/b] parameter allowed to be used seperate from the [b]float[/b] parameter.

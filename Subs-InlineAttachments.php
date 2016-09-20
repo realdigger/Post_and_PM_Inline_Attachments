@@ -233,11 +233,17 @@ function ILA_Mod_Settings(&$vars)
 //================================================================================
 function ILA_Setup($msg_id, $message)
 {
-	global $context;
+	global $context, $board;
 
-	// We can't load attachments if we don't know the message id number....
+	// Set some things up for performance benefits:
 	$context['ila_pm_attach'] = false;
 	$context['ila_attachments'] = array();
+	if (!isset($context['ila_view_attachments']))
+		$context['ila_view_attachments'] = allowedTo('view_attachments');
+	if (!isset($context['ila_pm_view_attachments']))
+		$context['ila_pm_view_attachments'] = allowedTo('pm_view_attachments');
+		
+	// We can't load attachments if we don't know the message id number....
 	if (($context['ila_message'] = (int) $msg_id) != 0)
 		ILA_Post_Attachments($msg_id);
 	elseif (($context['ila_message'] = (int) str_replace('pre', '', $msg_id)) != 0)
@@ -272,7 +278,7 @@ function ILA_Post_Attachments($msg_id)
 
 	// Fetch attachments for use in "parse_bbc" function...
 	unset($attachments[$msg_id]);
-	if (!empty($modSettings['attachmentEnable']) && allowedTo('view_attachments'))
+	if (!empty($modSettings['attachmentEnable']) && $context['ila_view_attachments'])
 	{
 		$request = $smcFunc['db_query']('', '
 			SELECT
@@ -322,7 +328,7 @@ function ILA_PM_Attachments($msg_id)
 
 	// Fetch attachments for use in "parse_bbc" function...
 	unset($attachments[$msg_id]);
-	if (!empty($modSettings['pmAttachmentEnable']) && allowedTo('pm_view_attachments'))
+	if (!empty($modSettings['pmAttachmentEnable']) && $context['ila_pm_view_attachments'])
 	{
 		$request = $smcFunc['db_query']('', '
 			SELECT
@@ -373,7 +379,7 @@ function ILA_Remove_Tags($message)
 
 	// Show attachment text string or error text string in topic history
 	$pattern = '#\[attachment=(.+?)\]([^\[]*)\[/attachment\]#i' . ($context['utf8'] ? 'u' : '') ;
-	if (empty($modSettings['attachmentEnable']) || !allowedTo('view_attachments'))
+	if (empty($modSettings['attachmentEnable']) || !$context['ila_view_attachments'])
 		$message = preg_replace($pattern, $txt['ila_nopermission'], $message);
 	else
 		$message = preg_replace($pattern, $txt['ila_attachment'], $message);
@@ -434,9 +440,9 @@ function ILA_Validate(&$tag, $id, $content)
 	global $modSettings, $context, $txt, $settings;
 
 	// Are attachments enabled and can we see them?  If not, return no permission message:
-	if (!$context['ila_pm_attach'] && (empty($modSettings['attachmentEnable']) || !allowedTo('view_attachments')))
+	if (!$context['ila_pm_attach'] && (empty($modSettings['attachmentEnable']) || !$context['ila_view_attachments']))
 		return $txt['ila_nopermission'];
-	if ($context['ila_pm_attach'] && (empty($modSettings['pmAttachmentEnable']) || !allowedTo('pm_view_attachments')))
+	if ($context['ila_pm_attach'] && (empty($modSettings['pmAttachmentEnable']) || !$context['ila_pm_view_attachments']))
 		return $txt['ila_nopermission'];
 
 	// Does the specified attachment exist?  If not, return attachment invalid message:
@@ -503,6 +509,7 @@ function ILA_Validate(&$tag, $id, $content)
 	// Build the replacement string for the caller:
 	if ($shrunk && $modSettings['ila_highslide'] && $tag['tag'] != 'attachurl')
 	{
+		// HS4SMF Installed?
 		if (!empty($modSettings['hs4smf_enabled']) && function_exists('hs4smf_get_slidegroup'))
 		{
 			$settings['hs4smf_img_count'] = (isset($settings['hs4smf_img_count'])) ? $settings['hs4smf_img_count'] + 1 : 1;
@@ -513,8 +520,8 @@ function ILA_Validate(&$tag, $id, $content)
 		}
 		// Highslide Image Viewer Installed?
 		elseif (function_exists('highslide_images'))
-			$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" rel="highslide"><img src="' . $thumb . '" ' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' id="thumb_' . $id . '" /></a><br /><span class="highslide-heading">' . $context['subject'] . '</span>';
-		// jQLightbox
+			$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" rel="highslide"><img src="' . $thumb . '" ' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' id="thumb_' . $id . '" /></a><span class="highslide-heading">' . $context['subject'] . '</span>';
+		// jQLightbox Installed?
 		elseif (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css'))
 			$html = '<a href="' . $image . ';image" id="link_' . $id . '" rel="lightbox[gallery]"><img src="' . $thumb . '" ' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' id="thumb_' . $id . '" /></a>';
 		// Simple Mode
@@ -526,7 +533,7 @@ function ILA_Validate(&$tag, $id, $content)
 
 	// Add the download count to the image tag if requested:
 	if (!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini')
-		$html .= '<br/><div class="smalltext"><a href="' . $image . '"><img src="' . $settings['images_url'] . '/icons/clip.gif" align="middle" alt="*" border="0" />&nbsp;' . $attachment['name'] . '</a> ('. $attachment['size']. ($attachment['is_image'] ? '. ' . $src_width . 'x' . $src_height . ' - ' . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . '.)</div>';
+		$html .= '<div class="smalltext"><a href="' . $image . '"><img src="' . $settings['images_url'] . '/icons/clip.gif" align="middle" alt="*" border="0" />&nbsp;' . $attachment['name'] . '</a> ('. $attachment['size']. ($attachment['is_image'] ? '. ' . $src_width . 'x' . $src_height . ' - ' . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . '.)</div>';
 
 	// Clear the parameter set for the next usage and return string to caller:
 	unset($context["ila_params"]);
