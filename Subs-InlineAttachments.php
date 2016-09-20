@@ -503,18 +503,19 @@ function ILA_Fix_Param_Order(&$message)
 		asort($matches);
 		foreach ($matches as $match)
 		{
-			$params = explode('|', str_replace(' ', '|', str_replace(']', ' ]', $match)));
+			$params = explode(' ', $match);
 			unset($params[0]);
-			unset($params[count($params)]);
 			$order = array();
+			$replace_str = $old = '';
 			foreach ($params as $param)
 			{
-				$key = explode('=', $param);
-				if (!isset($order[$key[0]]))
-					$order[$key[0]] = $key[1];
+				if (strpos($param, '=') === false)
+					$order[$old] .= ' ' . $param;
+				else
+					$order[$old = substr($param, 0, strpos($param, '='))] = substr($param, strpos($param, '=') + 1);
 			}
 			$out = '[' . $tag;
-			foreach ($ila_params as $key => $ignore)
+			foreach ($parameters as $key => $ignore)
 				$out .= (isset($order[$key]) ? ' ' . $key . '=' . $order[$key] : '');
 			$message = str_replace($match, $out . ']', $message);
 		}
