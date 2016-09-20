@@ -63,6 +63,7 @@ function ILA_Load_Stuff()
 
 	// Set some things up for performance benefits:
 	$context['ila']['pm_attach'] = false;
+	$context['ila_params'] = array();
 	if (!isset($context['ila']['attachments']))
 		$context['ila']['attachments'] = array();
 	if (!isset($context['ila']['pm_view_attachments']))
@@ -91,7 +92,6 @@ function ILA_Setup($msg_id, &$message)
 		elseif (($id = $context['ila']['msg'] = (int) str_replace('pm_pre', '', $msg_id)) != 0)
 			ILA_PM_Attachments($id);
 	}
-
 
 	// If there isn't a message to setup for, just return to the caller:
 	if (empty($message))
@@ -490,7 +490,7 @@ function ILA_Start_v20(&$tag, &$data, $disabled)
 
 function ILA_Build_Link(&$tag, &$id)
 {
-	global $context, $modSettings, $txt, $settings, $topic;
+	global $context, $modSettings, $txt, $settings, $topic, $sourcedir;
 
 	// If the "one-based numbering" option is set, subtract 1 from the attachment ID to make it compatible:
 	$id = $id - $modSettings['ila_one_based_numbering'];
@@ -503,7 +503,7 @@ function ILA_Build_Link(&$tag, &$id)
 
 	// Does the specified attachment exist in the message?  If not, return attachment invalid message:
 	$allowed = (isset($modSettings['ila_allow_quoted_images']) && !empty($modSettings['ila_allow_quoted_images']));
-	$msg = ($allowed && isset($context['ila_params']['msg']) ? $context['ila_params']['msg'] : $context['ila']['msg']);
+	$msg = (isset($context['ila_params']['msg']) ? ($allowed ? $context['ila_params']['msg'] : -1) : $context['ila']['msg']);
 	if (!isset($context['ila']['attachments'][$msg]))
 		return $txt['ila_invalid'];
 	if (!isset($context['ila']['attachments'][$msg][$id]))
@@ -528,15 +528,14 @@ function ILA_Build_Link(&$tag, &$id)
 		$max_width = $modSettings['max_image_width'];
 		$max_height = $modSettings['max_image_height'];
 	}
-
 	// Figure out which parameters we are going to use:
 	$use_thumbnail = ($tag['tag'] == 'attachthumb');
 	if (isset($modSettings['ila_attach_same_as_attachment']) && empty($modSettings['ila_attach_same_as_attachment']))
-		$use_thumbnail = $use_thumbnail || ($tag['tag'] == 'attach' && !empty($attachment['thumbnail']['has_thumb']));
-	$src_width = $real_width = ($use_thumbnail ? $attachment['thumb_width'] : $attachment['real_width']);
-	$src_height = $real_height = ($use_thumbnail ? $attachment['thumb_height'] : $attachment['real_height']);
+		$use_thumbnail = $use_thumbnail || ($tag['tag'] == 'attach');
 	$thumb = ($use_thumbnail && !empty($attachment['thumbnail']['has_thumb']) ? $attachment['thumbnail']['href'] : $attachment['href']);
 	$image = ($tag['tag'] == 'attachthumb' ? $thumb : $attachment['href']);
+	$src_width = $real_width = ($use_thumbnail ? $attachment['thumb_width'] : $attachment['real_width']);
+	$src_height = $real_height = ($use_thumbnail ? $attachment['thumb_height'] : $attachment['real_height']);
 
 	// Did the user request no scaling activities?
 	$shrunk = false;
@@ -594,6 +593,10 @@ function ILA_Build_Link(&$tag, &$id)
 	else
 		$html = '<img src="' . $thumb . ';image" alt=""' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' class="bbc_img resized" />';
 
+	// If the option to show EXIF is checked, let's show the EXIF information (if available):
+	if (!empty($modSettings['ila_display_exif']) && isset($attachment['exif']))
+		$html .= $attachment['exif'] . '<br /><br />';
+
 	// Add the download count to the image tag if requested:
 	if (!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini')
 		$html = '<div class="smalltext"' . $divfloat . '>' . $html . '<br/><a href="' . $image . '"><img src="' . $settings['images_url'] . '/icons/clip.gif" align="middle" alt="*" border="0" />&nbsp;' . $attachment['name'] . '</a> ('. $attachment['size']. ($attachment['is_image'] ? '. ' . $src_width . 'x' . $src_height . ' - ' . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . '.)</div>';
@@ -620,7 +623,7 @@ function ILA_Admin_Settings_Hook(&$sub)
 
 function ILA_Admin_Settings($return_config = false)
 {
-	global $context, $modSettings, $txt, $scripturl;
+	global $context, $modSettings, $txt, $scripturl, $sourcedir;
 
 	// Get latest version of the mod and display whether current mod is up-to-date:
 	if (($file = cache_get_data('ila_mod_version', 86400)) == null)
@@ -647,6 +650,8 @@ function ILA_Admin_Settings($return_config = false)
 	);
 	if (function_exists('hs4smf') || function_exists('highslide_images') || (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css')))
 		$config[] = array('check', 'ila_highslide');
+	if (file_exists($sourcedir . '/exif.php'))
+		$config[] = array('check', 'ila_display_exif');
 		
 	if ($return_config)
 		return $config_vars;

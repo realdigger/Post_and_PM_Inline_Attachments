@@ -1,3 +1,14 @@
+v3.3 - May 2nd, 2015
+o Added checkbox to enable the display of EXIF information (when available) to ILA settings.
+o Modified [b]Subs-InlineAttachments.php[/b] to display EXIF information when option is enabled.
+o Modified code to optimize memory usage within [b]Sources/Display.php[/b].
+
+v3.2 - May 2nd, 2015
+o Modified inserting attachment javascript code so that it works with SMF 2.1 Beta 1....
+o Modified inserting attachment javascript code so that it works with SMF 2.0 with SCEditor mod installed.
+o Fixed bug relating to referring to inline attachments from another message.
+o All settings reset to their default settings upon installation or upgrade.
+
 v3.1.2 - April 27th, 2015
 o Fixed missing variable declaration on ILA settings page.
 

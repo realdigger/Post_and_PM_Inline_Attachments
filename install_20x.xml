@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>3.1.2</version>
+<version>3.2</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -17,8 +17,18 @@
 </file>
 <file name="$sourcedir/Display.php">
 	<operation>
-		<search position="replace"><![CDATA[loadAttachmentContext($message['id_msg']),]]></search>
-		<add><![CDATA[(!empty($context['ila']['msg']) ? $context['ila']['attachments'][$context['ila']['msg']] : array()),]]></add>
+		<search position="replace"><![CDATA['attachment' => loadAttachmentContext($message['id_msg']),]]></search>
+		<add><![CDATA['attachment' => array(),]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[);
+
+	// Is this user the message author?]]></search>
+		<add><![CDATA[);
+	if (!empty($context['ila']['msg']))
+		$output['attachment'] = &$context['ila']['attachments'][$context['ila']['msg']];
+
+	// Is this user the message author?]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Post.php">
@@ -162,6 +172,12 @@
 </file>
 <file name="$themedir/PersonalMessage.template.php">
 	<operation error="ignore">
+		<search position="before"><![CDATA[function template_folder()
+{
+	global $context, $settings, $options, $scripturl, $modSettings, $txt]]></search>
+		<add><![CDATA[, $sourcedir]]></add>
+	</operation>
+	<operation error="ignore">
 		<search position="after"><![CDATA[// Assuming there are attachments...]]></search>
 		<add><![CDATA[// If the user has requested so, then remove any attachments that are already displayed...
 	if (!empty($message['attachment']))
@@ -184,12 +200,12 @@
 		<add><![CDATA[foreach ($context['current_attachments'] as $attid => $attachment)
 				echo '
 					<dd class="smalltext">
-						<label for="attachment_', $attachment['id'], '"><input type="checkbox" id="attachment_', $attachment['id'], '" name="attach_del[]" value="', $attachment['id'], '"', empty($attachment['unchecked']) ? ' checked="checked"' : '', ' class="input_check" /> ', $attachment['name'], '	<a href="javascript:void(0);" onclick="replaceText(\'[attachment=', ($attid + $modSettings['ila_one_based_numbering']), ']\', document.forms.postmodify.', $context['post_box_name'], '); return false;">(', $txt['ila_insert'] ,' ', ($attid  + $modSettings['ila_one_based_numbering']), ')</a></label>
+						<label for="attachment_', $attachment['id'], '"><input type="checkbox" id="attachment_', $attachment['id'], '" name="attach_del[]" value="', $attachment['id'], '"', empty($attachment['unchecked']) ? ' checked="checked"' : '', ' class="input_check" /> ', $attachment['name'], '	<a href="javascript:void(0);" onclick="insertAttachment(', ($attid + $modSettings['ila_one_based_numbering']), '); return false;">(', $txt['ila_insert'] ,' ', ($attid  + $modSettings['ila_one_based_numbering']), ')</a></label>
 ]]></add>
 	</operation>
 	<operation error="ignore">
 		<search position="replace"><![CDATA[<input type="file" size="38" name="attachment[]" class="input_file" />';]]></search>
-		<add><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a href="javascript:void(0);" onclick="replaceText(\'[attachment=', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + $modSettings['ila_one_based_numbering']), ']\', document.forms.postmodify.', $context['post_box_name'], '); return false;">', $txt['ila_insert'] ,' ', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + $modSettings['ila_one_based_numbering']),'</a>)]]></add>
+		<add><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a href="javascript:void(0);" onclick="insertAttachment(', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + $modSettings['ila_one_based_numbering']), '); return false;">', $txt['ila_insert'] ,' ', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + $modSettings['ila_one_based_numbering']),'</a>) ]]></add>
 	</operation>
 	<operation error="ignore">
 		<search position="replace"><![CDATA[function addAttachment()
@@ -212,16 +228,25 @@
 											if (allowed_attachments <= 0)
 												return alert("', $txt['more_attachments_error'], '");
 
-											setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(', $txt['more_attachments'], ')<\' + \'/a><\' + \'/dd>\');
+											setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="insertAttachment(\' + current_attachment + \'); return false;">', $txt['ila_insert'] ,' \' + current_attachment + \')</a> (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
 
 											allowed_attachments = allowed_attachments - 1;
 
 											return true;
 										}
+										function insertAttachment(id)
+										{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
+											$(smfmod_editor).data(\'sceditor\').insertText(\'[attachment=\' + id + \']\');' : '
+											replaceText(\'[attachment=\' + id + \']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
+										}
 ]]></add>
 	</operation>
 </file>
 <file name="$themedir/Post.template.php">
+	<operation>
+		<search position="before"><![CDATA[global $context, $settings, $options, $txt, $scripturl, $modSettings, $counter]]></search>
+		<add><![CDATA[, $sourcedir]]></add>
+	</operation>
 	<operation>
 		<search position="replace"><![CDATA[foreach ($context['current_attachments'] as $attachment)
 			echo '
@@ -231,12 +256,12 @@
 		<add><![CDATA[foreach ($context['current_attachments'] as $attid => $attachment)
 			echo '
 						<dd class="smalltext">
-							<label for="attachment_', $attachment['id'], '"><input type="checkbox" id="attachment_', $attachment['id'], '" name="attach_del[]" value="', $attachment['id'], '"', empty($attachment['unchecked']) ? ' checked="checked"' : '', ' class="input_check" /> ', $attachment['name'], '	<a href="javascript:void(0);" onclick="replaceText(\'[attachment=', ($attid + $modSettings['ila_one_based_numbering']), ']\', document.forms.postmodify.', $context['post_box_name'], '); return false;">(', $txt['ila_insert'] ,' ', ($attid  + $modSettings['ila_one_based_numbering']), ')</a></label>
+							<label for="attachment_', $attachment['id'], '"><input type="checkbox" id="attachment_', $attachment['id'], '" name="attach_del[]" value="', $attachment['id'], '"', empty($attachment['unchecked']) ? ' checked="checked"' : '', ' class="input_check" /> ', $attachment['name'], '	<a href="javascript:void(0);" onclick="insertAttachment(', ($attid + $modSettings['ila_one_based_numbering']), '); return false;">(', $txt['ila_insert'] ,' ', ($attid  + $modSettings['ila_one_based_numbering']), ')</a></label>
 ]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" />]]></search>
-		<add><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a href="javascript:void(0);" onclick="replaceText(\'[attachment=', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + $modSettings['ila_one_based_numbering']), ']\', document.forms.postmodify.', $context['post_box_name'], '); return false;">', $txt['ila_insert'] ,' ', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + $modSettings['ila_one_based_numbering']),'</a>)]]></add>
+		<add><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a href="javascript:void(0);" onclick="insertAttachment(', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + $modSettings['ila_one_based_numbering']), '); return false;">', $txt['ila_insert'] ,' ', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + $modSettings['ila_one_based_numbering']),'</a>) ]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[var current_attachment = 1;
@@ -262,9 +287,14 @@
 									if (allowed_attachments <= 0)
 										return alert("', $txt['more_attachments_error'], '");
 
-									setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="replaceText(\\\'[attachment=\' + current_attachment + \']\\\', document.forms.postmodify.', $context['post_box_name'], '); return false;">', $txt['ila_insert'] ,' \' + current_attachment + \')</a> (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
+									setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="insertAttachment(\' + current_attachment + \'); return false;">', $txt['ila_insert'] ,' \' + current_attachment + \')</a> (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
 
 									return true;
+								}
+								function insertAttachment(id)
+								{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
+									$(smfmod_editor).data(\'sceditor\').insertText(\'[attachment=\' + id + \']\');' : '
+									replaceText(\'[attachment=\' + id + \']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
 								}
 ]]></add>
 	</operation>

@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v3.1.2[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v3.2[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -80,6 +80,8 @@ For SMF 2.1 Beta 1, this mod contains no functionality for PM attachments, and p
 These mods can be installed at any time (not required):
 o [url=http://custom.simplemachines.org/mods/index.php?mod=1450]Highslide Image Viewer[/url]
 o [url=http://custom.simplemachines.org/mods/index.php?mod=1605]JQLightBox[/url]
+o [url=http://custom.simplemachines.org/mods/index.php?mod=3594]SCEditor4Smf[/url]
+o [url=http://custom.simplemachines.org/mods/index.php?mod=169]EXIF[/url]
 
 These mods should be installed before this mod (not required):
 o [url=https://github.com/Spuds/SMF-HS4SMF]HS4SMF v0.8.1[/url]
