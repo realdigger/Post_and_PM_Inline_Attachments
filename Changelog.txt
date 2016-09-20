@@ -1,3 +1,7 @@
+v4.14 - November 21st, 2015
+o Added support for the "Boilerplates for Posts" mod to update ILA tags used.
+o Modified ILA_Admin_Adjust to attempt to avoid incorrect of post messages.
+
 v4.13 - November 15th, 2015
 o Rewrote ILA admin page so that hopefully the ILA tags are modified correctly.
 o Fixed potential issue with adjusting ILA tags with attachment IDs greater than 9.
@@ -285,4 +289,7 @@ v1.1 - July 28th, 2014
 o Fixed two undeclared array element errors in PersonalMessage.template.php...
 
 v1.0 - July 21th, 2014
-o Initial Release of the mod
+o Public Release of the mod
+
+v0.1 - August 2nd, 2013
+o First publication to the Simple Machines Customization site.

@@ -36,6 +36,16 @@ function ILA_Admin_Settings($return_config = false)
 	require_once($sourcedir . '/ManagePermissions.php');
 	require_once($sourcedir . '/ManageServer.php');
 
+	// Make sure that the following setting exists to avoid errors, cause we hate errors!
+	$context['settings_insert_above'] = '';
+	
+	// If the "done" parameter was passed in the URL, get the count from it and display it:
+	if (isset($_GET['done']))
+	{
+		$_GET['done'] = (int) $_GET['done'];
+		$context['settings_insert_above'] .= '<div class="information"><p>' . ($_GET['done'] == 1 ? $txt['ila_completed_singular'] : sprintf($txt['ila_completed_plural'], $_GET['done'])) . '</p></div>';
+	}
+	
 	// Get latest version of the mod and display whether current mod is up-to-date:
 	if (($file = cache_get_data('ila_mod_version', 86400)) == null)
 	{
@@ -45,9 +55,9 @@ function ILA_Admin_Settings($return_config = false)
 	if (!empty($file) && preg_match('#Post_and_PM_Inline_Attachments_v(.+?)\.zip#i', $file, $version))
 	{
 		if (isset($modSettings['ila_version']) && $version[1] > $modSettings['ila_version'])
-			$context['settings_insert_above'] = '<div class="information"><p class="alert">' . sprintf($txt['ila_new_version'], $version[1]) . '<p></div>';
+			$context['settings_insert_above'] .= '<div class="information"><p class="alert">' . sprintf($txt['ila_new_version'], $version[1]) . '<p></div>';
 		else
-			$context['settings_insert_above'] = '<div class="information"><p>' . $txt['ila_no_update'] . '</p></div>';
+			$context['settings_insert_above'] .= '<div class="information"><p>' . $txt['ila_no_update'] . '</p></div>';
 	}
 
 	// Assemble the options available in this mod:
@@ -70,12 +80,12 @@ function ILA_Admin_Settings($return_config = false)
 		array('int', 'ila_transparent', 'javascript' => 'onchange="validateOpacity();"'),
 		'',
 		array('check', 'ila_embed_video_files', 'javascript' => 'onchange="toggleVideo();"'),
-		array('check', 'ila_video_options_start', 'type' => 'callback'), 	// <== Begin hidden video options section
+		array('callback', 'ila_hidden_video_start', 'type' => 'callback'), 	// <== Begin hidden video options section
 		array('int', 'ila_video_default_width', 'javascript' => 'onchange="validateWidth();"'),
 		array('int', 'ila_video_default_height', 'javascript' => 'onchange="validateHeight();"'),
 		array('check', 'ila_video_show_download_link'),
 		array('check', 'ila_video_html5'),
-		array('check', 'ila_video_options_end', 'type' => 'callback'),		// <== Finish hidden video options section
+		array('callback', 'ila_hidden_video_end', 'type' => 'callback'),	// <== Finish hidden video options section
 		'',
 		array('check', 'ila_embed_svg_files'),
 		array('check', 'ila_embed_txt_files'),
@@ -98,7 +108,7 @@ function ILA_Admin_Settings($return_config = false)
 			function toggleVideo()
 			{
 				var checked = document.getElementById("ila_embed_video_files").checked;
-				document.getElementById("ila_video_options").style.display = (checked ? "" : "none");
+				document.getElementById("ila_hidden_video").style.display = (checked ? "" : "none");
 			}
 			function validateOpacity()
 			{
@@ -127,23 +137,24 @@ function ILA_Admin_Settings($return_config = false)
 	if (isset($_GET['save']))
 	{
 		checkSession();
-		$_POST['ila_opacity'] = min(100, max(0, (isset($_POST['ila_opacity']) ? $_POST['ila_opacity'] : 40)));
+		$_POST['ila_transparent'] = min(100, max(0, (isset($_POST['ila_transparent']) ? $_POST['ila_transparent'] : 40)));
 		$old = (isset($modSettings['ila_one_based_numbering']) ? $modSettings['ila_one_based_numbering'] : 0);
 		saveDBSettings($config_vars);
-		$redirect = -1;
-		if (!empty($old) && empty($_POST['ila_one_based_numbering']))
+		$redirect = false;
+		$context['ila_completed'] = 0;
+		if (!empty($old) && empty($modSettings['ila_one_based_numbering']))
 			$redirect = ILA_Admin_Adjust(false);
-		elseif (empty($old) && !empty($_POST['ila_one_based_numbering']))
+		elseif (empty($old) && !empty($modSettings['ila_one_based_numbering']))
 			$redirect = ILA_Admin_Adjust(true);
 		if ($redirect)
-			redirectexit('action=admin;area=manageattachments;sa=ila;done');
+			redirectexit('action=admin;area=manageattachments;sa=ila;done=' . $context['ila_completed']);
 	}
 	// Haven't completed the renumbering thing yet?
-	elseif (isset($_GET['ascend']) || isset($_GET['descend']))
+	elseif (isset($_GET['continue']))
 	{
 		checkSession();
-		if (ILA_Admin_Adjust( isset($_GET['ascend']) ))
-			redirectexit('action=admin;area=manageattachments;sa=ila;done');
+		if (ILA_Admin_Adjust( isset($_POST['ascend']) ))
+			redirectexit('action=admin;area=manageattachments;sa=ila;done=' . $context['ila_completed']);
 	}
 	prepareDBSettingContext($config_vars);
 }
@@ -151,12 +162,12 @@ function ILA_Admin_Settings($return_config = false)
 //================================================================================
 // Template callback functions needed for hiding video options:
 //================================================================================
-function template_callback_ila_video_options_start()
+function template_callback_ila_hidden_video_start()
 {
-	echo '<div id="ila_video_options">';
+	echo '<div id="ila_hidden_video">';
 }
 
-function template_callback_ila_video_options_end()
+function template_callback_ila_hidden_video_end()
 {
 	echo '</div>';
 }
@@ -166,66 +177,61 @@ function template_callback_ila_video_options_end()
 //================================================================================
 function ILA_Admin_Adjust($ascending = true)
 {
-	global $smcFunc, $context;
+	global $smcFunc, $context, $modSettings, $sourcedir, $db_unbuffered;
 	isAllowedTo('admin_forum');
 
 	// Set some variables before we start:
 	$start_time = time();
 	$change_by = ($ascending ? 1 : -1);
-	$start = (isset($_POST['start']) ? (int) $_POST['start'] : 0);
-	$count = (isset($_POST['count']) ? (int) $_POST['count'] : 0);
-	$last_step = (isset($_POST['step']) ? (int) $_POST['step'] : 0);
-	$step = 0;
 	$tags = ILA_tags();
 
-	// There are two cycles to this operation: posts & PMs....
-	foreach (array(array('messages', 'id_msg'), array('personal_messages', 'id_pm')) as $cycle)
+	// Gather the POST variables so that we know where to start:
+	$start = $count = (isset($_POST['count1']) ? (int) $_POST['count1'] : 0);
+	$context['ila_completed'] = (isset($_POST['count2']) ? (int) $_POST['count2'] : 0);
+	$table = (!empty($_POST['pms']) ? 'personal_messages' : 'messages');
+	$id = ($table == 'personal_messages' ? 'pm_id' : 'id_msg');
+
+	// DO NOT REMOVE THE NEXT LINE!!!  It is necessary to prevent out-of-memory situations!
+	$db_unbuffered = true;
+	$queries = array();
+
+	while (true)
 	{
-		// Split the "$cycle" array into 2 variables: $table AND $id
-		list($table, $id) = $cycle;
-		
-		// Process only the posts that has at least one ILA tag within it:
-		foreach ($tags as $tag)
+		// Get the number of post/PMs that have an ILA tag within it:
+		$request = $smcFunc['db_query']('', '
+			SELECT COUNT(*) AS count
+			FROM {db_prefix}' . $table . '
+			WHERE body LIKE "%[attach%"',
+			array()
+		);
+		$row = $smcFunc['db_fetch_assoc']($request);
+		$smcFunc['db_free_result']($request);
+		$context['ila_max'] = $max = $row['count'];
+
+		// Start processing messages with the ILA tag in it:
+		$request = $smcFunc['db_query']('', '
+			SELECT ' . $id . ' AS id, body
+			FROM {db_prefix}' . $table . '
+			WHERE body LIKE "%[attach%"
+			ORDER BY ' . $id . '
+			LIMIT {int:start}, {int:count}',
+			array(
+				'start' => (int) $count,
+				'count' => (int) $max - $count,
+			)
+		);
+		$queries = array();
+		while ($row = $smcFunc['db_fetch_assoc']($request))
 		{
-			// Skip tags we've already covered.	 Unset tag parameter once we get there....
-			$step++;
-			if ($step < $last_step)
-				continue;
-
-			// Get the number of posts that have an ILA tag within it:
-			$request = $smcFunc['db_query']('', '
-				SELECT COUNT(*) AS count
-				FROM {db_prefix}' . $table . '
-				WHERE body LIKE "%' . $tag . '=%"
-					OR body LIKE "%' . $tag . ' id=%"',
-				array(
-				)
-			);
-			$row = $smcFunc['db_fetch_assoc']($request);
-			$smcFunc['db_free_result']($request);
-			$max = $row['count'];
-
-			// Start processing messages with the ILA tag in it:
-			do 
+			// Process only the post/PMs that has at least one ILA tag within it:
+			$count++;
+			$begin = $end = '';
+			foreach ($tags as $tag)
 			{
-				$request = $smcFunc['db_query']('', '
-					SELECT ' . $id . ', body
-					FROM {db_prefix}' . $table . '
-					WHERE body LIKE "%' . $tag . '=%"
-						OR body LIKE "%' . $tag . ' id=%"
-					LIMIT {int:start}, 100',
-					array(
-						'start' => $start,
-					)
-				);
-				while ($row = $smcFunc['db_fetch_assoc']($request))
+				// Does this message have the bbcode are looking for?
+				$pattern = '#\[(' . $tag . '(=| id=))(\d+)(|(,| )(.+?))\]#i' . ($context['utf8'] ? 'u' : '');
+				if (preg_match_all($pattern, $row['body'], $attachtags, PREG_PATTERN_ORDER))
 				{
-					// Does this message have the bbcode are looking for?
-					$count++;
-					$pattern = '#\[(' . $tag . '(=| id=))(\d+)(|(,| )(.+?))\]#i' . ($context['utf8'] ? 'u' : '');
-					if (!preg_match_all($pattern, $row['body'], $attachtags, PREG_PATTERN_ORDER))
-						continue;
-
 					// If ascending, sort in reverse order.	 If descending, sort in normal order.
 					// We do this to keep from overwriting the wrong attachment ID during this operation!
 					$attachtags = array_unique($attachtags[0]);
@@ -235,51 +241,97 @@ function ILA_Admin_Adjust($ascending = true)
 						asort($attachtags);
 
 					// Change the attachment ID number that the bbcode is using:
-					$begin = $end = '';
 					foreach ($attachtags as $attach)
 					{
 						if (preg_match('#\[' . $tag . '(=| id=)(\d+)(|(,| )(.+?))\]#i', $attach, $params))
 						{
 							$begin .= 'REPLACE(';
-							$end .= ', "[' . $tag . $params[1] . $params[2] . $params[3] . '", "[' . $tag . $params[1] . ($params[2] + $change_by) . $params[3] . '")';
+							$end .= ', "[' . $tag . $params[1] . $params[2] . $params[3] . ']", "[' . $tag . $params[1] . ($params[2] + $change_by) . $params[3] . ']")';
 						}
 					}
-
-					// Modify the message in the database so that it is correct:
-					$smcFunc['db_query']('', '
-						UPDATE {db_prefix}' . $table . '
-						SET body = ' . $begin . 'body' . $end . '
-						WHERE ' . $id . ' = {int:id}',
-						array(
-							'id' => $row[$id],
-						)
-					);
-
-					// If more than 5 seconds have passed, tell the user "not done yet"....
-					if (time() - $start_time > 5)
-					{
-						$smcFunc['db_free_result']($request);
-						$context['sub_template'] = 'not_done';
-						$context['substep_enabled'] = true;
-						$context['substep_continue_percent'] = floor(($count / $max) * 100);
-						$context['continue_percent'] = floor( ( (($step - 1) / (count($tags) * 2)) + ($context['substep_continue_percent'] * (1 / count($tags) * 2)) ) * 100);
-						$context['continue_get_data'] = 'action=admin;area=manageattachments;sa=ila;' . ($ascending ? 'ascend' : 'descend');
-						$context['continue_post_data'] = '
-					<input type="hidden" name="' . $context['session_var'] . '" value="' . $context['session_id'] . '" />
-					<input type="hidden" name="step" value="' . $step .'" />
-					<input type="hidden" name="count" value="' . $count . '" />
-					<input type="hidden" name="start" value="' . $start . '" />';
-						$context['continue_countdown'] = 5;
-						return false;
-					}
 				}
-				$smcFunc['db_free_result']($request);
-			} while ($count < $max);
+			}
 
-			// Yay! We're done with this one!  Reset the starting point to 0 and go to next tag:
-			$count = $start = 0;
+			// We can't write anything back to the database using the same database connection.  Otherwise,
+			// we lose out place in the query.  So let's store the change we need to make in an array for later:
+			if (!empty($begin))
+				$queries[] = 'SET body = ' . $begin . 'body' . $end . ' WHERE ' . $id . ' = ' . ((int) $row['id']);
+
+			// If more than 5 seconds have passed, tell the user "not done yet"....
+			if (time() - $start_time > 5)
+			{
+				// Finish reading the query, then close the query:
+				while ($row = $smcFunc['db_fetch_assoc']($request)) { }
+				$smcFunc['db_free_result']($request);
+
+				// Update the database for all posts processed:
+				foreach ($queries as $query)
+					$smcFunc['db_query']('', 'UPDATE {db_prefix}'. $table . ' ' . $query, array());
+
+				// Set up for the "we're not done" message:
+				$context['sub_template'] = 'not_done';
+				$context['substep_enabled'] = true;
+				$context['substep_continue_percent'] = floor(($count / $max) * 100);
+				$context['continue_percent'] = floor( ( (($step - 1) / (count($tags) * 2)) + ($context['substep_continue_percent'] * (1 / count($tags) * 2)) ) * 100);
+				$context['continue_get_data'] = 'action=admin;area=manageattachments;sa=ila;continue';
+				$context['continue_post_data'] = '
+			<input type="hidden" name="' . $context['session_var'] . '" value="' . $context['session_id'] . '" />
+			<input type="hidden" name="' . ($ascending ? 'ascend' : 'descend') . '" value="1" />
+			<input type="hidden" name="count1" value="' . $count . '" />
+			<input type="hidden" name="count2" value="' . $context['ila_completed'] + ($count - $start). '" />
+			<input type="hidden" name="pms" value="' . ((int) $table == 'personal_messages') . '" />';
+				$context['continue_countdown'] = 5;
+				return false;
+			}
 		}
+
+		// Close the query, then update the database for all posts processed:
+		$smcFunc['db_free_result']($request);
+		foreach ($queries as $query)
+			$smcFunc['db_query']('', 'UPDATE {db_prefix}'. $table . ' ' . $query, array());
+
+		// Have we processed the PMs?  If not, start on the PMs!  If so, break out of the loop:
+		if ($table == 'personal_messages')
+			break;
+		$table = 'personal_messages';
+		$id = 'id_pm';
+		$context['ila_completed'] += $count;
+		$count = 0;
 	}
+
+	// Adjust the boilerplate strings so they are correct:
+	if (isset($modSettings['boiler_content']))
+	{
+		$setting = $modSettings['boiler_content'];
+		foreach ($tags as $tag)
+		{
+			// Does this string have the bbcode we are looking for?
+			$pattern = '#\[' . $tag . '(=| id=)(\d+)(|(,| )(.+?))\]#i' . ($context['utf8'] ? 'u' : '');
+			if (!preg_match_all($pattern, $setting, $attachtags, PREG_PATTERN_ORDER))
+				continue;
+
+			// If ascending, sort in reverse order.	 If descending, sort in normal order.
+			// We do this to keep from overwriting the wrong attachment ID during this operation!
+			$attachtags = array_unique($attachtags[0]);
+			if ($ascending)
+				arsort($attachtags);
+			else
+				asort($attachtags);
+
+			// Change the attachment ID number that the bbcode is using:
+			foreach ($attachtags as $attach)
+			{
+				if (preg_match('#\[' . $tag . '(=| id=)(\d+)(|(,| )(.+?))\]#i', $attach, $params))
+					$setting = str_replace('[' . $tag . $params[1] . $params[2] . $params[3], '[' . $tag . $params[1] . ($params[2] + $change_by) . $params[3], $setting);
+			}
+		}
+
+		// Update the database so that the boilerplates are changed accordingly:
+		require_once($sourcedir.'/Subs-Admin.php');
+		updateSettings(array('boiler_content' => $setting));
+	}
+
+	// Signal that we are done adjust the ILA tags:
 	return true;
 }
 

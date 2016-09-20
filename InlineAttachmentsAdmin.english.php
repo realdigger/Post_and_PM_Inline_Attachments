@@ -15,6 +15,8 @@ if (!defined('SMF'))
 $txt['ila_admin_settings'] = 'Inline Attachments';
 $txt['ila_new_version'] = 'Post and PM Inline Attachments mod version %s is available for download!';
 $txt['ila_no_update'] = 'Your install of Post and PM Inline Attachments is up to date!';
+$txt['ila_completed_singular'] = '1 post with inline attachment tags have been updated!';
+$txt['ila_completed_plural'] = '%d posts with inline attachment tags have been updated!';
 
 $txt['ila_title'] = 'Post and PM Inline Attachments';
 $txt['ila_insert_tag'] = 'Tag to use when inserting inline attachments:';

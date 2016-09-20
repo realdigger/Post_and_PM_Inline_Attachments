@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v4.13[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v4.14[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -64,6 +64,7 @@ o Attachments used by the inline attachments mod can be omitted from the attachm
 o Reloads the attachments for Ajax Editing.
 o Removing an attachment removes the attachment bbcode for that attachment & changes remaining attachment tags to ensure proper post appearance.
 o Text between inline attachment brackets are removed (as of version 3.0).
+o Automatic modification of boilerplates that use the ILA tags within them when changing "1-based" numbering option.
 
 [color=blue][b][size=12pt][u]Admin Settings[/u][/size][/b][/color]
 The bbcode may be disabled by going to [b][i]Admin[/i] -> [i]Forums[/i] -> [i]Posts and Topics[/i] -> [i]Bulletin Board Code[/i][/b] and unchecking the [b]attachment[/b] bbcode.
@@ -89,6 +90,7 @@ o [url=http://custom.simplemachines.org/mods/index.php?mod=1450]Highslide Image 
 o [url=http://custom.simplemachines.org/mods/index.php?mod=1605]JQLightBox[/url]
 o [url=http://custom.simplemachines.org/mods/index.php?mod=3594]SCEditor4Smf[/url]
 o [url=http://custom.simplemachines.org/mods/index.php?mod=169]EXIF[/url]
+o [url=http://custom.simplemachines.org/mods/index.php?mod=2233]Boilerplates for Posts[/url]
 
 These mods should be installed before this mod (not required):
 o [url=https://github.com/Spuds/SMF-HS4SMF]HS4SMF v0.8.1[/url]
