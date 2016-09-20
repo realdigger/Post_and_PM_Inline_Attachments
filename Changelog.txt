@@ -1,3 +1,9 @@
+v4.3 - September 9th, 2015
+o Added MIME types for AVI and WMV files.
+o SMF 2.1: Fixed Javascript issue where option to upload additional files wasn't available.
+o SMF 2.1: Fixed formatting issue for download/viewed counts underneath inline attachments.
+o SMF 2.1: Fixed missing clip icon underneath inline attachment in download/viewed counts.
+
 v4.2 - September 4th, 2015
 o Operation that calls "fix parameter order" function now skipped for nightly SMF 2.1 Beta 2.
 

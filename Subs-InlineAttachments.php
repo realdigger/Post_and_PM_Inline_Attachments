@@ -655,7 +655,7 @@ function ILA_Start_v20(&$tag, &$data, &$disabled)
 //================================================================================
 function ILA_Build_HTML(&$tag, &$id)
 {
-	global $context, $modSettings, $settings, $txt, $topic, $sourcedir, $user_info, $smcFunc;
+	global $context, $modSettings, $settings, $txt, $topic, $sourcedir, $user_info, $smcFunc, $forum_version;
 
 	// If the "one-based numbering" option is set, subtract 1 from the attachment ID to make it compatible:
 	$id = $id - !empty($modSettings['ila_one_based_numbering']);
@@ -865,9 +865,15 @@ function ILA_Build_HTML(&$tag, &$id)
 	// Add the download count to the image tag if requested:
 	if (empty($html) || ($download_count && $tag['tag'] != 'attachmini') || $tag['tag'] == 'attachurl')
 	{
+		// Prepare certain elements so that the HTML building code looks at least a little nicer:
+		$download_count = (!isset($txt['attach_times']) ? sprintf($txt['attach_downloaded'], $attachment['downloads']) : $txt['attach_downloaded'] . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times']);
+		$viewed_count = (!isset($txt['attach_times']) ? sprintf($txt['attach_viewed'], $attachment['downloads']) : $txt['attach_viewed'] . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times']);
+		$clip_pic = $settings['images_url'] . '/icons/clip.' . (!isset($txt['attach_times']) ? 'png' : 'gif');
 		$idc = (isset($modSettings['ila_download_count']) ? $modSettings['ila_download_count'] : ($tag['tag'] == 'attachurl' ? 4 : 0));
-		$temp = ($idc == 1 ? '' : ($idc >= 5 ? '<br/>' : ' ') . '(' . $attachment['size'] . ($attachment['is_image'] ? ' . ' . $pic_width . 'x' . $pic_height . ($idc == 6 ? ')<br/>(' : ' - ') . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . ')');
-		$html = (!empty($html) ? $html . '<br/>' : '') . '<span class="smalltext"><a href="' . $attachment['href'] . '"><img src="' . $settings['images_url'] . '/icons/clip.gif" align="middle" alt="*" border="0" /> ' . $attachment['name'] . '</a>' . $temp . '</span>';
+		
+		// Let's build the HTML code for the download count now....
+		$temp = ($idc == 1 ? '' : ($idc >= 5 ? '<br/>' : ' ') . '(' . $attachment['size'] . ($attachment['is_image'] ? ' . ' . $pic_width . 'x' . $pic_height . ($idc == 6 ? ')<br/>(' : ' - ') . $viewed_count : ' - ' . $download_count) . ')');
+		$html = (!empty($html) ? $html . '<br/>' : '') . '<span class="smalltext"><a href="' . $attachment['href'] . '"><img src="' . $clip_pic . '" align="middle" alt="*" border="0" /> ' . $attachment['name'] . '</a>' . $temp . '</span>';
 	}
 
 	// Do we have something to float or put a margin around?
@@ -925,6 +931,8 @@ function ILA_Mime_Type($ext, &$mime_type)
 		'ogv' => 'video/ogg',
 		'mp4' => 'video/mp4',
 		'webm' => 'video/webm',
+		'avi' => 'video/x-msvideo',
+		'wmv' => 'video/x-ms-wmv',
 	);
 	$mime_type = (isset($mime[$ext]) ? $mime[$ext] : '');
 	return !empty($mime_type);

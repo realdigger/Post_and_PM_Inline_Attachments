@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v4.2[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v4.3[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -16,22 +16,24 @@ This mod adds the ability to position your attachments in either your forum post
 [/quote]
 [b]Version 2.0[/b] keeps the version 1.0 forms, plus introduces more natural forms:
 [quote]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] margin=[b]{pixels}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] float=[b]{float}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] float=[b]{float}[/b] margin=[b]{pixels}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] margin=[b]{pixels}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] float=[b]{float}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] float=[b]{float}[/b] margin=[b]{pixels}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] height=[b]{height}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] height=[b]{height}[/b] margin=[b]{pixels}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] height=[b]{height}[/b] float=[b]{float}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] height=[b]{height}[/b] float=[b]{float}[/b] margin=[b]{pixels}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] height=[b]{height}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] height=[b]{height}[/b] margin=[b]{pixels}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] height=[b]{height}[/b] float=[b]{float}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] height=[b]{height}[/b] float=[b]{float}[/b] margin=[b]{pixels}[/b]][/attachment]
+[nobbc][attachment[/nobbc] {parameter}={value}[b]{id}[/b]][/attachment]
+[/quote]
+where the following parameters are accepted:
+[quote]
+id=[b]{attachment id}[/b] => ID number of the attachment to show inline (NOT attachment number!)
+width=[b]{width}[/b] => Desired width of image to show.  Valid: positive integers.
+height=[b]{height}[/b] => Desired height of image to show.  Valid: positive integers.
+float=[b]{float}[/b] => Floats image to relation to everything else.  Valid: left, right, center
+margin=[b]{pixels}[/b] => Margin around inline attachment.  Valid: positive integers
+margin-left=[b]{pixels}[/b] => Left margin around inline attachment.  Valid: positive integers
+margin-right=[b]{pixels}[/b] => Right margin around inline attachment.  Valid: positive integers
+margin-top=[b]{pixels}[/b] => Top margin around inline attachment.  Valid: positive integers
+margin-bottom=[b]{pixels}[/b] => Bottom margin around inline attachment.  Valid: positive integers
+border-style=[b]{style}[/b] => Border style.  Valid: none, dotted, dashed, solid, double, groove, ridge, inset, outset
+border-width=[b]{pixels}[/b] => Border width around inline attachment.  Valid: positive integers
+border-color=[b]{color}[/b] => Border color.  Valid formats: plain text, #xxx, #xxxxxx, rbg(d,d,d)
+scale=[b]{answer}[/b] => Override scaling of image.  Valid: true, false, yes, no
+msg=[b]{msg ID}[/b] => Message ID number.  Valid: positive integers.
 [/quote]
 [b]Version 2.1[/b] keeps the version 1.0 and 2.0 forms, plus introduces more BBCodes:
 [quote]
