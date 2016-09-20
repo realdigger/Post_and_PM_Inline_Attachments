@@ -1,3 +1,11 @@
+v4.10 - November 5th, 2015
+o "Allow quoted attachments from another post" is ignored if Tapatalk mod is detected.
+o "Allow quoted attachments from another post" is now unchecked and disabled when Tapatalk mod is detected.
+o Modified ILA admin area so that video options are disabled if embedding video option is not checked.
+o Added help strings to the ILA admin area to attempt to clearly define what the options do.
+o Added Javascript validation functions to the ILA admin area so that invalid data cannot be entered.
+o Fixed issue with scaling ILA option where maximum image size was used instead all the time.
+
 v4.9 - October 30th, 2015
 o Fixed double Javascript function declaration issue, found by asmith.
 o Fixed undefined index error where apparently no attachments were available for the post.

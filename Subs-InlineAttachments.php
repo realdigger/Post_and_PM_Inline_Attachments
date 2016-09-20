@@ -605,11 +605,11 @@ function ILA_Param_Scale($answer)
 
 function ILA_Param_Msg($msg)
 {
-	global $context, $modSettings;
+	global $context, $modSettings, $sourcedir;
 
 	$context['ila_params']['msg'] = ($msg == 'new' ? 'new' : (int) $msg);
 	$msg = (int) $msg;
-	if (empty($modSettings['ila_allow_quoted_images']) || empty($msg))
+	if (empty($modSettings['ila_allow_quoted_images']) || empty($msg) || file_exists($sourcedir . '/Subs-Tapatalk.php'))
 		return;
 	elseif (!isset($context['ila']['attachments'][$msg]) && empty($context['ila']['pm_attach']))
 		ILA_Post_Attachments($msg, true);
@@ -625,7 +625,7 @@ function ILA_Start_v1x(&$tag, &$data, &$disabled)
 	global $context, $txt;
 
 	if (!isset($data[1]))
-		$data = $txt['ila_invalid'];
+		$tag['content'] = $txt['ila_invalid'];
 	else
 	{
 		$context['ila_params'] = array(
@@ -668,7 +668,7 @@ function ILA_Build_HTML(&$tag, &$id)
 		return $txt['ila_nopermission'];
 
 	// Make sure that we can access other messages:
-	$allowed = (isset($modSettings['ila_allow_quoted_images']) && !empty($modSettings['ila_allow_quoted_images']));
+	$allowed = (isset($modSettings['ila_allow_quoted_images']) && !empty($modSettings['ila_allow_quoted_images']) && !file_exists($sourcedir . '/Subs-Tapatalk.php'));
 	if (isset($context['ila_params']['msg']))
 		$msg = ($allowed || (isset($context['ila']['msg']) && $context['ila_params']['msg'] == $context['ila']['msg']) ? $context['ila_params']['msg'] : -1);
 	else
@@ -858,7 +858,7 @@ function ILA_Build_HTML(&$tag, &$id)
 						'<param name="wmode" value="transparent" />' .
 						'<param name="flashVars" value="controlbar=over&amp;' . (!empty($img) ? 'image=' . urlencode($img) . '&amp;' : '') . 'file=' . (!empty($file['mp4']['href']) ? urlencode($file['mp4']['href']) : urlencode($file['webm']['href'])) . '" />' .
 						(!empty($img) ? '<img src="' . $img . '" width="' . $width . '" height="' . $height .'" title="' . $txt['ila_no_video'] . '" />' : $txt['ila_no_video']) .
-					'</object>' : '') . '</video>';
+					'</object>' : '') . ($html5 ? '</video>' : '');
 			}
 		}
 	}

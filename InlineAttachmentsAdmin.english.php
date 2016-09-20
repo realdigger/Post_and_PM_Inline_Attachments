@@ -17,7 +17,6 @@ $txt['ila_new_version'] = 'Post and PM Inline Attachments mod version %s is avai
 $txt['ila_no_update'] = 'Your install of Post and PM Inline Attachments is up to date!';
 
 $txt['ila_title'] = 'Post and PM Inline Attachments';
-$txt['ila_mod_settings'] = 'MOD Settings';
 $txt['ila_insert_tag'] = 'Tag to use when inserting inline attachments:';
 $txt['ila_highslide'] = 'Enable Highslide effects for inline attachment?';
 $txt['ila_one_based_numbering'] = 'Should first attachment should be numbered &quot;1&quot;?';

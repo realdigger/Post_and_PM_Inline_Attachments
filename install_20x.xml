@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>4.9</version>
+<version>4.10</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -43,6 +43,15 @@
 		<add><![CDATA[
 	elseif (ILA_Mime_Type($file_ext, $mime_type))
 		header('Content-Type: ' . $mime_type);]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Help.php">
+	<operation>
+		<search position="after"><![CDATA[// Permission specific help?]]></search>
+		<add><![CDATA[// Load the ILA language file.
+	loadLanguage('InlineAttachmentsAdmin');
+
+	]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/ManageAttachments.php">

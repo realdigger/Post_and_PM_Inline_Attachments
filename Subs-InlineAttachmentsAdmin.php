@@ -29,7 +29,7 @@ function ILA_Admin_Settings_Hook(&$sub)
 
 function ILA_Admin_Settings($return_config = false)
 {
-	global $context, $modSettings, $txt, $scripturl, $sourcedir;
+	global $context, $modSettings, $txt, $scripturl, $sourcedir, $forum_version;
 	isAllowedTo('admin_forum');
 
 	// Load required stuff in order to make this work right:
@@ -53,33 +53,36 @@ function ILA_Admin_Settings($return_config = false)
 	// Assemble the options available in this mod:
 	if (!isset($modSettings['ila_insert_tag']))
 		$modSettings['ila_insert_tag'] = 'attachment';
+	if ($tapatalk = file_exists($sourcedir . '/Subs-Tapatalk.php'))
+		$modSettings['ila_allow_quoted_images'] = 0;
 	$tags = array();
 	foreach (ILA_tags() as $tag)
 		$tags[$tag] = $tag;
 	$config_vars = array(
-		array('title', 'ila_mod_settings'),
 		array('select', 'ila_insert_tag', $tags),
 		array('check', 'ila_attach_same_as_attachment'),
 		'',
-		array('check', 'ila_highslide', 'javascript' => ((function_exists('hs4smf') || function_exists('highslide_images') || (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css'))) ? '' : ' disabled="disabled"')),
+		array('check', 'ila_highslide', ((function_exists('hs4smf') || function_exists('highslide_images') || (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css'))) ? 99 : 'disabled') => true),
 		array('check', 'ila_one_based_numbering'),
-		array('check', 'ila_allow_quoted_images'),
+		array('check', 'ila_allow_quoted_images', ($tapatalk ? 'disabled' : 99) => true),
 		array('check', 'ila_duplicate'),
 		array('select', 'ila_download_count', array($txt['ila_download_count_n'], $txt['ila_download_count_f'], $txt['ila_download_count_fs'], $txt['ila_download_count_fsd'], $txt['ila_download_count_fsdc'], $txt['ila_download_count_fsdc2'], $txt['ila_download_count_fsdc3'])),
-		array('int', 'ila_transparent'),
+		array('int', 'ila_transparent', 'javascript' => 'onchange="validateOpacity();"'),
 		'',
-		array('check', 'ila_embed_video_files'),
-		array('int', 'ila_video_default_width'),
-		array('int', 'ila_video_default_height'),
+		array('check', 'ila_embed_video_files', 'javascript' => 'onchange="toggleVideo();"'),
+		array('check', 'ila_video_options_start', 'type' => 'callback'), 	// <== Begin hidden video options section
+		array('int', 'ila_video_default_width', 'javascript' => 'onchange="validateWidth();"'),
+		array('int', 'ila_video_default_height', 'javascript' => 'onchange="validateHeight();"'),
 		array('check', 'ila_video_show_download_link'),
 		array('check', 'ila_video_html5'),
+		array('check', 'ila_video_options_end', 'type' => 'callback'),		// <== Finish hidden video options section
 		'',
 		array('check', 'ila_embed_svg_files'),
 		array('check', 'ila_embed_txt_files'),
 		array('check', 'ila_embed_pdf_files'),
 		'',
-		array('check', 'ila_turn_nosniff_off'),
-		array('check', 'ila_display_exif', 'javascript' => (file_exists($sourcedir . '/exif.php') ? '' : ' disabled="disabled"')),
+		array('check', 'ila_turn_nosniff_off', (substr($forum_version, 0, 7) == 'SMF 2.0' ? 99 : 'disabled') => true),
+		array('check', 'ila_display_exif', (file_exists($sourcedir . '/exif.php') ? 99 : 'disabled') => true),
 	);
 	if ($return_config)
 		return $config_vars;
@@ -88,6 +91,32 @@ function ILA_Admin_Settings($return_config = false)
 	$context['sub_template'] = 'show_settings';
 	$context['settings_title'] = $txt['ila_title'];
 	$context['post_url'] = $scripturl . '?action=admin;area=manageattachments;sa=ila;save';
+
+	// We want javascript for our video options.
+	$context['settings_insert_below'] = '
+		<script type="text/javascript"><!-- // --><![CDATA[
+			function toggleVideo()
+			{
+				var checked = document.getElementById("ila_embed_video_files").checked;
+				document.getElementById("ila_video_options").style.display = (checked ? "" : "none");
+			}
+			function validateOpacity()
+			{
+				value = document.getElementById("ila_transparent").value;
+				document.getElementById("ila_transparent").value = Math.max(0, Math.min(100, value));
+			}
+			function validateWidth()
+			{
+				value = document.getElementById("ila_video_default_width").value;
+				document.getElementById("ila_video_default_width").value = Math.max(0, value);
+			}
+			function validateHeight()
+			{
+				value = document.getElementById("ila_video_default_height").value;
+				document.getElementById("ila_video_default_height").value = Math.max(0, value);
+			}
+			toggleVideo();
+		// ]]></script>';
 
 	// Set certain fields to default values if they aren't already set:
 	$modSettings['ila_transparent'] = (isset($modSettings['ila_transparent']) ? $modSettings['ila_transparent'] : 40);
@@ -117,6 +146,19 @@ function ILA_Admin_Settings($return_config = false)
 			redirectexit('action=admin;area=manageattachments;sa=ila;done');
 	}
 	prepareDBSettingContext($config_vars);
+}
+
+//================================================================================
+// Template callback functions needed for hiding video options:
+//================================================================================
+function template_callback_ila_video_options_start()
+{
+	echo '<div id="ila_video_options">';
+}
+
+function template_callback_ila_video_options_end()
+{
+	echo '</div>';
 }
 
 //================================================================================

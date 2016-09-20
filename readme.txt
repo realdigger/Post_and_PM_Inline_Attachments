@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v4.9[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v4.10[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -43,7 +43,7 @@ msg=[b]{msg ID}[/b] => Message ID number.  Valid: positive integers.
 [/quote]
 [b]Version 2.2[/b] introduces one more BBCode:
 [quote]
-[b]attachurl[/b] => Shows the attachment like you used an [b]img[/b] tag instead of this tag.
+[b]attachurl[/b] => Shows the attachment like you used an [b]url[/b] tag instead of this tag.
 [/quote]
 Each of these new BBCodes uses the same format as the [b][nobbc][attachment][/nobbc][/b] BBCodes.
 

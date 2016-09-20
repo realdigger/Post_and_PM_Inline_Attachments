@@ -4,12 +4,13 @@
 	<name>Post and PM Inline Attachments</name>
 	<id>Dougiefresh:ILA</id>
 	<type>modification</type>
-	<version>4.9</version>
+	<version>4.10</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme type="file" parsebbc="true">readme.txt</readme>
 		<code>add_remove_hooks.php</code>
 		<modification>install_20x.xml</modification>
+		<modification>language_english.xml</modification>
 		<require-file name="InlineAttachments.english.php" destination="$boarddir/Themes/default/languages" />
 		<require-file name="InlineAttachmentsAdmin.english.php" destination="$boarddir/Themes/default/languages" />
 		<require-file name="Subs-InlineAttachments.php" destination="$sourcedir" />
@@ -19,6 +20,7 @@
 	<uninstall for="2.0 - 2.0.99">
 		<code>add_remove_hooks.php</code>
 		<modification reverse="true">install_20x.xml</modification>
+		<modification reverse="true">language_english.xml</modification>
 		<remove-file name="$boarddir/Themes/default/languages/InlineAttachments.english.php" />
 		<remove-file name="$boarddir/Themes/default/languages/InlineAttachmentsAdmin.english.php" />
 		<remove-file name="$sourcedir/Subs-InlineAttachments.php" />
@@ -29,6 +31,7 @@
 		<readme type="file" parsebbc="true">readme.txt</readme>
 		<code>add_remove_hooks.php</code>
 		<modification>install_21x.xml</modification>
+		<modification>language_english.xml</modification>
 		<require-file name="InlineAttachments.english.php" destination="$boarddir/Themes/default/languages" />
 		<require-file name="InlineAttachmentsAdmin.english.php" destination="$boarddir/Themes/default/languages" />
 		<require-file name="Subs-InlineAttachments.php" destination="$sourcedir" />
@@ -38,6 +41,7 @@
 	<uninstall for="2.1 Beta 1">
 		<code>add_remove_hooks.php</code>
 		<modification reverse="true">install_21x.xml</modification>
+		<modification reverse="true">language_english.xml</modification>
 		<remove-file name="$boarddir/Themes/default/languages/InlineAttachments.english.php" />
 		<remove-file name="$boarddir/Themes/default/languages/InlineAttachmentsAdmin.english.php" />
 		<remove-file name="$sourcedir/Subs-InlineAttachments.php" />
