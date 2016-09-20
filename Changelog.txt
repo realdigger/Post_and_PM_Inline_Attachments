@@ -1,3 +1,7 @@
+v3.1.1 - April 25th, 2015
+o Added code to cache the mod version check for 1 day between checks.
+o Fixed code regarding times download and download link without float/margin parameter.
+
 v3.1 - April 24th, 2015
 o Fixed a bug preventing previewing posts from working correctly.
 o Viewing inline attachments now works for guests when viewing PM attachments permission is granted.

@@ -595,8 +595,8 @@ function ILA_Build_Link(&$tag, &$id)
 		$html = '<img src="' . $thumb . ';image" alt=""' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' class="bbc_img resized" />';
 
 	// Add the download count to the image tag if requested:
-	if (!empty($divfloat))
-		$html .= '<div class="smalltext"' . $divfloat . '>' . $html . '<br/><a href="' . $image . '"><img src="' . $settings['images_url'] . '/icons/clip.gif" align="middle" alt="*" border="0" />&nbsp;' . $attachment['name'] . '</a> ('. $attachment['size']. ($attachment['is_image'] ? '. ' . $src_width . 'x' . $src_height . ' - ' . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . '.)</div>';
+	if (!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini')
+		$html = '<div class="smalltext"' . $divfloat . '>' . $html . '<br/><a href="' . $image . '"><img src="' . $settings['images_url'] . '/icons/clip.gif" align="middle" alt="*" border="0" />&nbsp;' . $attachment['name'] . '</a> ('. $attachment['size']. ($attachment['is_image'] ? '. ' . $src_width . 'x' . $src_height . ' - ' . $txt['attach_viewed'] : ' - ' . $txt['attach_downloaded']) . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times'] . '.)</div>';
 
 	// Clear the parameter set for the next usage and return string to caller:
 	unset($context['ila_params']);
@@ -623,7 +623,11 @@ function ILA_Admin_Settings($return_config = false)
 	global $context, $modSettings, $txt;
 
 	// Get latest version of the mod and display whether current mod is up-to-date:
-	$file = file_get_contents('http://www.xptsp.com/tools/mod_version.php?url=Post_and_PM_Inline_Attachments');
+	if (($file = cache_get_data('ila_mod_version', 86400)) == null)
+	{
+		$file = file_get_contents('http://www.xptsp.com/tools/mod_version.php?url=Post_and_PM_Inline_Attachments');
+		cache_put_data('ila_mod_version', $file, 86400);
+	}
 	if (preg_match('#Post_and_PM_Inline_Attachments_v(.+?)\.zip#i', $file, $version))
 	{
 		if (isset($modSettings['ila_version']) && $version[1] > $modSettings['ila_version'])
