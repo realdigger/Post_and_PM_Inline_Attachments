@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v2.0[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v2.1[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -17,15 +17,31 @@ Version 1.0 introduced the following forms:
 Version 2.0 keeps the version 1.0 forms, plus introduces more natural forms:
 [quote]
 [nobbc][attachment[/nobbc] id=[b]{id}[/b]][/attachment]
+[nobbc][attachment[/nobbc] id=[b]{id}[/b] margin=[b]{pixels}[/b]][/attachment]
 [nobbc][attachment[/nobbc] id=[b]{id}[/b] float=[b]{float}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] float=[b]{float}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] height=[b]{height}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] height=[b]{height}[/b] float=[b]{float}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] height=[b]{height}[/b]][/attachment]
-[nobbc][attachment[/nobbc] id=[b]{id}[/b] height=[b]{height}[/b] float=[b]{float}[/b]][/attachment]
+[nobbc][attachment[/nobbc] id=[b]{id}[/b] float=[b]{float}[/b] margin=[b]{pixels}[/b]][/attachment]
+[nobbc][attachment=[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b]][/attachment]
+[nobbc][attachment=[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] margin=[b]{pixels}[/b]][/attachment]
+[nobbc][attachment=[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] float=[b]{float}[/b]][/attachment]
+[nobbc][attachment=[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] float=[b]{float}[/b] margin=[b]{pixels}[/b]][/attachment]
+[nobbc][attachment=[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] height=[b]{height}[/b]][/attachment]
+[nobbc][attachment=[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] height=[b]{height}[/b] margin=[b]{pixels}[/b]][/attachment]
+[nobbc][attachment=[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] height=[b]{height}[/b] float=[b]{float}[/b]][/attachment]
+[nobbc][attachment=[/nobbc] id=[b]{id}[/b] width=[b]{width}[/b] height=[b]{height}[/b] float=[b]{float}[/b] margin=[b]{pixels}[/b]][/attachment]
+[nobbc][attachment=[/nobbc] id=[b]{id}[/b] height=[b]{height}[/b]][/attachment]
+[nobbc][attachment=[/nobbc] id=[b]{id}[/b] height=[b]{height}[/b] margin=[b]{pixels}[/b]][/attachment]
+[nobbc][attachment=[/nobbc] id=[b]{id}[/b] height=[b]{height}[/b] float=[b]{float}[/b]][/attachment]
+[nobbc][attachment=[/nobbc] id=[b]{id}[/b] height=[b]{height}[/b] float=[b]{float}[/b] margin=[b]{pixels}[/b]][/attachment]
 [/quote]
-In each case, [b]{id}[/b] is the attachment number relative to the topic, [b]{width}[/b] is the max desired width, [b]{height}[/b] is the max desired height, and [b]{float}[/b] can be either [b]left[/b], [b]right[/b], or [b]center[/b].  All text between the opening and closing attachment tags is discarded.
+Version 2.1 keeps the version 1.0 and 2.0 forms, plus introduces more BBCodes:
+[quote]
+[b]attach[/b] => Shows the attachment as a thumbnail, expandable to full size.
+[b]attachthumb[/b] => Shows only the thumbnail of the attachment.
+[b]attachmini[/b] => Shows the attachment, omitting the download count and filename beneath.
+[/quote]
+Each of these new BBCodes uses the same format as the [b][nobbc][attachment][/nobbc][/b] BBCodes.
+
+In each case, [b]{id}[/b] is the attachment number relative to the topic, [b]{width}[/b] is the max desired width, [b]{height}[/b] is the max desired height, [b]{pixels}[/b] is the number of pixels surrounding the image, and [b]{float}[/b] can be either [b]left[/b], [b]right[/b], or [b]center[/b].  All text between the opening and closing attachment tags is discarded.
 
 If width and height are not specified, max image width and height settings set by admin are respected.  Attachment image will be scaled proportionally to meet desired width/height settings.
 
@@ -60,7 +76,15 @@ o [url=http://custom.simplemachines.org/mods/index.php?mod=2758]Custom View of A
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
-[b][u]v2.0 - December 13th, 2014[/u][/b]
+[b][u]v2.1 - December 19th, 2014[/u][/b]
+o New BBCodes added: [b]attach[/b], [b]attachthumb[/b], and [b]attachmini[/b].
+o Some reorganization of the code to accommodate the new BBCodes.
+o Image not scaled if both width and height are specified.
+o Parameter validation functions fixed to prevent negative values from being passed.
+o No highslide features if image size is smaller than specified max image dimensions.
+o Fixed image placement code by removing "block_level" requirements from all BBcodes...
+
+[b][u]v2.0 - December 7th, 2014[/u][/b]
 o Added new form of the [b]attachment[/b] bbcode, as explained above.
 o Fixed preview capability in non-WYSIWYG mode for already saved attachments in posts...
 o Changed code that scales image to use global settings only if no size is specified by the user.
