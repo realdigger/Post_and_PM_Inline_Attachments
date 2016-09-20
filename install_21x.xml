@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>3.4</version>
+<version>3.5</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -186,12 +186,12 @@
 	<operation>
 		<search position="replace"><![CDATA[if (!empty($message['attachment']))]]></search>
 		<add><![CDATA[$msg_id = $message['id'];
-		if (!empty($message['attachment']) && count($context['dontshowattachment'][$msg_id]) != count($message['attachment']))]]></add>
+		if (!empty($message['attachment']) && count($context['ila']['dont_show'][$msg_id]) != count($message['attachment']))]]></add>
 	</operation>
 	<operation>
 		<search position="after"><![CDATA[// Show a special box for unapproved attachments...]]></search>
 		<add><![CDATA[// Skip over already-displayed inline attachments:
-				if (!empty($context['dontshowattachment'][$msg_id][$attachment['id']]))
+				if (!empty($context['ila']['dont_show'][$msg_id][$attachment['id']]))
 					continue;
 				
 				]]></add>
@@ -241,10 +241,19 @@
 
 										return true;
 									}
-									function insertAttachment(id)
-									{
-										$(\'#', $context['post_box_name'], '\').data(\'sceditor\').sourceEditorInsertText(\'[attachment=\' + id + \']\', 0);
 									}]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[<dd class="smalltext">';
+
+		// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.]]></search>
+		<add><![CDATA[<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+								function insertAttachment(id)
+								{
+									$(\'#', $context['post_box_name'], '\').data(\'sceditor\').sourceEditorInsertText(\'[attachment=\' + id + \']\', 0);
+								}
+							// ]]]]><![CDATA[></script>
+							]]></add>
 	</operation>
 </file>
 </modification>

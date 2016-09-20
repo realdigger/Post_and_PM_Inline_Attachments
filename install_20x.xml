@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>3.4</version>
+<version>3.5</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -132,7 +132,7 @@
 <file name="$sourcedir/Subs-CustomView.php" error="skip">
 	<operation>
 		<search position="replace"><![CDATA[if (!isset($context['ila_dont_show_attach_below']) || !array_key_exists($attachment['id'], $context['ila_dont_show_attach_below']))]]></search>
-		<add><![CDATA[if (empty($context['dontshowattachment'][$attachment['id']]) && ((!isset($context['ila_dont_show_attach_below']) || !array_key_exists($attachment['id'], $context['ila_dont_show_attach_below']))))]]></add>
+		<add><![CDATA[if (empty($context['ila']['dont_show'][$attachment['id']]) && ((!isset($context['ila_dont_show_attach_below']) || !array_key_exists($attachment['id'], $context['ila_dont_show_attach_below']))))]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/hs4smf-Subs.php" error="skip">
@@ -158,12 +158,12 @@
 	<operation>
 		<search position="replace"><![CDATA[if (!empty($message['attachment']))]]></search>
 		<add><![CDATA[$msg_id = $message['id'];
-		if (!empty($message['attachment']) && count($context['dontshowattachment'][$msg_id]) != count($message['attachment']))]]></add>
+		if (!empty($message['attachment']) && count($context['ila']['dont_show'][$msg_id]) != count($message['attachment']))]]></add>
 	</operation>
 	<operation>
 		<search position="after"><![CDATA[// Show a special box for unapproved attachments...]]></search>
 		<add><![CDATA[// Skip over already-displayed inline attachments:
-				if (!empty($context['dontshowattachment'][$msg_id][$attachment['id']]))
+				if (!empty($context['ila']['dont_show'][$msg_id][$attachment['id']]))
 					continue;
 				
 				]]></add>
@@ -183,7 +183,7 @@
 	{
 		foreach ($message['attachment'] as $id => $attachment)
 		{
-			if (isset($context['dontshowattachment'][$attachment['id']]))
+			if (isset($context['ila']['dont_show'][$attachment['id']]))
 				unset($message['attachment'][$id]);
 		}
 	}
@@ -240,6 +240,19 @@
 										}
 ]]></add>
 	</operation>
+	<operation error="ignore">
+		<search position="after"><![CDATA[<dd class="smalltext">';
+
+		// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.]]></search>
+		<add><![CDATA[<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+							function insertAttachment(id)
+							{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
+								$(smfmod_editor).data(\'sceditor\').insertText(\'[attachment=\' + id + \']\');' : '
+								replaceText(\'[attachment=\' + id + \']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
+							}
+						// ]]]]><![CDATA[></script>
+						]]></add>
+	</operation>
 </file>
 <file name="$themedir/Post.template.php">
 	<operation>
@@ -290,28 +303,35 @@
 
 									return true;
 								}
-								function insertAttachment(id)
-								{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
-									$(smfmod_editor).data(\'sceditor\').insertText(\'[attachment=\' + id + \']\');' : '
-									replaceText(\'[attachment=\' + id + \']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
-								}
 ]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[<dd class="smalltext">';
+
+		// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.]]></search>
+		<add><![CDATA[<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+							function insertAttachment(id)
+							{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
+								$(smfmod_editor).data(\'sceditor\').insertText(\'[attachment=\' + id + \']\');' : '
+								replaceText(\'[attachment=\' + id + \']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
+							}
+						// ]]]]><![CDATA[></script>
+						]]></add>
 	</operation>
 </file>
 <file name="$boarddir/Themes/core/Display.template.php" error="skip">
 	<operation>
-		<search position="after"><![CDATA[// Assuming there are attachments...]]></search>
-		<add><![CDATA[// If the user has requested so, then remove any attachments that are already displayed...
-	if (!empty($message['attachment']))
-	{
-		foreach ($message['attachment'] as $id => $attachment)
-		{
-			if (isset($context['dontshowattachment'][$attachment['id']]))
-				unset($message['attachment'][$id]);
-		}
-	}
-
-	]]></add>
+		<search position="replace"><![CDATA[if (!empty($message['attachment']))]]></search>
+		<add><![CDATA[$msg_id = $message['id'];
+		if (!empty($message['attachment']) && count($context['ila']['dont_show'][$msg_id]) != count($message['attachment']))]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[// Show a special box for unapproved attachments...]]></search>
+		<add><![CDATA[// Skip over already-displayed inline attachments:
+				if (!empty($context['ila']['dont_show'][$msg_id][$attachment['id']]))
+					continue;
+				
+				]]></add>
 	</operation>
 </file>
 </modification>

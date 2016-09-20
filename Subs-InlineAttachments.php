@@ -75,7 +75,7 @@ function ILA_Load_Stuff()
 //================================================================================
 function ILA_Setup($msg_id, &$message)
 {
-	global $context, $topic;
+	global $context;
 	
 	// Load language strings and stuff (duh)
 	ILA_Load_Stuff();
@@ -92,6 +92,10 @@ function ILA_Setup($msg_id, &$message)
 		elseif (($id = $context['ila']['msg'] = (int) str_replace('pm_pre', '', $msg_id)) != 0)
 			ILA_PM_Attachments($id);
 	}
+
+	// Make damn sure that the "dont_show" element is defined for this message:
+	if (!isset($context['ila']['dont_show'][$id]))
+		$context['ila']['dont_show'][$id] = array();
 
 	// If there isn't a message to setup for, just return to the caller:
 	if (empty($message))
@@ -525,7 +529,7 @@ function ILA_Build_Link(&$tag, &$id)
 	// Mark attachment as "don't show" if admin has checked that option:
 	$attachment = &$context['ila']['attachments'][$msg][$id];
 	if (!empty($modSettings['ila_duplicate']))
-		$context['dontshowattachment'][$msg][$attachment['id']] = true;
+		$context['ila']['dont_show'][$msg][$attachment['id']] = true;
 
 	// Return empty string if a non-image attachment was requested:
 	if (!$attachment['is_image'] && $tag['tag'] != 'attachmini')

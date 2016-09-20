@@ -1,3 +1,7 @@
+v3.5 - April 14th, 2015
+o Fixed issue where error generated on post with attachments, but no inline images.
+o Fixed issue where insert attachment link didn't work if post had one less than maximum attachments.
+
 v3.4 - April 14th, 2015
 o Fixed topic display issue when using Recent Forum Topics Boardindex mod.
 o Fixed inline attachment display issue when quoting inline attachments from another post.
