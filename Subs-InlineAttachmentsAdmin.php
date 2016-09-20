@@ -238,7 +238,7 @@ function ILA_Admin_Adjust($ascending = true)
 						if (preg_match('#\[' . $tag . '(=| id=)(\d+)(|(,| )(.+?))\]#i', $txt, $params))
 						{
 							$begin .= 'REPLACE(';
-							$end = ', "[' . $tag . $params[1] . $params[2] . '", "[' . $tag . $params[1] . ($params[2] + $change_by) . '")' . $end;
+							$end .= ', "[' . $tag . $params[1] . $params[2] . '", "[' . $tag . $params[1] . ($params[2] + $change_by) . '")';
 						}
 					}
 

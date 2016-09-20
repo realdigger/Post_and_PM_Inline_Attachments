@@ -1,3 +1,6 @@
+v4.12 - November 11th, 2015
+o Fixed the ILA_Admin_Adjust function so that it doesn't screw up posts with ILA tags.
+
 v4.11 - November 10th, 2015
 o Fixed undefined index error in PersonalMessage.template.php, reported by brynn.
 o Modified renumbering function to avoid "hacking attempt" error message.

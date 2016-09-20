@@ -413,7 +413,7 @@ function ILA_Reorganize_Tags(&$message, &$query)
 	$msg_id = $query['id_msg'];
 	if (!isset($attachment[$msg_id]))
 		ILA_Setup($msg_id, $msg_id);
-	$i = !empty($modSettings['ila_one_based_numbering']);
+	$i = (int) !empty($modSettings['ila_one_based_numbering']);
 	$attach = array();
 	foreach ($attachments[$msg_id] as $attachment)
 	{
