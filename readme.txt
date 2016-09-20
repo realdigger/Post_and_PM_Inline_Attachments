@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v2.3[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v2.4[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -80,6 +80,9 @@ o [url=http://custom.simplemachines.org/mods/index.php?mod=2758]Custom View of A
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
+[b][u]v2.4 - January 11th, 2015[/u][/b]
+o Fixed undefined index error within [b]Subs-InlineAttachments.php[/b]...
+
 [b][u]v2.3 - December 28th, 2014[/u][/b]
 o Performance enhancement due to storing permission check after first check.
 o Fixed spacing issues between picture and download counter/link.  Thanks, [url=http://www.simplemachines.org/community/index.php?action=profile;u=399264]RSI[/url]!

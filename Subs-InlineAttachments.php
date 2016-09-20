@@ -520,7 +520,7 @@ function ILA_Validate(&$tag, $id, $content)
 		}
 		// Highslide Image Viewer Installed?
 		elseif (function_exists('highslide_images'))
-			$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" rel="highslide"><img src="' . $thumb . '" ' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' id="thumb_' . $id . '" /></a><span class="highslide-heading">' . $context['subject'] . '</span>';
+			$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" rel="highslide"><img src="' . $thumb . '" ' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' id="thumb_' . $id . '" /></a>' . (isset($context['subject']) ? '<span class="highslide-heading">' . $context['subject'] . '</span>' : '');
 		// jQLightbox Installed?
 		elseif (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css'))
 			$html = '<a href="' . $image . ';image" id="link_' . $id . '" rel="lightbox[gallery]"><img src="' . $thumb . '" ' . $width . $height . ' alt="' . $attachment['name'] . '"' . $float . $margin . ' id="thumb_' . $id . '" /></a>';
