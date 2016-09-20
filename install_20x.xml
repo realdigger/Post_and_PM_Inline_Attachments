@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>3.6</version>
+<version>3.7</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -209,7 +209,7 @@
 	</operation>
 	<operation error="ignore">
 		<search position="replace"><![CDATA[<input type="file" size="38" name="attachment[]" class="input_file" />';]]></search>
-		<add><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a href="javascript:void(0);" onclick="insertAttachment(', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + $modSettings['ila_one_based_numbering']), '); return false;">', $txt['ila_insert'] ,' ', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + $modSettings['ila_one_based_numbering']),'</a>) ]]></add>
+		<add><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a href="javascript:void(0);" onclick="insertAttachment(', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + $modSettings['ila_one_based_numbering']), '); return false;">', $txt['ila_insert'] ,' ', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + $modSettings['ila_one_based_numbering']),'</a>)';]]></add>
 	</operation>
 	<operation error="ignore">
 		<search position="replace"><![CDATA[function addAttachment()

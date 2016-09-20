@@ -81,7 +81,7 @@ function ILA_Setup($msg_id, &$message)
 	ILA_Load_Stuff();
 
 	// We can't load attachments if we don't know the message id number....
-	$id = ($msg_id == '' ? $context['ila']['msg'] : $msg_id);
+	$id = ($msg_id == '' && isset($context['ila']['msg']) ? $context['ila']['msg'] : $msg_id);
 	if ($msg_id != '')
 	{
 		if (($id = $context['ila']['msg'] = (int) $msg_id) != 0)
