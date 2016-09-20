@@ -1,4 +1,12 @@
-v3.8 - July 3th, 2015
+v3.9 - July 4th, 2015
+o Fixed the ILA float parameter so that [b]float=center[/b] works as expected.
+o Added code to make sure ILA tag parameters are in the correct order.
+o Added code to add the message ID to quoted inline attachments BEFORE the user sees it.
+o Removed the option added in v3.8 to stop adding message ID to quoted inline attachments.
+o Altered templates to use version 2.0 bbcodes to insert inline attachments code.
+o Altered templates to add the message ID to the insert inline attachments code.
+
+v3.8 - July 3rd, 2015
 o Fixed issue with post preview reporting not allowed to view attachments.
 o Added override of "Display attachments as pictures under post" option to show pictures when disabled.
 o Added an option to stop adding message ID to quoted inline attachments.

@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>3.7</version>
+<version>3.9</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -46,17 +46,16 @@
 	ILA_Load_Stuff();]]></add>
 	</operation>
 	<operation>
-		<search position="before"><![CDATA[
-		$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
-]]></search>
-		<add><![CDATA[
+		<search position="replace"><![CDATA[$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);]]></search>
+		<add><![CDATA[$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
+
 		// Show attachment string or error message in topic history
-		$row['body'] = ILA_Invalid_Tags($row['body']);
-]]></add>
+		$row['body'] = ILA_Invalid_Tags($row['body']);]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[$context['preview_message'] = parse_bbc($context['preview_message'], isset($_REQUEST['ns']) ? 0 : 1);]]></search>
-		<add><![CDATA[$context['preview_message'] = parse_bbc($context['preview_message'], isset($_REQUEST['ns']) ? 0 : 1, 'pre' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : ''));
+		<add><![CDATA[ILA_Fix_Param_Order($context['preview_message']);
+			$context['preview_message'] = parse_bbc($context['preview_message'], isset($_REQUEST['ns']) ? 0 : 1, 'pre' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : ''));
 
 			// Show attachment string or error message in topic history
 			$context['preview_message'] = ILA_Invalid_Tags($context['preview_message']);
@@ -102,7 +101,7 @@
 			'id_msg' => (int) $_REQUEST['msg'],
 			'not_id_attach' => $del_temp,
 		);
-		ILA_Fix_Tags($_POST['message'], $attachmentQuery);
+		ILA_Reorganize_Tags($_POST['message'], $attachmentQuery);
 		removeAttachments($attachmentQuery);
 	}
 
@@ -111,7 +110,20 @@
 	<operation>
 		<search position="before"><![CDATA[// Collect all parameters for the creation or modification of a post.]]></search>
 		<add><![CDATA[
+	ILA_Fix_Param_Order($_POST['message']);
 	ILA_Process_Quotes($_POST['message']);]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[$form_message = '[quote author=' . $mname . ' link=topic=' . $topic . '.msg' . (int) $_REQUEST['quote'] . '#msg' . (int) $_REQUEST['quote'] . ' date=' . $mdate . ']' . "\n" . rtrim($form_message) . "\n" . '[/quote]';]]></search>
+		<add><![CDATA[
+			$form_message = ILA_Add_MsgID($form_message);]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[createPost($msgOptions, $topicOptions, $posterOptions);]]></search>
+		<add><![CDATA[
+		$msgOptions['body'] = str_replace('msg=new', 'msg=' . $msgOptions['id'], ($body_temp = $msgOptions['body']));
+		if ($body_temp != $msgOptions['body'])
+			modifyPost($msgOptions, $topicOptions, $posterOptions);]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Profile-View.php">
@@ -325,8 +337,8 @@
 		<add><![CDATA[<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
 							function insertAttachment(id)
 							{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
-								$(smfmod_editor).data(\'sceditor\').insertText(\'[attachment=\' + id + \']\');' : '
-								replaceText(\'[attachment=\' + id + \']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
+								$(smfmod_editor).data(\'sceditor\').insertText(\'[attachment id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . '\');' : '
+								replaceText(\'[attachment id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . ']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
 							}
 						// ]]]]><![CDATA[></script>
 						]]></add>
