@@ -690,8 +690,9 @@ function ILA_Build_HTML(&$tag, &$id)
 	$opacity = min(100, max(0, (isset($modSettings['ila_transparent']) ? $modSettings['ila_transparent'] : 40)));
 	if (empty($attachment['is_approved']) && empty($opacity))
 		return $txt['ila_unapproved'];
+	$download_count = ($tag['tag'] == 'attachurl' ? 4 : ($tag['tag'] == 'attachmini' ? 0 : 
+		(isset($modSettings['ila_download_count']) ? $modSettings['ila_download_count'] : 0)));
 	$opacity = (empty($attachment['is_approved']) ? ' style=" opacity: ' . ($opacity / 100) . '; filter: alpha(opacity=' . $opacity . ');"' : '');
-	$download_count = !empty($modSettings['ila_duplicate']);
 
 	//===========================================================================================
 	// Is this an image?  If so, assemble the HTML necessary to show it:
@@ -812,7 +813,7 @@ function ILA_Build_HTML(&$tag, &$id)
 			$height = (!empty($context['ila_params']['height']) ? $context['ila_params']['height'] :
 				(!empty($modSettings['ila_video_default_height']) ? $modSettings['ila_video_default_height'] : 400));
 			$dim = ' width="' . $width . '" height="' . $height . '"';
-			$download_count = !empty($modSettings['ila_video_show_download_link']);
+			$download_count = isset($modSettings['ila_video_show_download_link']) ? $modSettings['ila_video_show_download_link'] : 0;
 
 			if ($ext == 'avi')
 				$html = '<object classid="clsid:67DABFBF-D0AB-41fa-9C46-CC0F21721616"' . $dim . ' codebase="http://go.divx.com/plugin/DivXBrowserPlugin.cab">' .
@@ -863,17 +864,18 @@ function ILA_Build_HTML(&$tag, &$id)
 
 	//===========================================================================================
 	// Add the download count to the image tag if requested:
-	if (empty($html) || ($download_count && $tag['tag'] != 'attachmini') || $tag['tag'] == 'attachurl')
+	if (empty($html) || $download_count)
 	{
 		// Prepare certain elements so that the HTML building code looks at least a little nicer:
-		$download_count = (!isset($txt['attach_times']) ? sprintf($txt['attach_downloaded'], $attachment['downloads']) : $txt['attach_downloaded'] . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times']);
-		$viewed_count = (!isset($txt['attach_times']) ? sprintf($txt['attach_viewed'], $attachment['downloads']) : $txt['attach_viewed'] . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times']);
-		$clip_pic = $settings['images_url'] . '/icons/clip.' . (!isset($txt['attach_times']) ? 'png' : 'gif');
-		$idc = (isset($modSettings['ila_download_count']) ? $modSettings['ila_download_count'] : ($tag['tag'] == 'attachurl' ? 4 : 0));
+		$downloaded = (!isset($txt['attach_times']) ? sprintf($txt['attach_downloaded'], $attachment['downloads']) : $txt['attach_downloaded'] . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times']);
+		$viewed = (!isset($txt['attach_times']) ? sprintf($txt['attach_viewed'], $attachment['downloads']) : $txt['attach_viewed'] . ' ' . $attachment['downloads'] . ' ' . $txt['attach_times']);
 		
 		// Let's build the HTML code for the download count now....
-		$temp = ($idc == 1 ? '' : ($idc >= 5 ? '<br/>' : ' ') . '(' . $attachment['size'] . ($attachment['is_image'] ? ' . ' . $pic_width . 'x' . $pic_height . ($idc == 6 ? ')<br/>(' : ' - ') . $viewed_count : ' - ' . $download_count) . ')');
-		$html = (!empty($html) ? $html . '<br/>' : '') . '<span class="smalltext"><a href="' . $attachment['href'] . '"><img src="' . $clip_pic . '" align="middle" alt="*" border="0" /> ' . $attachment['name'] . '</a>' . $temp . '</span>';
+		$html = (!empty($html) ? $html . '<br/>' : '') . 
+			'<span class="smalltext">' .
+				'<a href="' . $attachment['href'] . '"><img src="' . $settings['images_url'] . '/icons/clip.' . (!isset($txt['attach_times']) ? 'png' : 'gif') . '" align="middle" alt="*" border="0" />' . $attachment['name'] . '</a>' . 
+				($download_count ? ($download_count >= 5 ? '<br/>' : ' ') . '(' . $attachment['size'] . ($attachment['is_image'] ? ' . ' . $pic_width . 'x' . $pic_height . ($download_count == 6 ? ')<br/>(' : ' - ') . $viewed : ' - ' . $downloaded) . ')' : '').
+			'</span>';
 	}
 
 	// Do we have something to float or put a margin around?
@@ -913,7 +915,7 @@ function ILA_Build_HTML(&$tag, &$id)
 	}
 
 	// Mark ONLY approved attachments as "don't show" if admin has checked that option:
-	if (!empty($modSettings['ila_download_count']) && !empty($attachment['is_approved']))
+	if (!empty($modSettings['ila_duplicate']) && !empty($attachment['is_approved']))
 		$context['ila']['dont_show'][$msg][$attachment['id']] = true;
 
 	// Return to our lord and saviour, our caller! :p

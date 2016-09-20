@@ -1,3 +1,8 @@
+v4.4 - September 11th, 2015
+o Rewrote the code that puts the download counter and link underneath the inline attachment.
+o Fixed issue where thumbnail image is still shown under post regardless of setting.
+o Fixed issue where text under image is still shown under inline image regardless of setting.
+
 v4.3 - September 9th, 2015
 o Added MIME types for AVI and WMV files.
 o SMF 2.1: Fixed Javascript issue where option to upload additional files wasn't available.
