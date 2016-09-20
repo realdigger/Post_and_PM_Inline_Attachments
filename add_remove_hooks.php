@@ -21,6 +21,7 @@ $hook_functions = array(
 	'integrate_pre_include' => '$sourcedir/Subs-InlineAttachments.php',
 	'integrate_bbc_codes' => 'ILA_BBCode',
 	'integrate_general_mod_settings' => 'ILA_Mod_Settings',
+	'integrate_bbc_buttons' => 'ILA_BBC_Buttons',
 );
 
 // Adding or removing them?

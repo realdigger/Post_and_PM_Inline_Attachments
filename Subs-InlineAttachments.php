@@ -10,6 +10,22 @@ if (!defined('SMF'))
 	die('Hacking attempt...');
 
 //================================================================================
+// BBCode bbcode button hook function for the Inline Attachment mod
+//================================================================================
+function ILA_BBC_Buttons(&$buttons)
+{
+	global $txt;
+
+	$buttons[count($buttons) - 1][] = array(
+		'image' => 'attachment',
+		'code' => 'attachment',
+		'description' => $txt['ila_insert'],
+		'before' => '[attachment=]',
+		'after' => '[/attachment]',
+	);
+}
+
+//================================================================================
 // BBCode hook function for the Inline Attachment mod
 //================================================================================
 function ILA_BBCode(&$codes)
