@@ -1,3 +1,7 @@
+v3.14 - July 13th, 2015
+o Fixed the "attach bbcode same as attachment" option so that it works as expected.
+o Fixed incorrectly closed tag with SCEditor.
+
 v3.13 - July 12th, 2015
 o Added "margin-left", "margin-right", "margin-top" and "margin-bottom" ILA parameters.
 o Rewrote code to apply float and margin parameters to all ILA tags used.

@@ -650,7 +650,7 @@ function ILA_Build_HTML(&$tag, &$id)
 
 		// Figure out which parameters we are going to use:
 		$use_thumbnail = ($tag['tag'] == 'attachthumb');
-		if (!empty($modSettings['ila_attach_same_as_attachment']) && empty($modSettings['ila_attach_same_as_attachment']))
+		if (!empty($modSettings['ila_attach_same_as_attachment']))
 			$use_thumbnail = $use_thumbnail || ($tag['tag'] == 'attach');
 		$thumb = ($use_thumbnail && !empty($attachment['thumbnail']['has_thumb']) ? $attachment['thumbnail']['href'] : $attachment['href']);
 		$image = ($tag['tag'] == 'attachthumb' ? $thumb : $attachment['href']);
@@ -685,6 +685,7 @@ function ILA_Build_HTML(&$tag, &$id)
 		$height = (!empty($src_height) ? 'height="' . $src_height .'"' : '');
 
 		// Build the replacement string for the caller:
+		$alt = $attachment['name'];
 		if ($shrunk && !empty($modSettings['ila_highslide']) && $tag['tag'] != 'attachurl')
 		{
 			// HS4SMF Installed?
@@ -694,17 +695,17 @@ function ILA_Build_HTML(&$tag, &$id)
 				$slidegroup = hs4smf_get_slidegroup($id);
 				if (!isset($settings['hs4smf_slideshow']) && $settings['hs4smf_img_count'] > 1)
 					$settings['hs4smf_slideshow'] = 1;
-				$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" onclick="return hs.expand(this, ' . $slidegroup . ')"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . ' id="thumb_' . $id . '" /></a>';
+				$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" onclick="return hs.expand(this, ' . $slidegroup . ')"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $alt . '"' . ' id="thumb_' . $id . '" /></a>';
 			}
 			// Highslide Image Viewer Installed?
 			elseif (function_exists('highslide_images'))
-				$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" rel="highslide"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . ' id="thumb_' . $id . '" /></a>' . (isset($context['subject']) ? '<span class="highslide-heading">' . $context['subject'] . '</span>' : '');
+				$html = '<a href="' . $image . ';image" id="link_' . $id . '" class="highslide" rel="highslide"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $alt . '"' . ' id="thumb_' . $id . '" /></a>' . (isset($context['subject']) ? '<span class="highslide-heading">' . $context['subject'] . '</span>' : '');
 			// jQLightbox Installed?
 			elseif (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css'))
-				$html = '<a href="' . $image . ';image" id="link_' . $id . '" rel="lightbox[gallery]"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . ' id="thumb_' . $id . '" /></a>';
+				$html = '<a href="' . $image . ';image" id="link_' . $id . '" rel="lightbox[gallery]"><img src="' . $thumb . '" ' . $width . ' ' . $height . ' alt="' . $alt . '"' . ' id="thumb_' . $id . '" /></a>';
 		}
 		if (empty($html))
-			$html = '<img src="' . $thumb . ';image" ' . $width . ' ' . $height . ' alt="' . $attachment['name'] . '"' . ' class="bbc_img resized" />';
+			$html = '<img src="' . $thumb . ';image" ' . $width . ' ' . $height . ' alt="' . $alt . '"' . ' class="bbc_img resized" />';
 
 		// If the option to show EXIF is checked, let's show the EXIF information (if available):
 		if (!empty($modSettings['ila_display_exif']) && isset($attachment['exif']))

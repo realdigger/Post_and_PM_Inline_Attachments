@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>3.13</version>
+<version>3.14</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -358,7 +358,7 @@
 		<add><![CDATA[<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
 							function insertAttachment(id)
 							{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
-								$(smfmod_editor).data(\'sceditor\').insertText(\'[attachment id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . '\');' : '
+								$(smfmod_editor).data(\'sceditor\').insertText(\'[attachment id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . ']\');' : '
 								replaceText(\'[attachment id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . ']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
 							}
 						// ]]]]><![CDATA[></script>
