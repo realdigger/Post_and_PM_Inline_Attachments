@@ -1,3 +1,8 @@
+v4.1 - August 29th, 2015
+o Added option to switch between using HTML5 video tags with flash fallback and using flash only.
+o Fixed minor issue where the forum crashes on the Post page.
+o Fixed install-time error in add_remove_hooks.php when .htaccess doesn't exist.
+
 v4.0 - August 28th, 2015
 o Added code to adjust the inline attachment IDs when "one-based numbering" option is changed.
 o For post author, admin and moderators, unapproved image attachments are shown as partly transparent.

@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>4.0</version>
+<version>4.1</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -149,7 +149,7 @@
 	}]]></add>
 	</operation>
 	<operation>
-		<search position="before"><![CDATA[// Collect all parameters for the creation or modification of a post.
+		<search position="replace"><![CDATA[// Collect all parameters for the creation or modification of a post.
 	$msgOptions = array(
 		'id' => empty($_REQUEST['msg']) ? 0 : (int) $_REQUEST['msg'],]]></search>
 		<add><![CDATA[// Collect all parameters for the creation or modification of a post.

@@ -66,6 +66,7 @@ else
 		'ila_video_default_width' => 640,
 		'ila_video_default_height' => 400,
 		'ila_video_show_download_link' => 0,
+		'ila_video_html5' => 1,
 		'ila_embed_svg_files' => 0,
 		'ila_embed_txt_files' => 0,
 		'ila_embed_pdf_files' => 0,
@@ -83,7 +84,7 @@ else
 	updateSettings( $new );
 
 	// Update the .htaccess file so that we can send external sites a good short URL:
-	$oldHtaccess = file_get_contents($boarddir . '/.htaccess');
+	$oldHtaccess = @file_get_contents($boarddir . '/.htaccess');
 	$oldHtaccess = str_replace($insert, '', $oldHtaccess) . $insert;
 	if ($handle = fopen($boarddir . '/.htaccess', 'w'))
 	{

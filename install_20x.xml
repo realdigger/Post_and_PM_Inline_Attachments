@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>4.0</version>
+<version>4.1</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -320,19 +320,6 @@
 										}
 ]]></add>
 	</operation>
-	<operation error="ignore">
-		<search position="after"><![CDATA[<dd class="smalltext">';
-
-		// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.]]></search>
-		<add><![CDATA[<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
-							function insertAttachment(id)
-							{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
-								$(smfmod_editor).data(\'sceditor\').insertText(\'[' . (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment') . ' id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . '\');' : '
-								replaceText(\'[' . (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment') . ' id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . ']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
-							}
-						// ]]]]><![CDATA[></script>
-						]]></add>
-	</operation>
 </file>
 <file name="$themedir/Post.template.php">
 	<operation>
@@ -385,20 +372,12 @@
 
 									return true;
 								}
+								function insertAttachment(id)
+								{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
+									$(smfmod_editor).data(\'sceditor\').insertText(\'[' . (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment') . ' id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . '\');' : '
+									replaceText(\'[' . (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment') . ' id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . ']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
+								}
 ]]></add>
-	</operation>
-	<operation>
-		<search position="after"><![CDATA[<dd class="smalltext">';
-
-		// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.]]></search>
-		<add><![CDATA[<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
-							function insertAttachment(id)
-							{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
-								$(smfmod_editor).data(\'sceditor\').insertText(\'[' . (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment') . ' id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . '\');' : '
-								replaceText(\'[' . (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment') . ' id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . ']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
-							}
-						// ]]]]><![CDATA[></script>
-						]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[sendXMLDocument(smf_prepareScriptUrl(smf_scripturl) + \'action=post2\' + (current_board ? \';board=\' + current_board : \'\') + (make_poll ? \';poll\' : \'\') + \';preview;xml\', x.join(\'&\'), onDocSent);]]></search>

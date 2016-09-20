@@ -844,11 +844,12 @@ function ILA_Build_HTML(&$tag, &$id)
 
 				// Build the video HTML to show the user:
 				$img = (!empty($file['png']) ? $file['png']['href'] : (!empty($file['jpg']) ? $file['jpg']['href'] : ''));
-				$html = '<video controls="controls" width="'. $width . '" height="' . $height . '">' .
+				$html5 = !empty($modSettings['ila_video_html5']);
+				$html = ($html5 ? '<video controls="controls" width="'. $width . '" height="' . $height . '">' .
 					(!empty($file['mp4']['href']) ? '<source src="' . $file['mp4']['href'] . '" type="video/mp4" />' : '') .
 					(!empty($file['ogv']['href']) ? '<source src="' . $file['ogv']['href'] . '" type="video/ogv" />' : '') .
-					(!empty($file['webm']['href']) ? '<source src="' . $file['webm']['href'] . '" type="video/webm" />' : '')  .
-					(!empty($file['mp4']['href']) || !empty($file['webm']['href']) ?
+					(!empty($file['webm']['href']) ? '<source src="' . $file['webm']['href'] . '" type="video/webm" />' : '') : '') .
+					($html5 || !empty($file['mp4']['href']) || !empty($file['webm']['href']) ?
 					'<object type="application/x-shockwave-flash" data="http://player.longtailvideo.com/player.swf" width="' . $width . '" height="' . $height .'">' .
 						'<param name="movie" value="http://player.longtailvideo.com/player.swf" />' .
 						'<param name="allowFullScreen" value="true" />' .

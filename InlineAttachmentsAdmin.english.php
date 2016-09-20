@@ -37,6 +37,7 @@ $txt['ila_embed_video_files'] = 'Embed supported video formats within the post?'
 $txt['ila_video_default_width'] = 'Default width of video when width isn\'t specified:';
 $txt['ila_video_default_height'] = 'Default height of video when height isn\'t specified:';
 $txt['ila_video_show_download_link'] = 'Show download link for videos?';
+$txt['ila_video_html5'] = 'Check to use HTML5 video tags to show video:';
 
 $txt['ila_embed_svg_files'] = 'Embed SVG files within the post?';
 $txt['ila_embed_txt_files'] = 'Embed TXT files as part of the post?';

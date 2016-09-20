@@ -72,6 +72,7 @@ function ILA_Admin_Settings($return_config = false)
 		array('int', 'ila_video_default_width'),
 		array('int', 'ila_video_default_height'),
 		array('check', 'ila_video_show_download_link'),
+		array('check', 'ila_video_html5'),
 		'',
 		array('check', 'ila_embed_svg_files'),
 		array('check', 'ila_embed_txt_files'),
