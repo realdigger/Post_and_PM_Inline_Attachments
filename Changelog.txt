@@ -1,3 +1,9 @@
+v3.4 - April 14th, 2015
+o Fixed topic display issue when using Recent Forum Topics Boardindex mod.
+o Fixed inline attachment display issue when quoting inline attachments from another post.
+o Fixed issue with quoting inline attachments that changed the bbcode to an unusable bbcode.
+o Added check to make sure image attachment has been approved before displaying it.
+
 v3.3.2 - May 3rd, 2015
 o Minor font size adjustment to the code displaying the EXIF information.
 

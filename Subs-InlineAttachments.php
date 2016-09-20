@@ -123,21 +123,28 @@ function ILA_Setup($msg_id, &$message)
 //================================================================================
 // Sub-function dealing with gathering post attachments for ILA_Setup
 //================================================================================
-function ILA_Post_Attachments($msg_id)
+function ILA_Post_Attachments($msg_id, $override = false)
 {
 	global $context, $modSettings, $smcFunc, $attachments, $sourcedir, $topic;
 
-	// Check to make sure that we can view attachments:
-	$request = $smcFunc['db_query']('', '
-		SELECT id_topic FROM {db_prefix}messages WHERE id_msg = {int:msg}',
-		array('msg' => (int) $msg_id)
-	);
-	$row = $smcFunc['db_fetch_assoc']($request);
-	$smcFunc['db_free_result']($request);
-	$topic = $row['id_topic'];
-	if (!isset($context['ila']['view_attachments'][$topic]))
-		$context['ila']['view_attachments'][$topic] = allowedTo('view_attachments');
-	
+	// Only pull if topic ID --IS-- specified, or action is --NOT-- specified:
+	$msg_id = (int) $msg_id;
+	if (isset($_REQUEST['topic']) || isset($_REQUEST['action']) || SMF == 'SSI' || $override)
+	{
+		// Set the topic variable to whatever topic is being pulled from:
+		$request = $smcFunc['db_query']('', '
+			SELECT id_topic FROM {db_prefix}messages WHERE id_msg = {int:msg}',
+			array('msg' => (int) $msg_id)
+		);
+		$row = $smcFunc['db_fetch_assoc']($request);
+		$smcFunc['db_free_result']($request);
+		$topic = $row['id_topic'];
+
+		// Check to make sure that we can view attachments for the topic:
+		if (!isset($context['ila']['view_attachments'][$topic]))
+			$context['ila']['view_attachments'][$topic] = allowedTo('view_attachments');
+	}
+
 	// Fetch attachments for use in "parse_bbc" function...
 	unset($attachments[$msg_id]);
 	if (!empty($modSettings['attachmentEnable']) && !empty($context['ila']['view_attachments'][$topic]))
@@ -188,6 +195,7 @@ function ILA_PM_Attachments($msg_id)
 	global $context, $modSettings, $smcFunc, $attachments, $sourcedir, $user_info;
 
 	// Fetch attachments for use in "parse_bbc" function...
+	$msg_id = (int) $msg_id;
 	unset($attachments[$msg_id]);
 	if (!empty($modSettings['pmAttachmentEnable']) && !empty($context['ila']['pm_view_attachments']))
 	{
@@ -371,7 +379,10 @@ function ILA_Fix_Tags(&$message, &$query)
 							if (!isset($attach[$id_attach]))
 								$message = str_replace($txt, '', $message);
 							else
-								$message = preg_replace('#\[' . $tag . '(.+?)' . $attach_num[0] . '(.+?)\]#i' . ($context['utf8'] ? 'u' : ''), '[' . $tag . '$1id=' . $attach[$id_attach] . '$2]', $message);
+							{
+								$pattern = '#\[' . $tag . '(.+?)' . $attach_num[0] . '(.+?)\]#i' . ($context['utf8'] ? 'u' : '');
+								$message = preg_replace($pattern, '[' . $tag . '$1 id=' . $attach[$id_attach] . '$2]', $message);
+							}
 						}
 						else
 							$message = str_replace($txt, '', $message);
@@ -444,13 +455,13 @@ function ILA_Param_Msg($msg)
 {
 	global $context, $modSettings;
 	
-	if (isset($modSettings['ila_allow_quoted_images']) && empty($modSettings['ila_allow_quoted_images']))
+	if (empty($modSettings['ila_allow_quoted_images']))
 		return;
 	$context['ila_params']['msg'] = $msg = (int) $msg;
 	if (empty($msg))
 		return;
 	elseif (!isset($context['ila']['attachments'][$msg]) && empty($context['ila']['pm_attach']))
-		ILA_Post_Attachments($msg);
+		ILA_Post_Attachments($msg, true);
 	elseif (!isset($context['ila']['attachments'][$msg]) && !empty($context['ila']['pm_attach']))
 		ILA_PM_Attachments($msg);
 }
@@ -508,11 +519,13 @@ function ILA_Build_Link(&$tag, &$id)
 		return $txt['ila_invalid'];
 	if (!isset($context['ila']['attachments'][$msg][$id]))
 		return $txt['ila_invalid'];
+	if (empty($context['ila']['attachments'][$msg][$id]['is_approved']))
+		return $txt['ila_unapproved'];
 
 	// Mark attachment as "don't show" if admin has checked that option:
 	$attachment = &$context['ila']['attachments'][$msg][$id];
 	if (!empty($modSettings['ila_duplicate']))
-		$context['dontshowattachment'][$attachment['id']] = true;
+		$context['dontshowattachment'][$msg][$attachment['id']] = true;
 
 	// Return empty string if a non-image attachment was requested:
 	if (!$attachment['is_image'] && $tag['tag'] != 'attachmini')
@@ -528,6 +541,7 @@ function ILA_Build_Link(&$tag, &$id)
 		$max_width = $modSettings['max_image_width'];
 		$max_height = $modSettings['max_image_height'];
 	}
+
 	// Figure out which parameters we are going to use:
 	$use_thumbnail = ($tag['tag'] == 'attachthumb');
 	if (isset($modSettings['ila_attach_same_as_attachment']) && empty($modSettings['ila_attach_same_as_attachment']))
@@ -595,7 +609,7 @@ function ILA_Build_Link(&$tag, &$id)
 
 	// If the option to show EXIF is checked, let's show the EXIF information (if available):
 	if (!empty($modSettings['ila_display_exif']) && isset($attachment['exif']))
-		$html .= '<span class="smalltext">' . $attachment['exif'] . '</span><br />' . (!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini' ? '' : '<br />');
+		$html .= '<span class="smalltext">' . preg_replace('/\s+/', " ", $attachment['exif']) . '</span><br />' . (!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini' ? '' : '<br />');
 
 	// Add the download count to the image tag if requested:
 	if (!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini')
@@ -624,6 +638,7 @@ function ILA_Admin_Settings_Hook(&$sub)
 function ILA_Admin_Settings($return_config = false)
 {
 	global $context, $modSettings, $txt, $scripturl, $sourcedir;
+	isAllowedTo('admin_forum');
 
 	// Get latest version of the mod and display whether current mod is up-to-date:
 	if (($file = cache_get_data('ila_mod_version', 86400)) == null)

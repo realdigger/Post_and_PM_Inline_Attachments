@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>3.3.2</version>
+<version>3.4</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -184,18 +184,17 @@
 <!---------------------------------------------------------------------------->
 <file name="$themedir/Display.template.php">
 	<operation>
-		<search position="after"><![CDATA[// Assuming there are attachments...]]></search>
-		<add><![CDATA[// If the user has requested so, then remove any attachments that are already displayed...
-	if (!empty($message['attachment']))
-	{
-		foreach ($message['attachment'] as $id => $attachment)
-		{
-			if (isset($context['dontshowattachment'][$attachment['id']]))
-				unset($message['attachment'][$id]);
-		}
-	}
-
-	]]></add>
+		<search position="replace"><![CDATA[if (!empty($message['attachment']))]]></search>
+		<add><![CDATA[$msg_id = $message['id'];
+		if (!empty($message['attachment']) && count($context['dontshowattachment'][$msg_id]) != count($message['attachment']))]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[// Show a special box for unapproved attachments...]]></search>
+		<add><![CDATA[// Skip over already-displayed inline attachments:
+				if (!empty($context['dontshowattachment'][$msg_id][$attachment['id']]))
+					continue;
+				
+				]]></add>
 	</operation>
 </file>
 <file name="$themedir/Post.template.php">

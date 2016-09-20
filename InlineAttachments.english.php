@@ -18,6 +18,7 @@ $txt['ila_attachment'] = ' [ Attachment ] ';
 $txt['ila_nopermission'] = ' [ You are not allowed to view attachments ] ';
 $txt['ila_invalid'] = ' [ Invalid Attachment ] ';
 $txt['ila_disabled'] = ' [ Attachments Disabled ] ';
+$txt['ila_unapproved'] = ' [ Attachments has not been approved yet ] ';
 
 // MOD Configuration options strings:
 $txt['ila_admin_settings'] = 'ILA';
