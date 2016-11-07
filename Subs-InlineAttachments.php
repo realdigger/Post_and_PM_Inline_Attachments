@@ -722,13 +722,12 @@ function ILA_Build_HTML(&$tag, &$id)
 	if ($attachment['is_image'])
 	{
 		// If neither width nor height is set, use the global max image size settings:
-		$max_width = &$context['ila_params']['width'];
-		$max_height = &$context['ila_params']['height'];
-		if (empty($max_width) && empty($max_height))
-		{
-			$max_width = $modSettings['max_image_width'];
-			$max_height = $modSettings['max_image_height'];
-		}
+		$max_width = !empty($context['ila_params']['width']) ? $context['ila_params']['width'] : 0;
+		$max_height = !empty($context['ila_params']['height']) ? $context['ila_params']['height'] : 0;
+		if (!empty($modSettings['ila_max_width']) && $max_width > $modSettings['ila_max_width'])
+			$max_width = $modSettings['ila_max_width'];
+		if (!empty($modSettings['ila_max_height']) && $max_height > $modSettings['ila_max_height'])
+			$max_height = $modSettings['ila_max_height'];
 
 		// Figure out which parameters we are going to use:
 		if ($tag['tag'] == 'attachment' || ($tag['tag'] == 'attach' && !empty($modSettings['ila_attach_same_as_attachment'])))

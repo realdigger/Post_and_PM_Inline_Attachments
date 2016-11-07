@@ -1,3 +1,14 @@
+v4.16 - October 16th, 2016
+o Added maximum display width and height fields to ILA settings page.
+o Added ILA insert format selector to ILA settings page.
+o Modified code so that insert ILA code inserts requested format ILA tag into post.
+o Modified code so that ILA maximum display values are used instead of attachment settings values.
+o Modified code so that ILA maximum display values take priority over user-specified values.
+o Modified admin code that didn't correctly cache update mod query response to website.
+o Removed all [b]href="javascript:void(0)"[/b] references from all XML files.
+o Merge language XML files with language PHP files.
+o Fixed changelog so that versions before 3.1 are accounted for.
+
 v4.15 - April 15th, 2016
 o Added Spanish Latin translation by [url=http://www.simplemachines.org/community/index.php?action=profile;u=322597]Rock Lee [BC][/url].
 
@@ -292,7 +303,4 @@ v1.1 - July 28th, 2014
 o Fixed two undeclared array element errors in PersonalMessage.template.php...
 
 v1.0 - July 21th, 2014
-o Public Release of the mod
-
-v0.1 - August 2nd, 2013
-o First publication to the Simple Machines Customization site.
+o Initial Release of the mod

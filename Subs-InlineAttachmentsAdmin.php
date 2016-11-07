@@ -47,10 +47,11 @@ function ILA_Admin_Settings($return_config = false)
 	}
 	
 	// Get latest version of the mod and display whether current mod is up-to-date:
-	if (($file = cache_get_data('ila_mod_version', 86400)) == null)
+	$file = cache_get_data('ila_mod_version', 86400);
+	if (empty($file))
 	{
 		$file = @file_get_contents('http://www.xptsp.com/tools/mod_version.php?url=Post_and_PM_Inline_Attachments');
-		cache_put_data('ila_mod_version', $file, 86400);
+		cache_put_data('ila_mod_version', time() . $file, 86400);
 	}
 	if (!empty($file) && preg_match('#Post_and_PM_Inline_Attachments_v(.+?)\.zip#i', $file, $version))
 	{
@@ -71,6 +72,10 @@ function ILA_Admin_Settings($return_config = false)
 	$config_vars = array(
 		array('select', 'ila_insert_tag', $tags),
 		array('check', 'ila_attach_same_as_attachment'),
+		array('select', 'ila_insert_format', array('[attachment=0]', '[attachment id=0]', '[attachment id=0 msg=new]')),
+		'',
+		array('int', 'ila_max_width', 'javascript' => 'onchange="validateValue(\'ila_max_width\');"'),
+		array('int', 'ila_max_height', 'javascript' => 'onchange="validateValue(\'ila_max_height\');"'),
 		'',
 		array('check', 'ila_highslide', ((function_exists('hs4smf') || function_exists('highslide_images') || (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css'))) ? 99 : 'disabled') => true),
 		array('check', 'ila_one_based_numbering'),
@@ -81,8 +86,8 @@ function ILA_Admin_Settings($return_config = false)
 		'',
 		array('check', 'ila_embed_video_files', 'javascript' => 'onchange="toggleVideo();"'),
 		array('callback', 'ila_hidden_video_start', 'type' => 'callback'), 	// <== Begin hidden video options section
-		array('int', 'ila_video_default_width', 'javascript' => 'onchange="validateWidth();"'),
-		array('int', 'ila_video_default_height', 'javascript' => 'onchange="validateHeight();"'),
+		array('int', 'ila_video_default_width', 'javascript' => 'onchange="validateValue(\'ila_video_default_width\');"'),
+		array('int', 'ila_video_default_height', 'javascript' => 'onchange="validateValue(\'ila_video_default_height\');"'),
 		array('check', 'ila_video_show_download_link'),
 		array('check', 'ila_video_html5'),
 		array('callback', 'ila_hidden_video_end', 'type' => 'callback'),	// <== Finish hidden video options section
@@ -115,15 +120,10 @@ function ILA_Admin_Settings($return_config = false)
 				value = document.getElementById("ila_transparent").value;
 				document.getElementById("ila_transparent").value = Math.max(0, Math.min(100, value));
 			}
-			function validateWidth()
+			function validateValue(field)
 			{
-				value = document.getElementById("ila_video_default_width").value;
-				document.getElementById("ila_video_default_width").value = Math.max(0, value);
-			}
-			function validateHeight()
-			{
-				value = document.getElementById("ila_video_default_height").value;
-				document.getElementById("ila_video_default_height").value = Math.max(0, value);
+				value = document.getElementById(field).value;
+				document.getElementById(field).value = Math.max(0, value);
 			}
 			toggleVideo();
 		// ]]></script>';
@@ -132,6 +132,9 @@ function ILA_Admin_Settings($return_config = false)
 	$modSettings['ila_transparent'] = (isset($modSettings['ila_transparent']) ? $modSettings['ila_transparent'] : 40);
 	$modSettings['ila_video_default_width'] = (isset($modSettings['ila_video_default_width']) ? $modSettings['ila_video_default_width'] : 640);
 	$modSettings['ila_video_default_height'] = (isset($modSettings['ila_video_default_height']) ? $modSettings['ila_video_default_height'] : 400);
+	$modSettings['ila_max_width'] = (isset($modSettings['ila_max_width']) ? $modSettings['ila_max_width'] : 0);
+	$modSettings['ila_max_height'] = (isset($modSettings['ila_max_height']) ? $modSettings['ila_max_height'] : 0);
+	$modSettings['ila_insert_format'] = (isset($modSettings['ila_insert_format']) ? $modSettings['ila_insert_format'] : 0);
 
 	// Saving?
 	if (isset($_GET['save']))

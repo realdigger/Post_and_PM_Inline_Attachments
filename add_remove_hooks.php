@@ -71,6 +71,7 @@ else
 		'ila_embed_txt_files' => 0,
 		'ila_embed_pdf_files' => 0,
 		'ila_turn_nosniff_off' => 0,
+		'ila_insert_format' => 2,
 		'ila_display_exif' => 0,
 	);
 	foreach ($new as $key => $ignore)
