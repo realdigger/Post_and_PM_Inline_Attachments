@@ -78,11 +78,12 @@ function ILA_Admin_Settings($return_config = false)
 		array('int', 'ila_max_height', 'javascript' => 'onchange="validateValue(\'ila_max_height\');"'),
 		'',
 		array('check', 'ila_highslide', ((function_exists('hs4smf') || function_exists('highslide_images') || (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css'))) ? 99 : 'disabled') => true),
-		array('check', 'ila_one_based_numbering'),
+		array('check', 'ila_one_based_numbering', 'javascript' => 'onchange="askNumber();"', 'postinput' => '<input type="hidden" name="renumber_attachment_tags" id="renumber_attachment_tags" value="0" />'),
 		array('check', 'ila_allow_quoted_images', ($tapatalk ? 'disabled' : 99) => true),
 		array('check', 'ila_duplicate'),
 		array('select', 'ila_download_count', array($txt['ila_download_count_n'], $txt['ila_download_count_f'], $txt['ila_download_count_fs'], $txt['ila_download_count_fsd'], $txt['ila_download_count_fsdc'], $txt['ila_download_count_fsdc2'], $txt['ila_download_count_fsdc3'])),
 		array('int', 'ila_transparent', 'javascript' => 'onchange="validateOpacity();"'),
+		array('check', 'ila_popup_help'),
 		'',
 		array('check', 'ila_embed_video_files', 'javascript' => 'onchange="toggleVideo();"'),
 		array('callback', 'ila_hidden_video_start', 'type' => 'callback'), 	// <== Begin hidden video options section
@@ -117,13 +118,21 @@ function ILA_Admin_Settings($return_config = false)
 			}
 			function validateOpacity()
 			{
-				value = document.getElementById("ila_transparent").value;
+				var value = document.getElementById("ila_transparent").value;
 				document.getElementById("ila_transparent").value = Math.max(0, Math.min(100, value));
 			}
 			function validateValue(field)
 			{
-				value = document.getElementById(field).value;
+				var value = document.getElementById(field).value;
 				document.getElementById(field).value = Math.max(0, value);
+			}
+			function askNumber()
+			{
+				var now_renumber = document.getElementById("ila_one_based_numbering").checked ? 1 : 0;
+				if (now_renumber != ' . $modSettings['ila_one_based_numbering'] . ')
+					document.getElementById("renumber_attachment_tags").value = (confirm("' . $txt['ila_one_based_numbering_ask'] . '") ? 1 : 0);
+				else
+					document.getElementById("renumber_attachment_tags").value = 0;
 			}
 			toggleVideo();
 		// ]]></script>';
@@ -143,12 +152,15 @@ function ILA_Admin_Settings($return_config = false)
 		$_POST['ila_transparent'] = min(100, max(0, (isset($_POST['ila_transparent']) ? $_POST['ila_transparent'] : 40)));
 		$old = (isset($modSettings['ila_one_based_numbering']) ? $modSettings['ila_one_based_numbering'] : 0);
 		saveDBSettings($config_vars);
-		$redirect = false;
+		$redirect = true;
 		$context['ila_completed'] = 0;
-		if (!empty($old) && empty($modSettings['ila_one_based_numbering']))
-			$redirect = ILA_Admin_Adjust(false);
-		elseif (empty($old) && !empty($modSettings['ila_one_based_numbering']))
-			$redirect = ILA_Admin_Adjust(true);
+		if (!empty($_POST['renumber_attachment_tags']))
+		{
+			if (!empty($old) && empty($modSettings['ila_one_based_numbering']))
+				$redirect = ILA_Admin_Adjust(false);
+			elseif (empty($old) && !empty($modSettings['ila_one_based_numbering']))
+				$redirect = ILA_Admin_Adjust(true);
+		}
 		if ($redirect)
 			redirectexit('action=admin;area=manageattachments;sa=ila;done=' . $context['ila_completed']);
 	}

@@ -25,6 +25,7 @@ $txt['ila_title'] = 'Correos y adjuntos PM en l&iacute;nea';
 $txt['ila_insert_tag'] = 'Tag a utilizar al insertar archivos adjuntos en l&iacute;nea:';
 $txt['ila_highslide'] = '¿Habilitar efectos deslizantes para datos adjuntos en l&iacute;nea? ';
 $txt['ila_one_based_numbering'] = 'En caso de que la primera uni&oacute;n debe ser numerada &quot;1&quot;?';
+//$txt['ila_one_based_numbering_ask'] = 'Do you want to adjust all inline attachment IDs so that they still work the same as before?  Press \"OK\" to do this upon saving.';
 $txt['ila_allow_quoted_images'] = '¿Permitir el citado imágenes de fijaci&oacute;n de otro(s) tema(s) y/o mensaje(s)?';
 $txt['ila_duplicate'] = '¿Eliminar imagen del adjunto puesto despu&eacute;s de su uso en un(os) tema(s) y/o mensaje(s)?';
 $txt['ila_download_count'] = 'El enlace de descarga y ajuste del contador:';
@@ -36,6 +37,7 @@ $txt['ila_download_count_fsdc'] = 'Nombre de archivo, tama&ntilde;o, dimensiones
 $txt['ila_download_count_fsdc2'] = 'Nombre de archivo, tama&ntilde;o, dimensiones y descripci&oacute;n (2 l&iacute;neas)';
 $txt['ila_download_count_fsdc3'] = 'Nombre de archivo, tama&ntilde;o, dimensiones y descripci&oacute;n (3 l&iacute;neas)';
 $txt['ila_transparent'] = 'Las imágenes no aprobadas que se muestran transparentes: (%)<div class="smalltext">NOTA: Usar <strong>0</strong> para desactivar mostrar imágenes no aprobados</div>';
+//$txt['ila_popup_help'] = 'Include link for ILA popup window parameters?';
 
 $txt['ila_embed_video_files'] = '¿Incrustar formatos de v&iacute;deo compatibles en el tema/mensaje?';
 $txt['ila_video_default_width'] = 'Ancho predeterminado de v&iacute;deo cuando no se especifica el ancho:';

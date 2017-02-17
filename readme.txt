@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v4.16[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v5.0[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -7,53 +7,77 @@
 [color=blue][b][size=12pt][u]Introduction[/u][/size][/b][/color]
 This mod adds the ability to position your attachments in either your forum post or your personal message post using [attachment=n][/attachment] bbcode (where [b]n[/b] is the number of the attachment in the post, eg first = 0, second = 1).
 
-[color=blue][b][size=12pt][u]BBcode Usage Forms[/u][/size][/b][/color]
-[b]Version 1.0[/b] introduced the following forms:
+[color=blue][b][size=12pt][u]New BBcodes & Acceptable Formats[/u][/size][/b][/color]
 [quote]
+[u]BBCode tag: [b]attachment[/b][/u]
 [nobbc][attachment=[/nobbc][b]{id}[/b]][/attachment]
 [nobbc][attachment=[/nobbc][b]{id}[/b],[b]{width}[/b]][/attachment]
 [nobbc][attachment=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]][/attachment]
-[/quote]
-[b]Version 2.0[/b] keeps the version 1.0 forms, plus introduces more natural forms:
-[quote]
 [nobbc][attachment[/nobbc] {parameter}={value}[b]{id}[/b]][/attachment]
-[/quote]
-where the following parameters are accepted:
-[quote]
-id=[b]{attachment id}[/b] => ID number of the attachment to show inline (NOT attachment number!)
-width=[b]{width}[/b] => Desired width of image to show.  Valid: positive integers.
-height=[b]{height}[/b] => Desired height of image to show.  Valid: positive integers.
-float=[b]{float}[/b] => Floats image to relation to everything else.  Valid: left, right, center
-margin=[b]{pixels}[/b] => Margin around inline attachment.  Valid: positive integers
-margin-left=[b]{pixels}[/b] => Left margin around inline attachment.  Valid: positive integers
-margin-right=[b]{pixels}[/b] => Right margin around inline attachment.  Valid: positive integers
-margin-top=[b]{pixels}[/b] => Top margin around inline attachment.  Valid: positive integers
-margin-bottom=[b]{pixels}[/b] => Bottom margin around inline attachment.  Valid: positive integers
-border-style=[b]{style}[/b] => Border style.  Valid: none, dotted, dashed, solid, double, groove, ridge, inset, outset
-border-width=[b]{pixels}[/b] => Border width around inline attachment.  Valid: positive integers
-border-color=[b]{color}[/b] => Border color.  Valid formats: plain text, #xxx, #xxxxxx, rbg(d,d,d)
-scale=[b]{answer}[/b] => Override scaling of image.  Valid: true, false, yes, no
-msg=[b]{msg ID}[/b] => Message ID number.  Valid: positive integers.
-[/quote]
-[b]Version 2.1[/b] keeps the version 1.0 and 2.0 forms, plus introduces more BBCodes:
-[quote]
-[b]attach[/b] => Shows the attachment as a thumbnail, expandable to full size.
-[b]attachthumb[/b] => Shows NON-EXPANDABLE thumbnail of the attachment.
-[b]attachmini[/b] => Shows the attachment as a thumbnail, expandable to full size.  Download count and filename omitted beneath (regardless of ILA settings).
-[/quote]
-[b]Version 2.2[/b] introduces one more BBCode:
-[quote]
-[b]attachurl[/b] => Shows the attachment like you used an [b]url[/b] tag instead of this tag.
-[/quote]
-Each of these new BBCodes uses the same format as the [b][nobbc][attachment][/nobbc][/b] BBCodes.
+[nobbc][attachment=[/nobbc][b]{id}[/b]]
+[nobbc][attachment=[/nobbc][b]{id}[/b],[b]{width}[/b]]
+[nobbc][attachment=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]]
+[nobbc][attachment[/nobbc] {parameter}={value}[b]{id}[/b]]
 
-[b]Version 3.0[/b] makes further changes and allows the use of the inline attachments bbcodes [b]WITHOUT[/b] closing brackets, as well as using attachments from another post!
+[u]BBCode tag: [b]attach[/b][/u]
+[nobbc][attach=[/nobbc][b]{id}[/b]][/attach]
+[nobbc][attach=[/nobbc][b]{id}[/b],[b]{width}[/b]][/attach]
+[nobbc][attach=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]][/attach]
+[nobbc][attach[/nobbc] {parameter}={value}[b]{id}[/b]][/attach]
+[nobbc][attach=[/nobbc][b]{id}[/b]]
+[nobbc][attach=[/nobbc][b]{id}[/b],[b]{width}[/b]]
+[nobbc][attach=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]]
+[nobbc][attach[/nobbc] {parameter}={value}[b]{id}[/b]]
 
-[b]Version 3.11[/b] makes further changes and allows the use of closed tags, like [b][nobbc][attach][/nobbc][/b].  This new form is autonumbered!  Note that the [b][nobbc][attach][/nobbc][/b] tag is processed first, then [b][nobbc][attachment][/nobbc][/b], then [b][nobbc][attachmini][/nobbc][/b], then [b][nobbc][attachthumb][/nobbc][/b], then [b][nobbc][attachurl][/nobbc][/b].
+[u]BBCode tag: [b]attachthumb[/b][/u]
+[nobbc][attachthumb=[/nobbc][b]{id}[/b]][/attachthumb]
+[nobbc][attachthumb=[/nobbc][b]{id}[/b],[b]{width}[/b]][/attachthumb]
+[nobbc][attachthumb=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]][/attachthumb]
+[nobbc][attachthumb[/nobbc] {parameter}={value}[b]{id}[/b]][/attachthumb]
+[nobbc][attachthumb=[/nobbc][b]{id}[/b]]
+[nobbc][attachthumb=[/nobbc][b]{id}[/b],[b]{width}[/b]]
+[nobbc][attachthumb=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]]
+[nobbc][attachthumb[/nobbc] {parameter}={value}[b]{id}[/b]]
 
+[u]BBCode tag: [b]attachmini[/b][/u]
+[nobbc][attachmini=[/nobbc][b]{id}[/b]][/attachmini]
+[nobbc][attachmini=[/nobbc][b]{id}[/b],[b]{width}[/b]][/attachmini]
+[nobbc][attachmini=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]][/attachmini]
+[nobbc][attachmini[/nobbc] {parameter}={value}[b]{id}[/b]][/attachmini]
+[nobbc][attachmini=[/nobbc][b]{id}[/b]]
+[nobbc][attachmini=[/nobbc][b]{id}[/b],[b]{width}[/b]]
+[nobbc][attachmini=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]]
+[nobbc][attachmini[/nobbc] {parameter}={value}[b]{id}[/b]]
+
+[u]BBCode tag: [b]attachurl[/b][/u]
+[nobbc][attachurl=[/nobbc][b]{id}[/b]][/attachurl]
+[nobbc][attachurl=[/nobbc][b]{id}[/b],[b]{width}[/b]][/attachurl]
+[nobbc][attachurl=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]][/attachurl]
+[nobbc][attachurl[/nobbc] {parameter}={value}[b]{id}[/b]][/attachurl]
+[nobbc][attachurl=[/nobbc][b]{id}[/b]]
+[nobbc][attachurl=[/nobbc][b]{id}[/b],[b]{width}[/b]]
+[nobbc][attachurl=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]]
+[nobbc][attachurl[/nobbc] {parameter}={value}[b]{id}[/b]]
+[/quote]
 In each case, [b]{id}[/b] is the attachment number relative to the topic, [b]{width}[/b] is the max desired width, [b]{height}[/b] is the max desired height, [b]{pixels}[/b] is the number of pixels surrounding the image, and [b]{float}[/b] can be either [b]left[/b], [b]right[/b], or [b]center[/b].  All text between the opening and closing attachment tags is discarded.
 
-If width and height are not specified, max image width and height settings set by admin are respected.  Attachment image will be scaled proportionally to meet desired width/height settings.
+[color=blue][b][size=12pt][u]BBcode Parameters[/u][/size][/b][/color]
+[table]
+[tr][td]id[/td][td]{attachment id}[/td][td]ID number of the attachment to show inline (NOT attachment number!)[/td][/tr]
+[tr][td]width[/td][td]{width}[/td][td]Desired width of image to show.  Valid: positive integers.[/td][/tr]
+[tr][td]height[/td][td]{height}[/td][td]Desired height of image to show.  Valid: positive integers.[/td][/tr]
+[tr][td]float[/td][td]{float}[/td][td]Floats image to relation to everything else.  Valid: left, right, center[/td][/tr]
+[tr][td]margin[/td][td]{pixels}[/td][td]Margin around inline attachment.  Valid: positive integers[/td][/tr]
+[tr][td]margin-left[/td][td]{pixels}[/td][td]Left margin around inline attachment.  Valid: positive integers[/td][/tr]
+[tr][td]margin-right[/td][td]{pixels}[/td][td]Right margin around inline attachment.  Valid: positive integers[/td][/tr]
+[tr][td]margin-top[/td][td]{pixels}[/td][td]Top margin around inline attachment.  Valid: positive integers[/td][/tr]
+[tr][td]margin-bottom[/td][td]{pixels}[/td][td]Bottom margin around inline attachment.  Valid: positive integers[/td][/tr]
+[tr][td]border-style[/td][td]{style}[/td][td]Border style.  Valid: none, dotted, dashed, solid, double, groove, ridge, inset, outset[/td][/tr]
+[tr][td]border-width[/td][td]{pixels}[/td][td]Border width around inline attachment.  Valid: positive integers[/td][/tr]
+[tr][td]border-color[/td][td]{color}[/td][td]Border color.  Valid formats: plain text, #xxx, #xxxxxx, rbg(d,d,d)[/td][/tr]
+[tr][td]scale[/td][td]{answer}[/td][td]Override scaling of image.  Valid: true, false, yes, no[/td][/tr]
+[tr][td]msg[/td][td]{msg ID}[/td][td]Message ID number.  Valid: positive integers.[/td][/tr]
+[/table]
 
 [color=blue][b][size=12pt][u]Other Mod Features[/u][/size][/b][/color]
 o Error Text strings are shown for invalid/missing/deleted attachments.
@@ -81,7 +105,7 @@ o Use Highslide effects for inline attachments. (only if supported Highslide mod
 o Show EXIF information (only if [url=http://custom.simplemachines.org/mods/index.php?mod=169]EXIF[/url] mod is installed)
 
 [color=blue][b][size=12pt][u]Compatibility Notes[/u][/size][/b][/color]
-This mod was tested on SMF 2.0.9, but should work on SMF 2.1 Beta 1, as well as SMF 2.0 and up.  SMF 1.x is not and will not be supported.
+This mod was tested on SMF 2.0.13, but should work on SMF 2.1 Beta 1, as well as SMF 2.0 and up.  SMF 1.x is not and will not be supported.
 
 For SMF 2.1 Beta 1, this mod contains no functionality for PM attachments, and posting regular attachments has been changed slightly to allow only 1 file per input box.
 
@@ -101,7 +125,7 @@ o [url=http://custom.simplemachines.org/mods/index.php?mod=2758]Custom View of A
 The changelog has been removed and can be seen at [url=http://www.xptsp.com/board/index.php?topic=12.msg137#msg137]XPtsp.com[/url].
 
 [color=blue][b][size=12pt][u]License[/u][/size][/b][/color]
-Copyright (c) 2015, Douglas Orend
+Copyright (c) 2013 - 2017, Douglas Orend
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:

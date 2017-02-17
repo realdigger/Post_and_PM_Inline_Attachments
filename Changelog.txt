@@ -1,3 +1,15 @@
+v5.0 - February 17th, 2016
+o Added help link and popup window to the Post screen.
+o Rewrote bbcode handling code to properly handle each bbcode.
+o Modified [b]Sources/Help.php[/b] operation to use different line to look for.
+o Fixed issue where PMs with inline attachments only showed [nobbc]"[ Attachment ]"[/nobbc]
+o Fixed issue where SimplePortal didn't display embedded attachments.
+o Fixed undefined index error in [b]Subs-InlineAttachments.php[/b] when using HS4SMF mod.
+o Fixed several undefined variable errors in [b]Subs-InlineAttachments.php[/b].
+o Fixed incompatibility with PM Attachments version 2.0 Beta 1.
+o Fixed PM issue where [b][nobbc]"[attachment id=0 msg=new]"[/nobbc][/b] returns [b][nobbc]"[ Attachment ]"[/nobbc][/b].
+o Changed inline TXT files so that they are parsed (for security reasons!)
+
 v4.16 - October 16th, 2016
 o Added maximum display width and height fields to ILA settings page.
 o Added ILA insert format selector to ILA settings page.

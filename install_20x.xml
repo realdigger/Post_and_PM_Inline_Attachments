@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>4.16</version>
+<version>5.0</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -31,12 +31,12 @@
 	// Is this user the message author?]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA['is_image' => !empty($attachment['width']) && !empty($attachment['height']) && !empty($modSettings['attachmentShowImages']),]]></search>
-		<add><![CDATA['is_image' => !empty($attachment['width']) && !empty($attachment['height']) && (!empty($modSettings['attachmentShowImages']) || $override_show),]]></add>
+		<search position="before"><![CDATA[function loadAttachmentContext($id_msg]]></search>
+		<add><![CDATA[, $override_show = false]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[function loadAttachmentContext($id_msg)]]></search>
-		<add><![CDATA[function loadAttachmentContext($id_msg, $override_show = false)]]></add>
+		<search position="replace"><![CDATA['is_image' => !empty($attachment['width']) && !empty($attachment['height']) && !empty($modSettings['attachmentShowImages']),]]></search>
+		<add><![CDATA['is_image' => !empty($attachment['width']) && !empty($attachment['height']) && (!empty($modSettings['attachmentShowImages']) || $override_show),]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA[header('Content-Type: ' . strtr($mime_type, array('image/bmp' => 'image/x-ms-bmp')));]]></search>
@@ -47,11 +47,9 @@
 </file>
 <file name="$sourcedir/Help.php">
 	<operation>
-		<search position="after"><![CDATA[// Permission specific help?]]></search>
-		<add><![CDATA[// Load the ILA language file.
-	loadLanguage('InlineAttachmentsAdmin');
-
-	]]></add>
+		<search position="before"><![CDATA[loadLanguage('Help');]]></search>
+		<add><![CDATA[
+	loadLanguage('InlineAttachmentsAdmin');]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/ManageAttachments.php">
@@ -71,8 +69,8 @@
 	ILA_Load_Stuff();]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);]]></search>
-		<add><![CDATA[$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);
+		<search position="before"><![CDATA[$row['body'] = parse_bbc($row['body'], $row['smileys_enabled'], $row['id_msg']);]]></search>
+		<add><![CDATA[
 
 		// Show attachment string or error message in topic history
 		$row['body'] = ILA_Invalid_Tags($row['body'], $row['id_msg']);]]></add>
@@ -233,12 +231,16 @@
 ]]></add>
 	</operation>
 	<operation>
-		<search position="before"><![CDATA[// This file contains the basic functions for sending a PM.
-	require_once($sourcedir . '/Subs-Post.php');
+		<search position="after"><![CDATA[
 
-	loadLanguage('PersonalMessage');]]></search>
+	if (WIRELESS && WIRELESS_PROTOCOL == 'wap')]]></search>
 		<add><![CDATA[
 	loadLanguage('InlineAttachments');]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[$message['body'] = parse_bbc($message['body'], true, 'pm' . $message['id_pm']);]]></search>
+		<add><![CDATA[$message['body'] = str_replace('msg=new', 'msg=' . $message['id_pm'], $message['body']);
+	]]></add>
 	</operation>
 </file>
 
@@ -333,17 +335,24 @@
 ]]></add>
 	</operation>
 	<operation error="ignore">
-		<search position="after"><![CDATA[<dd class="smalltext">';
+		<search position="replace"><![CDATA[	echo '
+						<dd class="smalltext">';
 
-		// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.]]></search>
-		<add><![CDATA[<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
-							function insertAttachment(id)
-							{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
-								$(smfmod_editor).data(\'sceditor\').insertText(\'[' . (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment') . ' id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . '\');' : '
-								replaceText(\'[' . (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment') . ' id=\' + id + \' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') . ']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
-							}
-						// ]]]]><![CDATA[></script>
-						]]></add>
+		// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.]]></search>
+		<add><![CDATA[$ila_tag = (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment');
+		$ila_tag .= (empty($modSettings['ila_insert_format']) ? '=' : ' id=') . '\' + id + \'';
+		$ila_tag .= (!empty($modSettings['ila_insert_format']) && $modSettings['ila_insert_format'] == 2 ? ' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') : '');
+		echo '
+						<dd class="smalltext">
+							<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+								function insertAttachment(id)
+								{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
+									$(smfmod_editor).data(\'sceditor\').insertText(\'[' . $ila_tag . ']\');' : '
+									replaceText(\'[' . $ila_tag . ']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
+								}
+							// ]]]]><![CDATA[></script>';
+							
+		// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA[function template_send()
@@ -356,6 +365,11 @@
 	<operation>
 		<search position="before"><![CDATA[global $context, $settings, $options, $txt, $scripturl, $modSettings, $counter]]></search>
 		<add><![CDATA[, $sourcedir]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[', $context['show_approval'] ? '<li><label for="approve"><input type="checkbox" name="approve" id="approve" value="2" class="input_check" ' . ($context['show_approval'] === 2 ? 'checked="checked"' : '') . ' /> ' . $txt['approve_this_post'] . '</label></li>' : '', ']]></search>
+		<add><![CDATA[
+							', $context['can_post_attachment'] ? '<li>' . template_ILA_popup_trigger() . ' ' . $txt['ila_popup_title'] . '</li>' : '', ']]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[foreach ($context['current_attachments'] as $attachment)

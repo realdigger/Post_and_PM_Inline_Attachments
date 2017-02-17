@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>4.16</version>
+<version>5.0</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -28,8 +28,8 @@
 		<add><![CDATA['is_image' => !empty($attachment['width']) && !empty($attachment['height']) && (!empty($modSettings['attachmentShowImages']) || $override_show),]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[function loadAttachmentContext($id_msg)]]></search>
-		<add><![CDATA[function loadAttachmentContext($id_msg, $override_show = false)]]></add>
+		<search position="before"><![CDATA[function loadAttachmentContext($id_msg]]></search>
+		<add><![CDATA[, $override_show = false]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA[header('Content-Type: ' . strtr($mime_type, array('image/bmp' => 'image/x-ms-bmp')));]]></search>

@@ -25,6 +25,7 @@ $txt['ila_title'] = 'Post and PM Inline Attachments';
 $txt['ila_insert_tag'] = 'Tag to use when inserting inline attachments:';
 $txt['ila_highslide'] = 'Enable Highslide effects for inline attachment?';
 $txt['ila_one_based_numbering'] = 'Should first attachment should be numbered &quot;1&quot;?';
+$txt['ila_one_based_numbering_ask'] = 'Do you want to adjust all inline attachment IDs so that they still work the same as before?  Press \"OK\" to do this upon saving.';
 $txt['ila_allow_quoted_images'] = 'Allow quoted attachment images from another post?';
 $txt['ila_duplicate'] = 'Remove attachment image under post after in-post use?';
 $txt['ila_download_count'] = 'Download link and counter setting:';
@@ -36,6 +37,7 @@ $txt['ila_download_count_fsdc'] = 'Filename, Size, Dimensions and Count';
 $txt['ila_download_count_fsdc2'] = 'Filename, Size, Dimensions and Count (2 Lines)';
 $txt['ila_download_count_fsdc3'] = 'Filename, Size, Dimensions and Count (3 Lines)';
 $txt['ila_transparent'] = 'Unapproved images shown as transparent: (%)<div class="smalltext">NOTE: <strong>0</strong> disables showing unapproved images</div>';
+$txt['ila_popup_help'] = 'Include link for ILA popup window parameters?';
 
 $txt['ila_embed_video_files'] = 'Embed supported video formats within the post?';
 $txt['ila_video_default_width'] = 'Default width of video when width isn\'t specified:';

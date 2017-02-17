@@ -25,6 +25,7 @@ $hook_functions = array(
 // BBCode stuff:
 	'integrate_pre_include' => '$sourcedir/Subs-InlineAttachments.php',
 	'integrate_bbc_codes' => 'ILA_BBCode',
+	'integrate_load_theme' => 'ILA_Load_Theme',
 // Admin stuff:
 	'integrate_admin_include' => '$sourcedir/Subs-InlineAttachmentsAdmin.php',
 	'integrate_admin_areas' => 'ILA_Admin_Menu_Hook',
