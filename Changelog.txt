@@ -1,4 +1,7 @@
-v5.0 - February 17th, 2016
+v5.1 - February 23rd, 2017
+o Added an operation to copy [b]ILA.css[/b] to proper folder.
+
+v5.0 - February 17th, 2017
 o Added help link and popup window to the Post screen.
 o Rewrote bbcode handling code to properly handle each bbcode.
 o Modified [b]Sources/Help.php[/b] operation to use different line to look for.
