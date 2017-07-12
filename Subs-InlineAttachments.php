@@ -267,7 +267,8 @@ function ILA_Post_Attachments($msg_id)
 		SELECT
 			a.id_attach, a.id_folder, a.id_msg, a.filename, a.file_hash, IFNULL(a.size, 0) AS filesize,
 			a.downloads, a.approved, a.width, a.height, IFNULL(thumb.id_attach, 0) AS id_thumb,
-			thumb.width AS thumb_width, thumb.height AS thumb_height, m.id_topic
+			thumb.width AS thumb_width, thumb.height AS thumb_height, m.id_topic,
+			thumb.id_folder AS thumb_folder, thumb.file_hash AS thumb_hash, thumb.filename AS thumb_name
 		FROM {db_prefix}attachments AS a
 			LEFT JOIN {db_prefix}attachments AS thumb ON (thumb.id_attach = a.id_thumb)
 			LEFT JOIN {db_prefix}messages AS m ON (m.id_msg = a.id_msg)
@@ -928,7 +929,7 @@ function ILA_Build_HTML(&$tag, &$id)
 //================================================================================
 function ILA_subfunction($id, $full, $thumb, $name, $style = '', $has_thumb = false, $expand = true)
 {
-	global $sourcedir, $settings, $modSettings, $context;
+	global $sourcedir, $settings, $modSettings, $context, $msg;
 
 	// Yup, you read right: Increase attachment ID by one million! 99.99+% chance
 	// of no conflict while showing attachments as thumbnails below post!
@@ -950,7 +951,7 @@ function ILA_subfunction($id, $full, $thumb, $name, $style = '', $has_thumb = fa
 			$msgid = (int) $msg;
 			hs4smf_track_slidegroup($msgid); // is this needed?
 			$slidegroup = hs4smf_get_slidegroup($msgid);
-			if (!isset($settings['hs4smf_slideshow']) && $settings['hs4smf_img_count'] > 1)
+			if (!isset($settings['hs4smf_slideshow']) && $context['hs4smf_img_count'] > 1)
 				$settings['hs4smf_slideshow'] = 1;
 			return '<a href="' . $full . ';image" id="link_' . $id . '" class="highslide' . (!empty($class) ? ' ' . $class : '') . '" onclick="return hs.expand(this, ' . $slidegroup . ')"><img src="' . $thumb . '" alt="' . $name . '"' . ' id="thumb_' . $id . '"' . $style . (!empty($class) ? ' class="' . $class . '"' : '') . ' /></a>';
 		}

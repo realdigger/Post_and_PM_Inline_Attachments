@@ -1,3 +1,7 @@
+v5.7 - July 5th, 2017
+o Fixed 2 undefined index errors found by [url=http://www.simplemachines.org/community/index.php?action=profile;u=112942]GL700Wing[/url].  Thanks, GL700Wing!
+o Resolved undefined array element errors coming from [url=http://custom.simplemachines.org/mods/index.php?mod=4087]Automatic Attachment Rotation[/url] mod.  Thanks, [url=http://www.simplemachines.org/community/index.php?action=profile;u=112942]GL700Wing[/url]!!
+
 v5.6 - March 15th, 2017
 o Fixed regex expressions so that [b]code[/b] & [b]quote[/b] tags are processed correctly.
 
