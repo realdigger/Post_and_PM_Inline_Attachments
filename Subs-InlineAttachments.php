@@ -15,25 +15,6 @@ if (!defined('SMF'))
 //================================================================================
 // BBCode hook functions & supporting subfunction for ILA mod
 //================================================================================
-function ILA_Button(&$buttons)
-{
-	global $context, $settings;
-
-	return;
-	// Load everything we are going to need for the editor:
-	loadTemplate('InlineAttachments');
-	$context['template_layers'][] = 'ILA_popup';
-	$context['html_headers'] .= '
-	<link rel="stylesheet" type="text/css" href="' . $settings['theme_url'] . '/css/ILA.css" />';
-
-	// Now add the button to the editor!
-	$buttons[0][] = array(
-		'image' => 'attachment',
-		'code' => 'attachment',
-		'description' => $txt['ila_insert_button'],
-	);
-}
-
 function ILA_Load_Theme()
 {
 	global $context, $modSettings;
@@ -113,15 +94,35 @@ function ILA_BBCode(&$codes)
 	}
 }
 
+function ILA_Button(&$buttons)
+{
+	global $context, $settings;
+
+	return;
+	// Load everything we are going to need for the editor:
+	loadTemplate('InlineAttachments');
+	$context['template_layers'][] = 'ILA_popup';
+	$context['html_headers'] .= '
+	<link rel="stylesheet" type="text/css" href="' . $settings['theme_url'] . '/css/ILA.css" />';
+
+	// Now add the button to the editor!
+	$buttons[0][] = array(
+		'image' => 'attachment',
+		'code' => 'attachment',
+		'description' => $txt['ila_insert_button'],
+	);
+}
+
 //================================================================================
 // Subfunction that deals with preparing for running the ILA mod:
 //================================================================================
 function ILA_Load_Stuff()
 {
-	global $context;
+	global $context, $boarddir;
 
-	// Load the language strings for this mod:
-	loadLanguage('InlineAttachments');
+	// Load the language strings for this mod, if available:
+	if (file_exists($boarddir . '/Themes/default/languages/InlineAttachments.english.php'))
+		loadLanguage('InlineAttachments');
 
 	// Set some things up for performance benefits:
 	$context['ila']['pm_attach'] = false;
@@ -171,6 +172,19 @@ function ILA_Setup($msg_id, &$message)
 	if (empty($message))
 		return;
 
+	// We need to screw up the ILA tags within the code tags so that they don't get "fixed":
+	$pattern = '#\[code(?:.+?)?\](.+?)\[/code\]#i' . ($context['utf8'] ? 'u' : '');
+	if (preg_match_all($pattern, $message, $codes, PREG_PATTERN_ORDER))
+	{
+		$temp_tag = '[' . md5(time());
+		$codes = array_unique($codes[0]);
+		foreach ($codes as $id => $code)
+		{
+			$temp_rep[$id] = str_replace('[attach', $temp_tag, $code);
+			$message = str_replace($code, $temp_rep[$id], $message);
+		}
+	}
+
 	// Convert v3.0+ tags into usable tags for the parser:
 	$attach_id = empty($modSettings['ila_one_based_numbering']) ? 0 : 1;
 	foreach (ILA_tags() as $tag)
@@ -195,15 +209,16 @@ function ILA_Setup($msg_id, &$message)
 		} while ($pos !== false);
 	}
 
-	// Replace attachments inside code brackets cause we don't know what post/PM it belongs to...
-	$pattern = '#\[code(.+?)\](.+?)\[/code\]#i' . ($context['utf8'] ? 'u' : '');
-	if (preg_match_all($pattern, $message, $codes, PREG_PATTERN_ORDER))
+	// Let's fix the ILA tags within the code tags, since we screwed them up:
+	if (isset($temp_rep))
 	{
-		$codes = array_unique($codes[0]);
-		foreach ($codes as $code)
-			$message = str_replace($code, ILA_Invalid_Tags($code), $message);
+		foreach ($codes as $id => $code)
+		{
+			$temp_rep[$id] = str_replace('[attach', $temp_tag, $code);
+			$message = str_replace($temp_rep[$id], $code, $message);
+		}
 	}
-
+	
 	// Process the inline attachments in the quotes, then pass the result back:
 	ILA_Fix_Param_Order($message);
 	ILA_Process_Quotes($message);
@@ -212,83 +227,74 @@ function ILA_Setup($msg_id, &$message)
 //================================================================================
 // Sub-function dealing with gathering post attachments for ILA_Setup
 //================================================================================
-function ILA_Post_Attachments($msg_id, $override = false)
+function ILA_Post_Attachments($msg_id)
 {
-	global $context, $modSettings, $smcFunc, $attachments, $sourcedir, $topic, $board, $user_info;
+	global $context, $modSettings, $smcFunc, $attachments, $sourcedir, $user_info;
+	static $view_attachments = array();
 
-	// Only pull if topic ID --IS-- specified, or action is --NOT-- specified:
+	// Don't even attempt if attachments are disabled:
 	$msg_id = (int) $msg_id;
-	if (empty($msg_id))
+	if (empty($msg_id) || empty($modSettings['attachmentEnable']))
 		return;
-	if (isset($_REQUEST['topic']) || isset($_REQUEST['action']) || SMF == 'SSI' || $override)
-	{
-		// Set the topic variable to whatever topic is being pulled from:
-		$request = $smcFunc['db_query']('', '
-			SELECT id_topic, id_member, id_board
-			FROM {db_prefix}messages
-			WHERE id_msg = {int:msg}',
-			array(
-				'msg' => (int) $msg_id,
-			)
-		);
-		$row = $smcFunc['db_fetch_assoc']($request);
-		$smcFunc['db_free_result']($request);
-		$topic = $row['id_topic'];
-		$context['ila']['id_member'][$msg_id] = $row['id_member'];
-		if (empty($board))
-			$board = $row['id_board'];
-	}
 
-	// Check to make sure that we can view attachments for the topic:
-	if (!empty($topic) && !isset($context['ila']['view_attachments'][$topic]))
+	// Get the topic and board ID for the specified message:
+	$request = $smcFunc['db_query']('', '
+		SELECT id_member, id_board
+		FROM {db_prefix}messages
+		WHERE id_msg = {int:msg}',
+		array(
+			'msg' => $msg_id,
+		)
+	);
+	$row = $smcFunc['db_fetch_assoc']($request);
+	$smcFunc['db_free_result']($request);
+	$context['ila']['id_member'][$msg_id] = $row['id_member'];
+	$msg_board = (int) $row['id_board'];
+
+	// Check to make sure that we can view attachments for the board:
+	if (!empty($msg_board) && !isset($view_attachments[$msg_board]))
 	{
-		$permission_view_attachments = allowedTo('view_attachments');
-		if (!$permission_view_attachments && isset($board) && intval($board))
-		{
-			if (isset($context['ila']['cachedboardpermissioncheck'][$board]))
-				$permission_view_attachments = $context['ila']['cachedboardpermissioncheck'][$board];
-			else
-				$context['ila']['cachedboardpermissioncheck'][$board] = $permission_view_attachments = allowedTo('view_attachments', $board);
-		}
-		$context['ila']['view_attachments'][$topic] = $permission_view_attachments;
+		$view_attachments[$msg_board] = allowedTo('view_attachments');
+		if (!$view_attachments[$msg_board])
+			$view_attachments[$msg_board] = allowedTo('view_attachments', $msg_board);
 	}
+	if (empty($view_attachments[$msg_board]))
+		return;
 
 	// Fetch attachments for use in "parse_bbc" function...
 	unset($attachments[$msg_id]);
-	if (!empty($modSettings['attachmentEnable']) && !empty($context['ila']['view_attachments'][$topic]))
+	$request = $smcFunc['db_query']('', '
+		SELECT
+			a.id_attach, a.id_folder, a.id_msg, a.filename, a.file_hash, IFNULL(a.size, 0) AS filesize,
+			a.downloads, a.approved, a.width, a.height, IFNULL(thumb.id_attach, 0) AS id_thumb,
+			thumb.width AS thumb_width, thumb.height AS thumb_height, m.id_topic
+		FROM {db_prefix}attachments AS a
+			LEFT JOIN {db_prefix}attachments AS thumb ON (thumb.id_attach = a.id_thumb)
+			LEFT JOIN {db_prefix}messages AS m ON (m.id_msg = a.id_msg)
+		WHERE a.id_msg = {int:message_id}
+			AND a.attachment_type = {int:attachment_type}',
+		array(
+			'message_id' => $msg_id,
+			'attachment_type' => 0,
+			'is_approved' => 1,
+		)
+	);
+	$temp = array();
+	while ($row = $smcFunc['db_fetch_assoc']($request))
 	{
-		$request = $smcFunc['db_query']('', '
-			SELECT
-				a.id_attach, a.id_folder, a.id_msg, a.filename, a.file_hash, IFNULL(a.size, 0) AS filesize,
-				a.downloads, a.approved, a.width, a.height, IFNULL(thumb.id_attach, 0) AS id_thumb,
-				thumb.width AS thumb_width, thumb.height AS thumb_height
-			FROM {db_prefix}attachments AS a
-				LEFT JOIN {db_prefix}attachments AS thumb ON (thumb.id_attach = a.id_thumb)
-			WHERE a.id_msg = {int:message_id}
-				AND a.attachment_type = {int:attachment_type}',
-			array(
-				'message_id' => (int) $msg_id,
-				'attachment_type' => 0,
-				'is_approved' => 1,
-			)
-		);
-		$temp = array();
-		while ($row = $smcFunc['db_fetch_assoc']($request))
-		{
-			if (!$row['approved'] && !empty($modSettings['postmod_active']) && !allowedTo('approve_posts') && $context['ila']['id_member'][$msg_id] != $user_info['id'])
-				continue;
+		if (!$row['approved'] && !empty($modSettings['postmod_active']) && !allowedTo('approve_posts') && $context['ila']['id_member'][$msg_id] != $user_info['id'])
+			continue;
 
-			$temp[$row['id_attach']] = $row;
-			if (!isset($attachments[$row['id_msg']]))
-				$attachments[$row['id_msg']] = array();
-		}
-		$smcFunc['db_free_result']($request);
-
-		// This is better than sorting it with the query...
-		ksort($temp);
-		foreach ($temp as $row)
-			$attachments[$row['id_msg']][] = $row;
+		$temp[$row['id_attach']] = $row;
+		if (!isset($attachments[$row['id_msg']]))
+			$attachments[$row['id_msg']] = array();
 	}
+	$smcFunc['db_free_result']($request);
+
+	// This is better than sorting it with the query...
+	ksort($temp);
+	foreach ($temp as $row)
+		$attachments[$row['id_msg']][] = $row;
 
 	// Load the attachment context even if there are no attachments:
 	require_once($sourcedir . '/Display.php');
@@ -302,46 +308,45 @@ function ILA_PM_Attachments($msg_id)
 {
 	global $context, $modSettings, $smcFunc, $attachments, $sourcedir, $user_info;
 
-	// Fetch attachments for use in "parse_bbc" function...
+	// If attachments aren't enabled, why do anything?
 	$msg_id = (int) $msg_id;
-	if (empty($msg_id))
+	if (empty($msg_id) || empty($modSettings['pmAttachmentEnable']) || empty($context['ila']['pm_view_attachments']))
 		return;
+
+	// Fetch attachments for use in "parse_bbc" function...
 	unset($attachments[$msg_id]);
-	if (!empty($modSettings['pmAttachmentEnable']) && !empty($context['ila']['pm_view_attachments']))
+	$request = $smcFunc['db_query']('', '
+		SELECT
+			pa.id_attach, pa.id_folder, pa.id_pm, pa.pm_report, pa.filename, pa.file_hash,
+			IFNULL(pa.size, 0) AS filesize, pa.downloads, pa.width, pa.height,
+			IFNULL(thumb.id_attach, 0) AS id_thumb, thumb.width AS thumb_width, thumb.height AS thumb_height
+		FROM {db_prefix}pm_attachments AS pa
+			LEFT JOIN {db_prefix}pm_attachments AS thumb ON (thumb.id_attach = pa.id_thumb)
+			LEFT JOIN {db_prefix}personal_messages AS pm ON (pm.id_pm = pa.id_pm)
+			LEFT JOIN {db_prefix}pm_recipients AS pmr ON (pmr.id_pm = pa.id_pm AND pmr.id_member = {int:current_user})
+		WHERE pa.attachment_type = {int:attachment_type}
+			AND pa.id_pm = {int:msg_id}
+			AND (pm.id_member_from = {int:current_user} OR pmr.id_member = {int:current_user})',
+		array(
+			'msg_id' => $msg_id,
+			'attachment_type' => 0,
+			'current_user' => $user_info['id'],
+		)
+	);
+	$temp = array();
+	while ($row = $smcFunc['db_fetch_assoc']($request))
 	{
-		$request = $smcFunc['db_query']('', '
-			SELECT
-				pa.id_attach, pa.id_folder, pa.id_pm, pa.pm_report, pa.filename, pa.file_hash,
-				IFNULL(pa.size, 0) AS filesize, pa.downloads, pa.width, pa.height,
-				IFNULL(thumb.id_attach, 0) AS id_thumb, thumb.width AS thumb_width, thumb.height AS thumb_height
-			FROM {db_prefix}pm_attachments AS pa
-				LEFT JOIN {db_prefix}pm_attachments AS thumb ON (thumb.id_attach = pa.id_thumb)
-				LEFT JOIN {db_prefix}personal_messages AS pm ON (pm.id_pm = pa.id_pm)
-				LEFT JOIN {db_prefix}pm_recipients AS pmr ON (pmr.id_pm = pa.id_pm AND pmr.id_member = {int:current_user})
-			WHERE pa.attachment_type = {int:attachment_type}
-				AND pa.id_pm = {int:msg_id}
-				AND (pm.id_member_from = {int:current_user} OR pmr.id_member = {int:current_user})',
-			array(
-				'msg_id' => $msg_id,
-				'attachment_type' => 0,
-				'current_user' => $user_info['id'],
-			)
-		);
-		$temp = array();
-		while ($row = $smcFunc['db_fetch_assoc']($request))
-		{
-			$temp[$row['id_attach']] = $row;
+		$temp[$row['id_attach']] = $row;
 
-			if (!isset($attachments[$row['id_pm']]))
-				$attachments[$row['id_pm']] = array();
-		}
-		$smcFunc['db_free_result']($request);
-
-		// This is better than sorting it with the query...
-		ksort($temp);
-		foreach ($temp as $row)
-			$attachments[$row['id_pm']][] = $row;
+		if (!isset($attachments[$row['id_pm']]))
+			$attachments[$row['id_pm']] = array();
 	}
+	$smcFunc['db_free_result']($request);
+
+	// This is better than sorting it with the query...
+	ksort($temp);
+	foreach ($temp as $row)
+		$attachments[$row['id_pm']][] = $row;
 
 	// Load the attachment context even if there are no attachments:
 	require_once($sourcedir . '/PersonalMessage.php');
@@ -356,7 +361,7 @@ function ILA_Process_Quotes(&$message, $msg_id = 0)
 {
 	global $context, $modSettings;
 
-	$pattern = '#\[quote(.+?)\](.+?)\[/quote\]#i' . ($context['utf8'] ? 'u' : '');
+	$pattern = '#\[quote(?:.+?)?\](.+?)\[/quote\]#i' . ($context['utf8'] ? 'u' : '');
 	if (preg_match_all($pattern, $message, $quotes, PREG_PATTERN_ORDER))
 	{
 		$quotes = array_unique($quotes[0]);
@@ -706,7 +711,7 @@ function ILA_Start_v20(&$tag, &$data, &$disabled)
 //================================================================================
 function ILA_Build_HTML(&$tag, &$id)
 {
-	global $context, $modSettings, $settings, $txt, $topic, $sourcedir, $user_info, $smcFunc, $forum_version;
+	global $context, $modSettings, $settings, $txt, $sourcedir, $user_info, $smcFunc, $forum_version;
 
 	// If the "one-based numbering" option is set, subtract 1 from the attachment ID to make it compatible:
 	$id = $id - intval(!empty($modSettings['ila_one_based_numbering']));
@@ -722,7 +727,7 @@ function ILA_Build_HTML(&$tag, &$id)
 	if (!isset($context['ila']['attachments'][$msg][$id]))
 		return $txt['ila_invalid'];
 	$attachment = &$context['ila']['attachments'][$msg][$id];
-	if (empty($context['ila']['pm_attach']) && (empty($modSettings['attachmentEnable']) || empty($context['ila']['view_attachments'][$topic])))
+	if (empty($context['ila']['pm_attach']) && empty($modSettings['attachmentEnable']))
 		return $txt['ila_nopermission'];
 	if (!empty($context['ila']['pm_attach']) && (empty($modSettings['pmAttachmentEnable']) || empty($context['ila']['pm_view_attachments'])))
 		return $txt['ila_nopermission'];
@@ -936,7 +941,7 @@ function ILA_subfunction($id, $full, $thumb, $name, $style = '', $has_thumb = fa
 	if ($expand && !empty($modSettings['ila_highslide']))
 	{
 		// Load any other necessary files: (NOTE: Provided as courtesy to dcmouser)
-		if (!empty($modSettings['dc_mod_enable_highslideviewer']))
+		if (!empty($modSettings['dc_mod_enable_highslideviewer']) && file_exists($sourcedir . '/DcSubsHighslideImageViewer.php'))
 			require_once($sourcedir . '/DcSubsHighslideImageViewer.php');
 
 		// HS4SMF Installed?
@@ -947,14 +952,14 @@ function ILA_subfunction($id, $full, $thumb, $name, $style = '', $has_thumb = fa
 			$slidegroup = hs4smf_get_slidegroup($msgid);
 			if (!isset($settings['hs4smf_slideshow']) && $settings['hs4smf_img_count'] > 1)
 				$settings['hs4smf_slideshow'] = 1;
-			return '<a href="' . $full . ';image" id="link_' . $id . '" class="highslide' . (!empty($class) ? ' ' . $class : '') . '" onclick="return hs.expand(this, ' . $slidegroup . ')"><img src="' . $thumb . '" alt="' . $name . '"' . ' id="thumb_' . $id . '"' . $style  .' /></a>';
+			return '<a href="' . $full . ';image" id="link_' . $id . '" class="highslide' . (!empty($class) ? ' ' . $class : '') . '" onclick="return hs.expand(this, ' . $slidegroup . ')"><img src="' . $thumb . '" alt="' . $name . '"' . ' id="thumb_' . $id . '"' . $style . (!empty($class) ? ' class="' . $class . '"' : '') . ' /></a>';
 		}
 		// Highslide Image Viewer Installed?
 		elseif (function_exists('highslide_images'))
-			return '<a href="' . $full . ';image" id="link_' . $id . '" class="highslide' . (!empty($class) ? ' ' . $class : '') . '" rel="highslide"><img src="' . $thumb . '" alt="' . $name . '"' . ' id="thumb_' . $id . '"' . $style . ' /></a>' . (isset($context['subject']) ? '<span class="highslide-heading">' . $context['subject'] . '</span>' : '');
+			return '<a href="' . $full . ';image" id="link_' . $id . '" class="highslide' . (!empty($class) ? ' ' . $class : '') . '" rel="highslide"><img src="' . $thumb . '" alt="' . $name . '"' . ' id="thumb_' . $id . '"' . $style . (!empty($class) ? ' class="' . $class . '"' : '') . ' /></a>' . (isset($context['subject']) ? '<span class="highslide-heading">' . $context['subject'] . '</span>' : '');
 		// jQLightbox Installed?
 		elseif (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css'))
-			return '<a href="' . $full . ';image" id="link_' . $id . '" rel="lightbox[gallery]"><img src="' . $thumb . '"  alt="' . $name . '"' . ' id="thumb_' . $id . '"' . (!empty($class) ? ' ' . $class : '') . $style  .' /></a>';
+			return '<a href="' . $full . ';image" id="link_' . $id . '" rel="lightbox[gallery]" ' . (!empty($class) ? ' class="' . $class  . '"' : '') . '><img src="' . $thumb . '"  alt="' . $name . '"' . ' id="thumb_' . $id . '"' . (!empty($class) ? ' class="' . $class . '"' : '') . $style  .' /></a>';
 	}
 
 	// Okay, can't show via known highslide/lightbox viewers.  Show it via SMF methods:

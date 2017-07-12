@@ -1,3 +1,11 @@
+v5.4 - March 7th, 2017
+o Fixed readme compatibility note about HS4SMF mod being installed first.
+o Fixed issue where topic ID was changed by code pulling attachments.
+o Fixed issue where ILA tags within code tags were incorrectly translated.
+o Fixed issue with Highslide mods and maximum width/height settings.
+o Fixed incompatibility with [url=http://custom.simplemachines.org/mods/index.php?mod=3832]URL Popup[/url] mod.
+o Fixed error where unable to load language file after uninstalling.
+
 v5.3.1 - March 5th, 2017
 o Removed debug statement accidentally left in the mod.
 

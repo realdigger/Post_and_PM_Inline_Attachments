@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v5.3.1[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v5.4[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -84,13 +84,13 @@ This mod was tested on SMF 2.0.13, but should work on SMF 2.1 Beta 1, as well as
 For SMF 2.1 Beta 1, this mod contains no functionality for PM attachments, and posting regular attachments has been changed slightly to allow only 1 file per input box.
 
 These mods can be installed at any time (not required):
-o [url=http://custom.simplemachines.org/mods/index.php?mod=1450]Highslide Image Viewer[/url]
 o [url=http://custom.simplemachines.org/mods/index.php?mod=1605]JQLightBox[/url]
 o [url=http://custom.simplemachines.org/mods/index.php?mod=3594]SCEditor4Smf[/url]
 o [url=http://custom.simplemachines.org/mods/index.php?mod=169]EXIF[/url]
 o [url=http://custom.simplemachines.org/mods/index.php?mod=2233]Boilerplates for Posts[/url]
 
 These mods should be installed before this mod (not required):
+o [url=http://custom.simplemachines.org/mods/index.php?mod=1450]Highslide Image Viewer[/url]
 o [url=https://github.com/Spuds/SMF-HS4SMF]HS4SMF v0.8.1[/url]
 o [url=http://custom.simplemachines.org/mods/index.php?mod=1974]PM Attachments[/url]
 o [url=http://custom.simplemachines.org/mods/index.php?mod=2758]Custom View of Attachments[/url]
