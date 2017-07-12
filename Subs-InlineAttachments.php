@@ -967,14 +967,14 @@ function ILA_subfunction($id, $full, $thumb, $name, $style = '', $has_thumb = fa
 // Attachment => Show full expanded picture
 function ILA_tag_attachment(&$info, &$dim, $has_thumb, $style)
 {
-	$dim = array('width' => $info['width'], 'height' => $info['height']);
+	$dim = array('width' => $info['real_width'], 'height' => $info['real_height']);
 	return ILA_subfunction($info['id'], $info['href'], $info['href'], $info['name'], $style);
 }
 
 // Attach => Show thumbnail, expandable to full picture
 function ILA_tag_attach(&$info, &$dim, $has_thumb, $style)
 {
-	$dim = array('width' => $info['width'], 'height' => $info['height']);
+	$dim = array('width' => $info['real_width'], 'height' => $info['real_height']);
 	$image = ($expand = !empty($info['thumbnail']['has_thumb'])) ? $info['thumbnail']['href'] : $info['href'];
 	return ILA_subfunction($info['id'], $info['href'], $image, $info['name'], $style, $has_thumb, $expand);
 }
@@ -984,9 +984,9 @@ function ILA_tag_attachthumb(&$info, &$dim, $has_thumb, $style)
 {
 	$data = &$info;
 	if (!empty($info['thumbnail']['has_thumb']))
-		$dim = array('width' => $info['thumb_width'], 'height' => $info['thumb_height'], 'img' => $info['thumbnail']['href']);
-	else
 		$dim = array('width' => $info['width'], 'height' => $info['height'], 'img' => $info['href']);
+	else
+		$dim = array('width' => $info['real_width'], 'height' => $info['real_height']);
 	return ILA_subfunction($info['id'], $dim['href'], $dim['href'], $info['name'], $style, $has_thumb);
 }
 
@@ -994,7 +994,7 @@ function ILA_tag_attachthumb(&$info, &$dim, $has_thumb, $style)
 function ILA_tag_attachmini(&$info, &$dim, $has_thumb, $style)
 {
 	$image = ($expand = !empty($info['thumbnail']['has_thumb'])) ? $info['thumbnail']['href'] : $info['href'];
-	$dim = array('width' => $info['width'], 'height' => $info['height']);
+	$dim = array('width' => $info['real_width'], 'height' => $info['real_height']);
 	return ILA_subfunction($info['id'], $info['href'], $image, $info['name'], $style, $has_thumb, $expand);
 }
 
