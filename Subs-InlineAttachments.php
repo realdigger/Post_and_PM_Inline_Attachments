@@ -173,7 +173,7 @@ function ILA_Setup($msg_id, &$message)
 		return;
 
 	// We need to screw up the ILA tags within the code tags so that they don't get "fixed":
-	$pattern = '#\[code(?:.+?)?\](.+?)\[/code\]#i' . ($context['utf8'] ? 'u' : '');
+	$pattern = '#\[code(?:.*?)?\](.+?)\[/code\]#i' . ($context['utf8'] ? 'u' : '');
 	if (preg_match_all($pattern, $message, $codes, PREG_PATTERN_ORDER))
 	{
 		$temp_tag = '[' . md5(time());
@@ -361,7 +361,7 @@ function ILA_Process_Quotes(&$message, $msg_id = 0)
 {
 	global $context, $modSettings;
 
-	$pattern = '#\[quote(?:.+?)?\](.+?)\[/quote\]#i' . ($context['utf8'] ? 'u' : '');
+	$pattern = '#\[quote(?:.*?)?\](.+?)\[/quote\]#i' . ($context['utf8'] ? 'u' : '');
 	if (preg_match_all($pattern, $message, $quotes, PREG_PATTERN_ORDER))
 	{
 		$quotes = array_unique($quotes[0]);
