@@ -1,3 +1,10 @@
+v5.2 - February 24th, 2017
+o Fixed issue where popup option wasn't linked to anything....
+o Fixed responsive CSS image stuff that I added in version 5.0.
+o Fixed [b]scale[/b] parameter to disable/enable responsive stuff on request.
+o Added admin option to enable responsive CSS image stuff.
+o Added bbcode option to [b]scale[/b] parameter to invert responsive settings.
+
 v5.1 - February 23rd, 2017
 o Added an operation to copy [b]ILA.css[/b] to proper folder.
 

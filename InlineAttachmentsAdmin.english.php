@@ -26,6 +26,7 @@ $txt['ila_insert_tag'] = 'Tag to use when inserting inline attachments:';
 $txt['ila_highslide'] = 'Enable Highslide effects for inline attachment?';
 $txt['ila_one_based_numbering'] = 'Should first attachment should be numbered &quot;1&quot;?';
 $txt['ila_one_based_numbering_ask'] = 'Do you want to adjust all inline attachment IDs so that they still work the same as before?  Press \"OK\" to do this upon saving.';
+$txt['ila_enable_responsive'] = 'Enable responsive CSS for inline attachments?';
 $txt['ila_allow_quoted_images'] = 'Allow quoted attachment images from another post?';
 $txt['ila_duplicate'] = 'Remove attachment image under post after in-post use?';
 $txt['ila_download_count'] = 'Download link and counter setting:';
@@ -134,5 +135,6 @@ $helptxt['ila_display_exif'] = 'When used in conjunction with the <a href="http:
 		EXIF is short for Exchangeable Image File, a format that is a standard for storing interchange information in digital photography image files using JPEG compression. Almost all new digital cameras use the EXIF annotation, storing information on the image such as shutter speed, exposure compensation, F number, what metering system was used, if a flash was used, ISO number, date and time the image was taken, whitebalance, auxiliary lenses that were used and resolution. Some images may even store GPS information so you can easily see where the images were taken!
 	</blockquote>
 	Source: <a href="www.exifdata.com">EXIFdata.com</a>';
+$helptxt['ila_enable_responsive'] = 'Checking this option \dynamically resizes the images so that they stay inside the post area of the forum, regardless of the size of the window.  Not having this option checked and not having a specific width/height defined will result in images that spill over the post area and result in the need to use the scrollbars to view the entire image.';
 
 ?>

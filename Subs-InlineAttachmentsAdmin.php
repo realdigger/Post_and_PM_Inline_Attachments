@@ -79,6 +79,7 @@ function ILA_Admin_Settings($return_config = false)
 		'',
 		array('check', 'ila_highslide', ((function_exists('hs4smf') || function_exists('highslide_images') || (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css'))) ? 99 : 'disabled') => true),
 		array('check', 'ila_one_based_numbering', 'javascript' => 'onchange="askNumber();"', 'postinput' => '<input type="hidden" name="renumber_attachment_tags" id="renumber_attachment_tags" value="0" />'),
+		array('check', 'ila_enable_responsive'),
 		array('check', 'ila_allow_quoted_images', ($tapatalk ? 'disabled' : 99) => true),
 		array('check', 'ila_duplicate'),
 		array('select', 'ila_download_count', array($txt['ila_download_count_n'], $txt['ila_download_count_f'], $txt['ila_download_count_fs'], $txt['ila_download_count_fsd'], $txt['ila_download_count_fsdc'], $txt['ila_download_count_fsdc2'], $txt['ila_download_count_fsdc3'])),

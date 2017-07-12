@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>5.1</version>
+<version>5.2</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -369,7 +369,7 @@
 	<operation>
 		<search position="before"><![CDATA[', $context['show_approval'] ? '<li><label for="approve"><input type="checkbox" name="approve" id="approve" value="2" class="input_check" ' . ($context['show_approval'] === 2 ? 'checked="checked"' : '') . ' /> ' . $txt['approve_this_post'] . '</label></li>' : '', ']]></search>
 		<add><![CDATA[
-							', $context['can_post_attachment'] ? '<li>' . template_ILA_popup_trigger() . ' ' . $txt['ila_popup_title'] . '</li>' : '', ']]></add>
+							', $context['can_post_attachment'] && !empty($modSettings['ila_popup_help']) ? '<li>' . template_ILA_popup_trigger() . ' ' . $txt['ila_popup_title'] . '</li>' : '', ']]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[foreach ($context['current_attachments'] as $attachment)

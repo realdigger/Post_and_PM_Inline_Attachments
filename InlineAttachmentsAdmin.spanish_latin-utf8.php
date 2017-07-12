@@ -26,6 +26,7 @@ $txt['ila_insert_tag'] = 'Tag a utilizar al insertar archivos adjuntos en línea
 $txt['ila_highslide'] = '¿Habilitar efectos deslizantes para datos adjuntos en línea? ';
 $txt['ila_one_based_numbering'] = 'En caso de que la primera unión debe ser numerada &quot;1&quot;?';
 //$txt['ila_one_based_numbering_ask'] = 'Do you want to adjust all inline attachment IDs so that they still work the same as before?  Press \"OK\" to do this upon saving.';
+//$txt['ila_enable_responsive'] = 'Enable responsive CSS for inline attachments?';
 $txt['ila_allow_quoted_images'] = '¿Permitir el citado imágenes de fijación de otro(s) tema(s) y/o mensaje(s)?';
 $txt['ila_duplicate'] = '¿Eliminar imagen del adjunto puesto después de su uso en un(os) tema(s) y/o mensaje(s)?';
 $txt['ila_download_count'] = 'El enlace de descarga y ajuste del contador:';
@@ -134,5 +135,6 @@ $helptxt['ila_display_exif'] = 'Cuando se utiliza en combinación con el <a href
 		EXIF es la abreviatura de archivo de imagen intercambiable, un formato que es un estándar para el almacenamiento de información de intercambio en la fotografía digital de archivos de imágenes utilizando la compresión JPEG. Casi todas las nuevas cámaras digitales utilizan la anotación EXIF, el almacenamiento de información en la imagen, como la velocidad del obturador, la compensación de exposición, el número F, lo que el sistema de medición se utilizó, si un flash se utiliza, el número ISO, la fecha y la hora se tomó la imagen, blanco equilibrio, lentes auxiliares que se utilizaron y resolución. Algunas imágenes pueden incluso almacenar la información del GPS para que pueda ver fácilmente dónde se tomaron las imágenes!
 	</blockquote>
 	Fuente: <a href="www.exifdata.com">EXIFdata.com</a>';
+//$helptxt['ila_enable_responsive'] = 'Checking this option \dynamically resizes the images so that they stay inside the post area of the forum, regardless of the size of the window.  Not having this option checked and not having a specific width/height defined will result in images that spill over the post area and result in the need to use the scrollbars to view the entire image.';
 
 ?>

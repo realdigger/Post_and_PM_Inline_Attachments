@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v5.1[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v5.2[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
@@ -7,61 +7,29 @@
 [color=blue][b][size=12pt][u]Introduction[/u][/size][/b][/color]
 This mod adds the ability to position your attachments in either your forum post or your personal message post using [attachment=n][/attachment] bbcode (where [b]n[/b] is the number of the attachment in the post, eg first = 0, second = 1).
 
-[color=blue][b][size=12pt][u]New BBcodes & Acceptable Formats[/u][/size][/b][/color]
-[quote]
-[u]BBCode tag: [b]attachment[/b][/u]
-[nobbc][attachment=[/nobbc][b]{id}[/b]][/attachment]
-[nobbc][attachment=[/nobbc][b]{id}[/b],[b]{width}[/b]][/attachment]
-[nobbc][attachment=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]][/attachment]
-[nobbc][attachment[/nobbc] {parameter}={value}[b]{id}[/b]][/attachment]
-[nobbc][attachment=[/nobbc][b]{id}[/b]]
-[nobbc][attachment=[/nobbc][b]{id}[/b],[b]{width}[/b]]
-[nobbc][attachment=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]]
-[nobbc][attachment[/nobbc] {parameter}={value}[b]{id}[/b]]
+[color=blue][b][size=12pt][u]New BBcodes[/u][/size][/b][/color]
+This mod supports 5 new bbcodes in order to position your attachments inline:
+o [b]attachment[/b] => Show full expanded picture
+o [b]attach[/b] => Show thumbnail, expandable to full picture
+o [b]attachthumb[/b] => Show thumbnail ONLY, not expandable
+o [b]attachmini[/b] => Show thumbnail, expandable to full picture
+o [b]attachurl[/b] => Shows attachment size, iamge dimensions, and download count; no picture
 
-[u]BBCode tag: [b]attach[/b][/u]
+[color=blue][b][size=12pt][u]BBcodes Parameters[/u][/size][/b][/color]
+Each new BBCode accepts the following formats:
+[code=Version 1.x]
 [nobbc][attach=[/nobbc][b]{id}[/b]][/attach]
 [nobbc][attach=[/nobbc][b]{id}[/b],[b]{width}[/b]][/attach]
 [nobbc][attach=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]][/attach]
-[nobbc][attach[/nobbc] {parameter}={value}[b]{id}[/b]][/attach]
-[nobbc][attach=[/nobbc][b]{id}[/b]]
-[nobbc][attach=[/nobbc][b]{id}[/b],[b]{width}[/b]]
-[nobbc][attach=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]]
-[nobbc][attach[/nobbc] {parameter}={value}[b]{id}[/b]]
-
-[u]BBCode tag: [b]attachthumb[/b][/u]
-[nobbc][attachthumb=[/nobbc][b]{id}[/b]][/attachthumb]
-[nobbc][attachthumb=[/nobbc][b]{id}[/b],[b]{width}[/b]][/attachthumb]
-[nobbc][attachthumb=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]][/attachthumb]
-[nobbc][attachthumb[/nobbc] {parameter}={value}[b]{id}[/b]][/attachthumb]
-[nobbc][attachthumb=[/nobbc][b]{id}[/b]]
-[nobbc][attachthumb=[/nobbc][b]{id}[/b],[b]{width}[/b]]
-[nobbc][attachthumb=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]]
-[nobbc][attachthumb[/nobbc] {parameter}={value}[b]{id}[/b]]
-
-[u]BBCode tag: [b]attachmini[/b][/u]
-[nobbc][attachmini=[/nobbc][b]{id}[/b]][/attachmini]
-[nobbc][attachmini=[/nobbc][b]{id}[/b],[b]{width}[/b]][/attachmini]
-[nobbc][attachmini=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]][/attachmini]
-[nobbc][attachmini[/nobbc] {parameter}={value}[b]{id}[/b]][/attachmini]
-[nobbc][attachmini=[/nobbc][b]{id}[/b]]
-[nobbc][attachmini=[/nobbc][b]{id}[/b],[b]{width}[/b]]
-[nobbc][attachmini=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]]
-[nobbc][attachmini[/nobbc] {parameter}={value}[b]{id}[/b]]
-
-[u]BBCode tag: [b]attachurl[/b][/u]
-[nobbc][attachurl=[/nobbc][b]{id}[/b]][/attachurl]
-[nobbc][attachurl=[/nobbc][b]{id}[/b],[b]{width}[/b]][/attachurl]
-[nobbc][attachurl=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]][/attachurl]
-[nobbc][attachurl[/nobbc] {parameter}={value}[b]{id}[/b]][/attachurl]
-[nobbc][attachurl=[/nobbc][b]{id}[/b]]
-[nobbc][attachurl=[/nobbc][b]{id}[/b],[b]{width}[/b]]
-[nobbc][attachurl=[/nobbc][b]{id}[/b],[b]{width}[/b],[b]{height}[/b]]
-[nobbc][attachurl[/nobbc] {parameter}={value}[b]{id}[/b]]
-[/quote]
+[/code]
 In each case, [b]{id}[/b] is the attachment number relative to the topic, [b]{width}[/b] is the max desired width, [b]{height}[/b] is the max desired height, [b]{pixels}[/b] is the number of pixels surrounding the image, and [b]{float}[/b] can be either [b]left[/b], [b]right[/b], or [b]center[/b].  All text between the opening and closing attachment tags is discarded.
 
-[color=blue][b][size=12pt][u]BBcode Parameters[/u][/size][/b][/color]
+[color=blue][b][size=12pt][u]Version 2.0+ BBcode Parameters[/u][/size][/b][/color]
+Version 2.0+ introduced a new format that allows the following parameters:
+[code=Version 2.x]
+[nobbc][attachment[/nobbc] id=[b]{id}[/b] {parameter}={value}][/attachment]
+[/code]
+Allowed parameters:
 [table]
 [tr][td]id[/td][td]{attachment id}[/td][td]ID number of the attachment to show inline (NOT attachment number!)[/td][/tr]
 [tr][td]width[/td][td]{width}[/td][td]Desired width of image to show.  Valid: positive integers.[/td][/tr]
@@ -78,6 +46,12 @@ In each case, [b]{id}[/b] is the attachment number relative to the topic, [b]{wi
 [tr][td]scale[/td][td]{answer}[/td][td]Override scaling of image.  Valid: true, false, yes, no[/td][/tr]
 [tr][td]msg[/td][td]{msg ID}[/td][td]Message ID number.  Valid: positive integers.[/td][/tr]
 [/table]
+In each case, [b]{id}[/b] is the attachment number relative to the topic, [b]{width}[/b] is the max desired width, [b]{height}[/b] is the max desired height, [b]{pixels}[/b] is the number of pixels surrounding the image, and [b]{float}[/b] can be either [b]left[/b], [b]right[/b], or [b]center[/b].  All text between the opening and closing attachment tags is discarded.
+
+[color=blue][b][size=12pt][u]Version 3.0+ BBcode Format[/u][/size][/b][/color]
+[b]Version 3.0[/b] makes further changes and allows the use of the inline attachments bbcodes [b]WITHOUT[/b] closing brackets, as well as using attachments from another post!
+
+[b]Version 3.11[/b] makes further changes and allows the use of closed tags, like [b][nobbc][attach][/nobbc][/b].  This new form is autonumbered!  Note that the [b][nobbc][attach][/nobbc][/b] tag is processed first, then [b][nobbc][attachment][/nobbc][/b], then [b][nobbc][attachmini][/nobbc][/b], then [b][nobbc][attachthumb][/nobbc][/b], then [b][nobbc][attachurl][/nobbc][/b].
 
 [color=blue][b][size=12pt][u]Other Mod Features[/u][/size][/b][/color]
 o Error Text strings are shown for invalid/missing/deleted attachments.

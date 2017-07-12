@@ -28,15 +28,15 @@ function ILA_Load_Theme()
 	}
 
 	// Set max width and height for inline attachments via CSS:
-	$width = !empty($modSettings['ila_max_width']) ? $modSettings['ila_max_width'] . 'px' : '95%';
+	$width = !empty($modSettings['ila_max_width']) ? $modSettings['ila_max_width'] . 'px' : '100%';
 	$height = !empty($modSettings['ila_max_height']) ? $modSettings['ila_max_height'] . 'px' : 'auto';
 	$context['html_headers'] .= '
-	<style>ila_attach {width: auto; height: auto; max-width: ' . $width . '; max-height: ' . $height . ';}</style>';
+	<style>.ila_attach {width: auto; height: auto; max-width: ' . $width . '; max-height: ' . $height . ';}</style>';
 }
 
 function ILA_tags()
 {
-	return array('attach', 'attachment', 'attachmini', 'attachthumb', 'attachurl', 'attachthumb');
+	return array('attach', 'attachment', 'attachmini', 'attachthumb', 'attachurl');
 }
 
 function ILA_parameters(&$params1, &$params2)
@@ -60,7 +60,7 @@ function ILA_parameters(&$params1, &$params2)
 		'border-color' => array('optional' => true, 'match' => '(#[\da-fA-F]{3}|#[\da-fA-F]{6}|[A-Za-z]{1,20}|rgb\(\d{1,3}, ?\d{1,3}, ?\d{1,3}\))', 'validate' => 'ILA_Param_Border_Color'),
 	));
 	$more = array(
-		'scale' => array('optional' => true, 'match' => '(true|false|yes|no)', 'validate' => 'ILA_Param_Scale'),
+		'scale' => array('optional' => true, 'match' => '(true|false|yes|no|invert)', 'validate' => 'ILA_Param_Scale'),
 		'msg' => array('optional' => true, 'match' => '(new|\d+)', 'validate' => 'ILA_Param_Msg'),
 	);
 	$params1 = array_merge($params1, $more);
@@ -635,8 +635,11 @@ function ILA_Param_Border_Color($color)
 
 function ILA_Param_Scale($answer)
 {
-	global $context;
-	$context['ila_params']['scale'] = (!empty($answer) ? ($answer == false || $answer == 'no') : false);
+	global $context, $modSettings;
+	if ($answer == 'invert')
+		$context['ila_params']['scale'] = empty($modSettings['ila_enable_responsive']);
+	else
+		$context['ila_params']['scale'] = (!$answer || $answer == 'false' || $answer == 'no');
 }
 
 function ILA_Param_Msg($msg)
@@ -752,7 +755,7 @@ function ILA_Build_HTML(&$tag, &$id)
 		// Call the appropriate function to get the HTML we need:
 		$has_thumb = !empty($attachment['thumbnail']['has_thumb']);
 		$function = 'ILA_tag_' . (!empty($modSettings['ila_attach_same_as_attachment']) && $tag['tag'] == 'attach' ? 'attachment' : $tag['tag']);
-		$html = $function($attachment, $has_thumb, !empty($style) ? 'style="' . $style . '"' : '');
+		$html = $function($attachment, $dimensions, $has_thumb, !empty($style) ? 'style="' . $style . '"' : '');
 
 		// If the option to show EXIF is checked, let's show the EXIF information (if available):
 		if ($tag['tag'] != 'attachurl' && !empty($modSettings['ila_display_exif']) && isset($attachment['exif']))
@@ -856,7 +859,7 @@ function ILA_Build_HTML(&$tag, &$id)
 		$html = (!empty($html) ? $html . '<br/>' : '') . 
 			'<span class="smalltext">' .
 				'<a href="' . $attachment['href'] . '"><img src="' . $settings['images_url'] . '/icons/clip.' . (!isset($txt['attach_times']) ? 'png' : 'gif') . '" align="middle" alt="*" border="0" /> ' . $attachment['name'] . '</a>' . 
-				($download_count ? ($download_count >= 5 ? '<br/>' : ' ') . '(' . $attachment['size'] . ($attachment['is_image'] ? ' . ' . $attachment['width'] . 'x' . $attachment['height'] . ($download_count == 6 ? ')<br/>(' : ' - ') . $viewed : ' - ' . $downloaded) . ')' : '').
+				($download_count ? ($download_count >= 5 ? '<br/>' : ' ') . '(' . $attachment['size'] . ($attachment['is_image'] && !empty($dimensions['width']) ? ' . ' . $dimensions['width'] . 'x' . $dimensions['height'] . ($download_count == 6 ? ')<br/>(' : ' - ') . $viewed : ' - ' . $downloaded) . ')' : '').
 			'</span>';
 	}
 
@@ -909,12 +912,15 @@ function ILA_Build_HTML(&$tag, &$id)
 //================================================================================
 function ILA_subfunction($id, $full, $thumb, $name, $style = '', $has_thumb = false, $expand = true)
 {
-	global $sourcedir, $settings, $modSettings;
+	global $sourcedir, $settings, $modSettings, $context;
 
 	// Yup, you read right: Increase attachment ID by one million! 99.99+% chance
 	// of no conflict while showing attachments as thumbnails below post!
 	$id += 1000000;
 	
+	// Are we asked not to scale the image in ANY WAY?
+	$class = !empty($modSettings['ila_enable_responsive']) && empty($context['ila_params']['scale']) ? 'ila_attach' : '';
+
 	// Is the image expandable using known highslide/lightbox viewers?
 	if ($expand && !empty($modSettings['ila_highslide']))
 	{
@@ -930,52 +936,55 @@ function ILA_subfunction($id, $full, $thumb, $name, $style = '', $has_thumb = fa
 			$slidegroup = hs4smf_get_slidegroup($msgid);
 			if (!isset($settings['hs4smf_slideshow']) && $settings['hs4smf_img_count'] > 1)
 				$settings['hs4smf_slideshow'] = 1;
-			return '<a href="' . $full . ';image" id="link_' . $id . '" class="highslide" onclick="return hs.expand(this, ' . $slidegroup . ')"><img src="' . $thumb . '" alt="' . $name . '"' . ' id="thumb_' . $id . '"' . $style  .' /></a>';
+			return '<a href="' . $full . ';image" id="link_' . $id . '" class="highslide' . (!empty($class) ? ' ' . $class : '') . '" onclick="return hs.expand(this, ' . $slidegroup . ')"><img src="' . $thumb . '" alt="' . $name . '"' . ' id="thumb_' . $id . '"' . $style  .' /></a>';
 		}
 		// Highslide Image Viewer Installed?
 		elseif (function_exists('highslide_images'))
-			return '<a href="' . $full . ';image" id="link_' . $id . '" class="highslide" rel="highslide"><img src="' . $thumb . '" alt="' . $name . '"' . ' id="thumb_' . $id . '"' . $style . ' /></a>' . (isset($context['subject']) ? '<span class="highslide-heading">' . $context['subject'] . '</span>' : '');
+			return '<a href="' . $full . ';image" id="link_' . $id . '" class="highslide' . (!empty($class) ? ' ' . $class : '') . '" rel="highslide"><img src="' . $thumb . '" alt="' . $name . '"' . ' id="thumb_' . $id . '"' . $style . ' /></a>' . (isset($context['subject']) ? '<span class="highslide-heading">' . $context['subject'] . '</span>' : '');
 		// jQLightbox Installed?
 		elseif (!empty($modSettings['enable_jqlightbox_mod']) && strpos($context['html_headers'], 'jquery.prettyPhoto.css'))
-			return '<a href="' . $full . ';image" id="link_' . $id . '" rel="lightbox[gallery]"><img src="' . $thumb . '"  alt="' . $name . '"' . ' id="thumb_' . $id . '"' . $style  .' /></a>';
+			return '<a href="' . $full . ';image" id="link_' . $id . '" rel="lightbox[gallery]"><img src="' . $thumb . '"  alt="' . $name . '"' . ' id="thumb_' . $id . '"' . (!empty($class) ? ' ' . $class : '') . $style  .' /></a>';
 	}
 
-	// Okay, can't show via highslide/lightbox viewers.  Show it via SMF methods:
+	// Okay, can't show via known highslide/lightbox viewers.  Show it via SMF methods:
 	if ($has_thumb)
-		return '<a href="' . $full . '" id="link_' . $id . '" onclick="return expandThumb(' . $id . ');"><img src="' . $thumb . '" alt="" id="thumb_' . $id . '" class="ila_attach" /></a>';
+		return '<a href="' . $full . '" id="link_' . $id . '" onclick="return expandThumb(' . $id . ');"><img src="' . $thumb . '" alt="" id="thumb_' . $id . '"' . (!empty($class) ? ' class="' . $class . '"' : '') . ' /></a>';
 	else
-		return '<img src="' . $full . ';image" ' . ' alt="' . $name . '"' . ' class="bbc_img resized ila_attach"' . $style .' />';
+		return '<img src="' . $full . ';image" ' . ' alt="' . $name . '"' . ' class="bbc_img resized' . (!empty($class) ? ' ' . $class : '') . '"' . $style .' />';
 }
 
 // Attachment => Show full expanded picture
-function ILA_tag_attachment(&$attachment, $has_thumb, $style)
+function ILA_tag_attachment(&$attachment, &$dimensions, $has_thumb, $style)
 {
 	return ILA_subfunction($attachment['id'], $attachment['href'], $attachment['href'], $attachment['name'], $style);
 }
 
 // Attach => Show thumbnail, expandable to full picture
-function ILA_tag_attach(&$attachment, $has_thumb, $style)
+function ILA_tag_attach(&$attachment, &$dimensions, $has_thumb, $style)
 {
 	$image = ($expand = !empty($attachment['thumbnail']['has_thumb'])) ? $attachment['thumbnail']['href'] : $attachment['href'];
 	return ILA_subfunction($attachment['id'], $attachment['href'], $image, $attachment['name'], $style, $has_thumb, $expand);
 }
 
 // AttachThumb => Show thumbnail ONLY, not expandable
-function ILA_tag_attachthumb(&$attachment, $has_thumb, $style)
+function ILA_tag_attachthumb(&$attachment, &$dimensions, $has_thumb, $style)
 {
-	$image = !empty($attachment['thumbnail']['has_thumb']) ? $attachment['thumbnail']['href'] : $attachment['href'];
-	return ILA_subfunction($attachment['id'], $image, $image, $attachment['name'], $style, $has_thumb);
+	$data = &$attachment;
+	if (!empty($attachment['thumbnail']['has_thumb']))
+		$data = &$attachment['thumbnail'];
+	$dimensions = array('width' => $data['width'], 'height' => $data['height']);
+	return ILA_subfunction($attachment['id'], $data['href'], $data['href'], $attachment['name'], $style, $has_thumb);
 }
 
-// AttachMini => Show thumbnail, expandable to full picture
-function ILA_tag_attachmini(&$attachment, $has_thumb, $style)
+// AttachMini => Show thumbnail, expandable to full picture; exclude attachment info below
+function ILA_tag_attachmini(&$attachment, &$dimensions, $has_thumb, $style)
 {
 	$image = ($expand = !empty($attachment['thumbnail']['has_thumb'])) ? $attachment['thumbnail']['href'] : $attachment['href'];
 	return ILA_subfunction($attachment['id'], $attachment['href'], $image, $attachment['name'], $style, $has_thumb, $expand);
 }
 
 // AttachURL => Shows attachment size, iamge dimensions, and download count; no picture
-function ILA_tag_attachurl(&$attachment, $has_thumb, $style)
+function ILA_tag_attachurl(&$attachment, &$dimensions, $has_thumb, $style)
 {
 	return false;
 }

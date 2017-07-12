@@ -26,6 +26,7 @@ $txt['ila_insert_tag'] = 'Tag a utilizar al insertar archivos adjuntos en l&iacu
 $txt['ila_highslide'] = '¿Habilitar efectos deslizantes para datos adjuntos en l&iacute;nea? ';
 $txt['ila_one_based_numbering'] = 'En caso de que la primera uni&oacute;n debe ser numerada &quot;1&quot;?';
 //$txt['ila_one_based_numbering_ask'] = 'Do you want to adjust all inline attachment IDs so that they still work the same as before?  Press \"OK\" to do this upon saving.';
+//$txt['ila_enable_responsive'] = 'Enable responsive CSS for inline attachments?';
 $txt['ila_allow_quoted_images'] = '¿Permitir el citado imágenes de fijaci&oacute;n de otro(s) tema(s) y/o mensaje(s)?';
 $txt['ila_duplicate'] = '¿Eliminar imagen del adjunto puesto despu&eacute;s de su uso en un(os) tema(s) y/o mensaje(s)?';
 $txt['ila_download_count'] = 'El enlace de descarga y ajuste del contador:';
@@ -134,5 +135,6 @@ $helptxt['ila_display_exif'] = 'Cuando se utiliza en combinaci&oacute;n con el <
 		EXIF es la abreviatura de archivo de imagen intercambiable, un formato que es un est&aacute;ndar para el almacenamiento de informaci&oacute;n de intercambio en la fotograf&iacute;a digital de archivos de im&aacute;genes utilizando la compresi&oacute;n JPEG. Casi todas las nuevas c&aacute;maras digitales utilizan la anotaci&oacute;n EXIF, el almacenamiento de informaci&oacute;n en la imagen, como la velocidad del obturador, la compensaci&oacute;n de exposici&oacute;n, el número F, lo que el sistema de medici&oacute;n se utiliz&oacute;, si un flash se utiliza, el número ISO, la fecha y la hora se tom&oacute; la imagen, blanco equilibrio, lentes auxiliares que se utilizaron y resoluci&oacute;n. Algunas im&aacute;genes pueden incluso almacenar la informaci&oacute;n del GPS para que pueda ver f&aacute;cilmente d&oacute;nde se tomaron las im&aacute;genes!
 	</blockquote>
 	Fuente: <a href="www.exifdata.com">EXIFdata.com</a>';
+//$helptxt['ila_enable_responsive'] = 'Checking this option \dynamically resizes the images so that they stay inside the post area of the forum, regardless of the size of the window.  Not having this option checked and not having a specific width/height defined will result in images that spill over the post area and result in the need to use the scrollbars to view the entire image.';
 
 ?>
