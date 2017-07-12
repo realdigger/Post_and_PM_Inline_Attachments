@@ -420,7 +420,7 @@
 										return alert("', $txt['more_attachments_error'], '");
 
 									var temp = "', $txt['ila_insert'], '";
-7									temp = temp.replace("\%d", current_attachment);
+									temp = temp.replace("\%d", current_attachment);
 									setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a onclick="insertAttachment(\' + current_attachment + \'); return false;">\' + temp + \'</a>) (<a onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
 
 									return true;
