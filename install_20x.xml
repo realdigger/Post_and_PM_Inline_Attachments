@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>5.2</version>
+<version>5.3</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -411,7 +411,7 @@
 										return alert("', $txt['more_attachments_error'], '");
 
 									var temp = "', $txt['ila_insert'], '";
-									temp = temp.replace("\%d", current_attachment);
+7									temp = temp.replace("\%d", current_attachment);
 									setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a onclick="insertAttachment(\' + current_attachment + \'); return false;">\' + temp + \'</a>) (<a onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
 
 									return true;
@@ -442,6 +442,22 @@
 		<add><![CDATA[sendXMLDocument(smf_prepareScriptUrl(smf_scripturl) + \'action=post2', (isset($_REQUEST['msg']) ? ';msg=' . $_REQUEST['msg'] : ''), '\' + (current_board ? \';board=\' + current_board : \'\') + (make_poll ? \';poll\' : \'\') + \';preview;xml\', x.join(\'&\'), onDocSent);]]></add>
 	</operation>
 </file>
+<file name="$boarddir/Themes/default/scripts/editor.js">
+	<operation>
+		<search position="replace"><![CDATA[// Replace?
+			]]></search>
+		<add><![CDATA[// Inline attachments mod?
+			if (oButtonProperties.sCode == 'attachment')
+				window.location.href = "#ila_popup";
+
+			// Replace?
+			else ]]></add>
+	</operation>
+</file>
+
+<!---------------------------------------------------------------------------->
+<!-- Template file edits for other themes									-->
+<!---------------------------------------------------------------------------->
 <file name="$boarddir/Themes/core/Display.template.php" error="skip">
 	<operation>
 		<search position="replace"><![CDATA[if (!empty($message['attachment']))]]></search>

@@ -1,3 +1,7 @@
+v5.3 - March 4th, 2017
+o Fixed code that returns the image dimensions to the HTML building code.
+o Removed ILA popup window with ILA parameters.  Will be replaced by new stuff....
+
 v5.2 - February 24th, 2017
 o Fixed issue where popup option wasn't linked to anything....
 o Fixed responsive CSS image stuff that I added in version 5.0.

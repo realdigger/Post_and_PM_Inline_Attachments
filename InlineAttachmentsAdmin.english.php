@@ -23,10 +23,16 @@ $txt['ila_completed_plural'] = '%d posts with inline attachment tags have been u
 
 $txt['ila_title'] = 'Post and PM Inline Attachments';
 $txt['ila_insert_tag'] = 'Tag to use when inserting inline attachments:';
+$txt['ila_attach_same_as_attachment'] = '&quot;attach&quot; bbcode same as &quot;attachment&quot;?';
+$txt['ila_insert_format'] = 'Format to insert new attachment tags:';
+
+$txt['ila_max_width'] = 'Restrict images to maximum width of:<div class="smalltext">NOTE: <strong>0</strong> = disabled</div>';
+$txt['ila_max_height'] = 'Restrict images to maximum height of:<div class="smalltext">NOTE: <strong>0</strong> = disabled</div>';
+$txt['ila_enable_responsive'] = 'Enable responsive CSS for inline attachments?';
+
 $txt['ila_highslide'] = 'Enable Highslide effects for inline attachment?';
 $txt['ila_one_based_numbering'] = 'Should first attachment should be numbered &quot;1&quot;?';
 $txt['ila_one_based_numbering_ask'] = 'Do you want to adjust all inline attachment IDs so that they still work the same as before?  Press \"OK\" to do this upon saving.';
-$txt['ila_enable_responsive'] = 'Enable responsive CSS for inline attachments?';
 $txt['ila_allow_quoted_images'] = 'Allow quoted attachment images from another post?';
 $txt['ila_duplicate'] = 'Remove attachment image under post after in-post use?';
 $txt['ila_download_count'] = 'Download link and counter setting:';
@@ -38,7 +44,9 @@ $txt['ila_download_count_fsdc'] = 'Filename, Size, Dimensions and Count';
 $txt['ila_download_count_fsdc2'] = 'Filename, Size, Dimensions and Count (2 Lines)';
 $txt['ila_download_count_fsdc3'] = 'Filename, Size, Dimensions and Count (3 Lines)';
 $txt['ila_transparent'] = 'Unapproved images shown as transparent: (%)<div class="smalltext">NOTE: <strong>0</strong> disables showing unapproved images</div>';
-$txt['ila_popup_help'] = 'Include link for ILA popup window parameters?';
+
+//$txt['ila_popup_help'] = 'Include link for ILA popup window parameters?';
+//$txt['ila_no_popup_on_new'] = 'Include popup for new posts/PMs?';
 
 $txt['ila_embed_video_files'] = 'Embed supported video formats within the post?';
 $txt['ila_video_default_width'] = 'Default width of video when width isn\'t specified:';
@@ -50,13 +58,8 @@ $txt['ila_embed_svg_files'] = 'Embed SVG files within the post?';
 $txt['ila_embed_txt_files'] = 'Embed TXT files as part of the post?';
 $txt['ila_embed_pdf_files'] = 'Embed PDF files within the post?';
 
-$txt['ila_attach_same_as_attachment'] = '&quot;attach&quot; bbcode same as &quot;attachment&quot;?';
 $txt['ila_turn_nosniff_off'] = 'Turns &quot;nosniff&quot; option off for IE 8+?';
 $txt['ila_display_exif'] = 'Display EXIF information below image?';
-
-$txt['ila_max_width'] = 'Restrict images to maximum width of:<div class="smalltext">NOTE: <strong>0</strong> = disabled</div>';
-$txt['ila_max_height'] = 'Restrict images to maximum height of:<div class="smalltext">NOTE: <strong>0</strong> = disabled</div>';
-$txt['ila_insert_format'] = 'Format to insert new attachment tags:';
 
 // Help language strings:
 $helptxt['ila_insert_tag'] = 'This option allows you to choose which inline attachment tag to use with the &quot;Insert Attachment&quot; link after each uploaded attachment.<br /><br />
@@ -135,6 +138,6 @@ $helptxt['ila_display_exif'] = 'When used in conjunction with the <a href="http:
 		EXIF is short for Exchangeable Image File, a format that is a standard for storing interchange information in digital photography image files using JPEG compression. Almost all new digital cameras use the EXIF annotation, storing information on the image such as shutter speed, exposure compensation, F number, what metering system was used, if a flash was used, ISO number, date and time the image was taken, whitebalance, auxiliary lenses that were used and resolution. Some images may even store GPS information so you can easily see where the images were taken!
 	</blockquote>
 	Source: <a href="www.exifdata.com">EXIFdata.com</a>';
-$helptxt['ila_enable_responsive'] = 'Checking this option \dynamically resizes the images so that they stay inside the post area of the forum, regardless of the size of the window.  Not having this option checked and not having a specific width/height defined will result in images that spill over the post area and result in the need to use the scrollbars to view the entire image.';
+$helptxt['ila_enable_responsive'] = 'Checking this option dynamically resizes the images so that they stay inside the post area of the forum, regardless of the size of the window.  Not having this option checked and not having a specific width/height defined will result in images that spill over the post area and result in the need to use the scrollbars to view the entire image.';
 
 ?>

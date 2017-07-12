@@ -4,7 +4,7 @@
 	<name>Post and PM Inline Attachments</name>
 	<id>Dougiefresh:ILA</id>
 	<type>modification</type>
-	<version>5.2</version>
+	<version>5.3</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme type="file" parsebbc="true">readme.txt</readme>
@@ -18,7 +18,9 @@
 		<require-file name="InlineAttachmentsAdmin.spanish_latin-utf8.php" destination="$boarddir/Themes/default/languages" />
 		<require-file name="Subs-InlineAttachments.php" destination="$sourcedir" />
 		<require-file name="Subs-InlineAttachmentsAdmin.php" destination="$sourcedir" />
-		<require-file name="ILA.css" destination="$themedir/css" />
+		<require-file name="InlineAttachments.template.php" destination="$boarddir/Themes/default/" />
+		<require-file name="ILA.css" destination="$boarddir/Themes/default/css/" />
+		<require-file name="attachment.gif" destination="$boarddir/Themes/default/images/bbc/" />
 		<redirect timeout="5000" url="?action=admin;area=manageattachments;sa=ila" />
 	</install>
 	<uninstall for="2.0 - 2.0.99">
@@ -32,7 +34,9 @@
 		<remove-file name="$boarddir/Themes/default/languages/InlineAttachmentsAdmin.spanish_latin-utf8.php" />
 		<remove-file name="$sourcedir/Subs-InlineAttachments.php" />
 		<remove-file name="$sourcedir/Subs-InlineAttachmentsAdmin.php" />
-		<remove-file name="$themedir/css/ILA.css" />
+		<remove-file name="$boarddir/Themes/default/InlineAttachments.template.php" />
+		<remove-file name="$boarddir/Themes/default/css/ILA.css" />
+		<remove-file name="$boarddir/Themes/default/images/bbc/attachment.gif" />
 	</uninstall>
 
 	<install for="2.1 Beta 1">

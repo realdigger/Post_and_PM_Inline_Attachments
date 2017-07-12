@@ -13,19 +13,30 @@ if (!defined('SMF'))
 	die('Hacking attempt...');
 
 //================================================================================
-// BBCode hook function & supporting subfunction for ILA mod
+// BBCode hook functions & supporting subfunction for ILA mod
 //================================================================================
+function ILA_Button(&$buttons)
+{
+	global $context, $settings;
+
+	return;
+	// Load everything we are going to need for the editor:
+	loadTemplate('InlineAttachments');
+	$context['template_layers'][] = 'ILA_popup';
+	$context['html_headers'] .= '
+	<link rel="stylesheet" type="text/css" href="' . $settings['theme_url'] . '/css/ILA.css" />';
+
+	// Now add the button to the editor!
+	$buttons[0][] = array(
+		'image' => 'attachment',
+		'code' => 'attachment',
+		'description' => $txt['ila_insert_button'],
+	);
+}
+
 function ILA_Load_Theme()
 {
-	global $context, $settings, $modSettings;
-
-	// Include the ILA css style file if we are doing the "post" action:
-	if (isset($_GET['action']) && $_GET['action'] == 'post')
-	{
-		$context['template_layers'][] = 'ILA_popup';
-		$context['html_headers'] .= '
-	<link rel="stylesheet" type="text/css" href="' . $settings['theme_url'] . '/css/ILA.css" />';
-	}
+	global $context, $modSettings;
 
 	// Set max width and height for inline attachments via CSS:
 	$width = !empty($modSettings['ila_max_width']) ? $modSettings['ila_max_width'] . 'px' : '100%';
@@ -954,37 +965,41 @@ function ILA_subfunction($id, $full, $thumb, $name, $style = '', $has_thumb = fa
 }
 
 // Attachment => Show full expanded picture
-function ILA_tag_attachment(&$attachment, &$dimensions, $has_thumb, $style)
+function ILA_tag_attachment(&$info, &$dim, $has_thumb, $style)
 {
-	return ILA_subfunction($attachment['id'], $attachment['href'], $attachment['href'], $attachment['name'], $style);
+	$dim = array('width' => $info['width'], 'height' => $info['height']);
+	return ILA_subfunction($info['id'], $info['href'], $info['href'], $info['name'], $style);
 }
 
 // Attach => Show thumbnail, expandable to full picture
-function ILA_tag_attach(&$attachment, &$dimensions, $has_thumb, $style)
+function ILA_tag_attach(&$info, &$dim, $has_thumb, $style)
 {
-	$image = ($expand = !empty($attachment['thumbnail']['has_thumb'])) ? $attachment['thumbnail']['href'] : $attachment['href'];
-	return ILA_subfunction($attachment['id'], $attachment['href'], $image, $attachment['name'], $style, $has_thumb, $expand);
+	$dim = array('width' => $info['width'], 'height' => $info['height']);
+	$image = ($expand = !empty($info['thumbnail']['has_thumb'])) ? $info['thumbnail']['href'] : $info['href'];
+	return ILA_subfunction($info['id'], $info['href'], $image, $info['name'], $style, $has_thumb, $expand);
 }
 
 // AttachThumb => Show thumbnail ONLY, not expandable
-function ILA_tag_attachthumb(&$attachment, &$dimensions, $has_thumb, $style)
+function ILA_tag_attachthumb(&$info, &$dim, $has_thumb, $style)
 {
-	$data = &$attachment;
-	if (!empty($attachment['thumbnail']['has_thumb']))
-		$data = &$attachment['thumbnail'];
-	$dimensions = array('width' => $data['width'], 'height' => $data['height']);
-	return ILA_subfunction($attachment['id'], $data['href'], $data['href'], $attachment['name'], $style, $has_thumb);
+	$data = &$info;
+	if (!empty($info['thumbnail']['has_thumb']))
+		$dim = array('width' => $info['thumb_width'], 'height' => $info['thumb_height'], 'img' => $info['thumbnail']['href']);
+	else
+		$dim = array('width' => $info['width'], 'height' => $info['height'], 'img' => $info['href']);
+	return ILA_subfunction($info['id'], $dim['href'], $dim['href'], $info['name'], $style, $has_thumb);
 }
 
 // AttachMini => Show thumbnail, expandable to full picture; exclude attachment info below
-function ILA_tag_attachmini(&$attachment, &$dimensions, $has_thumb, $style)
+function ILA_tag_attachmini(&$info, &$dim, $has_thumb, $style)
 {
-	$image = ($expand = !empty($attachment['thumbnail']['has_thumb'])) ? $attachment['thumbnail']['href'] : $attachment['href'];
-	return ILA_subfunction($attachment['id'], $attachment['href'], $image, $attachment['name'], $style, $has_thumb, $expand);
+	$image = ($expand = !empty($info['thumbnail']['has_thumb'])) ? $info['thumbnail']['href'] : $info['href'];
+	$dim = array('width' => $info['width'], 'height' => $info['height']);
+	return ILA_subfunction($info['id'], $info['href'], $image, $info['name'], $style, $has_thumb, $expand);
 }
 
-// AttachURL => Shows attachment size, iamge dimensions, and download count; no picture
-function ILA_tag_attachurl(&$attachment, &$dimensions, $has_thumb, $style)
+// AttachURL => Shows attachment size, image dimensions, and download count; no picture
+function ILA_tag_attachurl(&$attachment, &$dim, $has_thumb, $style)
 {
 	return false;
 }
@@ -1005,43 +1020,6 @@ function ILA_Mime_Type($ext, &$mime_type)
 	);
 	$mime_type = (isset($mime[$ext]) ? $mime[$ext] : '');
 	return !empty($mime_type);
-}
-
-//================================================================================
-// Template functions necessary to perform the popup:
-//================================================================================
-function template_ILA_popup_above()
-{
-	global $txt, $scripturl, $settings;
-	
-	if (($parsed = cache_get_data('ILA_help', 86400)) == null)
-	{
-		$parsed['title'] = parse_bbc($txt['ila_popup_title']);
-		$parsed['body'] = parse_bbc($txt['ila_popup_body']);
-		cache_put_data('ILA_help', $parsed, 86400);
-	}
-	echo '
-	<div id="ila_popup" class="ila_overlay">
-		<div class="ila_popup">
-			<div class="cat_bar">
-				<h3 class="catbg">
-					<span class="ie6_header floatleft">', $txt['ila_popup_title'], '</span>
-				</h3>
-			</div>
-			<a class="ila_close" href="#" onclick="history.go(-1); return false;">&times;</a>
-			<div class="ila_content">', $parsed['body'], '</div>
-		</div>
-	</div>';
-}
-
-function template_ILA_popup_below()
-{
-}
-
-function template_ILA_popup_trigger()
-{
-	global $boardurl, $txt;
-	echo ' <a class="button" href="#ila_popup"><img src="', $boardurl, '/Themes/default/images/helptopics.gif" class="icon" alt="', $txt['ila_popup_title'], '"></a>';
 }
 
 ?>
