@@ -10,7 +10,7 @@
 <!---------------------------------------------------------------------------->
 <file name="$sourcedir/Display.php">
 	<operation>
-		<search position="replace"><![CDATA['attachment' => loadAttachmentContext($message['id_msg']),]]></search>
+		<search position="replace"><![CDATA['attachment' => loadAttachmentContext($message['id_msg'], $context['loaded_attachments']),]]></search>
 		<add><![CDATA['attachment' => array(),]]></add>
 	</operation>
 	<operation>
@@ -22,14 +22,6 @@
 		$output['attachment'] = &$context['ila']['attachments'][$context['ila']['msg']];
 
 	// Is this user the message author?]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA['is_image' => !empty($attachment['width']) && !empty($attachment['height']) && !empty($modSettings['attachmentShowImages']),]]></search>
-		<add><![CDATA['is_image' => !empty($attachment['width']) && !empty($attachment['height']) && (!empty($modSettings['attachmentShowImages']) || $override_show),]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[function loadAttachmentContext($id_msg]]></search>
-		<add><![CDATA[, $override_show = false]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA[header('Content-Type: ' . strtr($mime_type, array('image/bmp' => 'image/x-ms-bmp')));]]></search>
@@ -149,6 +141,16 @@
 					]]></add>
 	</operation>
 </file>
+<file name="$sourcedir/Subs-Attachments.php">
+	<operation>
+		<search position="replace"><![CDATA['is_image' => !empty($attachment['width']) && !empty($attachment['height']) && !empty($modSettings['attachmentShowImages']),]]></search>
+		<add><![CDATA['is_image' => !empty($attachment['width']) && !empty($attachment['height']) && (!empty($modSettings['attachmentShowImages']) || $override_show),]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[function loadAttachmentContext($id_msg]]></search>
+		<add><![CDATA[, $override_show = false]]></add>
+	</operation>
+</file>
 <file name="$sourcedir/Subs-CustomView.php" error="skip">
 	<operation>
 		<search position="replace"><![CDATA[if (!isset($context['ila_dont_show_attach_below']) || !array_key_exists($attachment['id'], $context['ila_dont_show_attach_below']))]]></search>
@@ -192,8 +194,8 @@
 		<search position="replace"><![CDATA[foreach ($context['current_attachments'] as $attachment)
 			echo '
 							<dd class="smalltext">
-								<label for="attachment_', $attachment['id'], '"><input type="checkbox" id="attachment_', $attachment['id'], '" name="attach_del[]" value="', $attachment['id'], '"', empty($attachment['unchecked']) ? ' checked' : '', ' class="input_check"> ', $attachment['name'], (empty($attachment['approved']) ? ' (' . $txt['awaiting_approval'] . ')' : ''),
-								!empty($modSettings['attachmentPostLimit']) || !empty($modSettings['attachmentSizeLimit']) ? sprintf($txt['attach_kb'], comma_format(round(max($attachment['size'], 1028) / 1028), 0)) : '', '</label>]]></search>
+								<label for="attachment_', $attachment['attachID'], '"><input type="checkbox" id="attachment_', $attachment['attachID'], '" name="attach_del[]" value="', $attachment['attachID'], '"', empty($attachment['unchecked']) ? ' checked' : '', ' class="input_check"> ', $attachment['name'], (empty($attachment['approved']) ? ' (' . $txt['awaiting_approval'] . ')' : ''),
+								!empty($modSettings['attachmentPostLimit']) || !empty($modSettings['attachmentSizeLimit']) ? sprintf($txt['attach_kb'], comma_format(round(max($attachment['size'], 1028) / 1028), 0)) : '', '</label>]]></add>
 		<add><![CDATA[foreach ($context['current_attachments'] as $attid => $attachment)
 			echo '
 							<dd class="smalltext">
@@ -201,8 +203,8 @@
 								!empty($modSettings['attachmentPostLimit']) || !empty($modSettings['attachmentSizeLimit']) ? sprintf($txt['attach_kb'], comma_format(round(max($attachment['size'], 1028) / 1028), 0)) : '', ' <a onclick="insertAttachment(', ($attid + !empty($modSettings['ila_one_based_numbering'])), '); return false;">(', sprintf($txt['ila_insert'], ($attid + !empty($modSettings['ila_one_based_numbering']))), ')</a></label>]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[<input type="file" multiple="multiple" name="attachment[]" id="attachment1" class="input_file">]]></search>
-		<add><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a onclick="insertAttachment(', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + !empty($modSettings['ila_one_based_numbering'])), '); return false;">', sprintf($txt['ila_insert'], ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + !empty($modSettings['ila_one_based_numbering']))), '</a>)]]></add>
+		<search position="replace"><![CDATA[<input type="file" multiple="multiple" name="attachment[]" id="attachment1" class="input_file fallback">]]></search>
+		<add><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file fallback" /> (<a onclick="insertAttachment(', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + !empty($modSettings['ila_one_based_numbering'])), '); return false;">', sprintf($txt['ila_insert'], ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + !empty($modSettings['ila_one_based_numbering']))), '</a>)]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[var current_attachment = 1;

@@ -262,40 +262,42 @@ function ILA_Post_Attachments($msg_id)
 		return;
 
 	// Fetch attachments for use in "parse_bbc" function...
-	unset($attachments[$msg_id]);
-	$request = $smcFunc['db_query']('', '
-		SELECT
-			a.id_attach, a.id_folder, a.id_msg, a.filename, a.file_hash, IFNULL(a.size, 0) AS filesize,
-			a.downloads, a.approved, a.width, a.height, IFNULL(thumb.id_attach, 0) AS id_thumb,
-			thumb.width AS thumb_width, thumb.height AS thumb_height, m.id_topic,
-			thumb.id_folder AS thumb_folder, thumb.file_hash AS thumb_hash, thumb.filename AS thumb_name
-		FROM {db_prefix}attachments AS a
-			LEFT JOIN {db_prefix}attachments AS thumb ON (thumb.id_attach = a.id_thumb)
-			LEFT JOIN {db_prefix}messages AS m ON (m.id_msg = a.id_msg)
-		WHERE a.id_msg = {int:message_id}
-			AND a.attachment_type = {int:attachment_type}',
-		array(
-			'message_id' => $msg_id,
-			'attachment_type' => 0,
-			'is_approved' => 1,
-		)
-	);
-	$temp = array();
-	while ($row = $smcFunc['db_fetch_assoc']($request))
+	if (!isset($attachments[$msg_id]))
 	{
-		if (!$row['approved'] && !empty($modSettings['postmod_active']) && !allowedTo('approve_posts') && $context['ila']['id_member'][$msg_id] != $user_info['id'])
-			continue;
+		$request = $smcFunc['db_query']('', '
+			SELECT
+				a.id_attach, a.id_folder, a.id_msg, a.filename, a.file_hash, IFNULL(a.size, 0) AS filesize,
+				a.downloads, a.approved, a.width, a.height, a.*, IFNULL(thumb.id_attach, 0) AS id_thumb,
+				thumb.width AS thumb_width, thumb.height AS thumb_height, m.id_topic,
+				thumb.id_folder AS thumb_folder, thumb.file_hash AS thumb_hash, thumb.filename AS thumb_name
+			FROM {db_prefix}attachments AS a
+				LEFT JOIN {db_prefix}attachments AS thumb ON (thumb.id_attach = a.id_thumb)
+				LEFT JOIN {db_prefix}messages AS m ON (m.id_msg = a.id_msg)
+			WHERE a.id_msg = {int:message_id}
+				AND a.attachment_type = {int:attachment_type}',
+			array(
+				'message_id' => $msg_id,
+				'attachment_type' => 0,
+				'is_approved' => 1,
+			)
+		);
+		$temp = array();
+		while ($row = $smcFunc['db_fetch_assoc']($request))
+		{
+			if (!$row['approved'] && !empty($modSettings['postmod_active']) && !allowedTo('approve_posts') && $context['ila']['id_member'][$msg_id] != $user_info['id'])
+				continue;
 
-		$temp[$row['id_attach']] = $row;
-		if (!isset($attachments[$row['id_msg']]))
-			$attachments[$row['id_msg']] = array();
+			$temp[$row['id_attach']] = $row;
+			if (!isset($attachments[$row['id_msg']]))
+				$attachments[$row['id_msg']] = array();
+		}
+		$smcFunc['db_free_result']($request);
+
+		// This is better than sorting it with the query...
+		ksort($temp);
+		foreach ($temp as $row)
+			$attachments[$row['id_msg']][] = $row;
 	}
-	$smcFunc['db_free_result']($request);
-
-	// This is better than sorting it with the query...
-	ksort($temp);
-	foreach ($temp as $row)
-		$attachments[$row['id_msg']][] = $row;
 
 	// Load the attachment context even if there are no attachments:
 	require_once($sourcedir . '/Display.php');

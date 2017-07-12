@@ -39,7 +39,7 @@
 		<remove-file name="$boarddir/Themes/default/images/bbc/attachment.gif" />
 	</uninstall>
 
-	<install for="2.1 Beta 1">
+	<install for="2.1 Beta 3">
 		<readme type="file" parsebbc="true">readme.txt</readme>
 		<code>add_remove_hooks.php</code>
 		<modification>install_21x.xml</modification>
@@ -54,7 +54,7 @@
 		<require-file name="ILA.css" destination="$themedir/css" />
 		<redirect timeout="5000" url="?action=admin;area=manageattachments;sa=ila" />
 	</install>
-	<uninstall for="2.1 Beta 1">
+	<uninstall for="2.1 Beta 3">
 		<code>add_remove_hooks.php</code>
 		<modification reverse="true">install_21x.xml</modification>
 		<remove-file name="$boarddir/Themes/default/languages/InlineAttachments.english.php" />
