@@ -129,7 +129,7 @@ function ILA_Admin_Settings($return_config = false)
 			function askNumber()
 			{
 				var now_renumber = document.getElementById("ila_one_based_numbering").checked ? 1 : 0;
-				if (now_renumber != ' . $modSettings['ila_one_based_numbering'] . ')
+				if (now_renumber != ' . (!empty($modSettings['ila_one_based_numbering']) ? $modSettings['ila_one_based_numbering'] : 0) . ')
 					document.getElementById("renumber_attachment_tags").value = (confirm("' . $txt['ila_one_based_numbering_ask'] . '") ? 1 : 0);
 				else
 					document.getElementById("renumber_attachment_tags").value = 0;

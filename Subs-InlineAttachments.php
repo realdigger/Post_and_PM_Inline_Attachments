@@ -229,7 +229,7 @@ function ILA_Setup($msg_id, &$message)
 //================================================================================
 function ILA_Post_Attachments($msg_id)
 {
-	global $context, $modSettings, $smcFunc, $attachments, $sourcedir, $user_info;
+	global $context, $modSettings, $smcFunc, $attachments, $sourcedir, $user_info, $forum_version;
 	static $view_attachments = array();
 
 	// Don't even attempt if attachments are disabled:
@@ -266,8 +266,8 @@ function ILA_Post_Attachments($msg_id)
 	{
 		$request = $smcFunc['db_query']('', '
 			SELECT
-				a.id_attach, a.id_folder, a.id_msg, a.filename, a.file_hash, IFNULL(a.size, 0) AS filesize,
-				a.downloads, a.approved, a.width, a.height, a.*, IFNULL(thumb.id_attach, 0) AS id_thumb,
+				a.id_attach, a.id_folder, a.id_msg, a.filename, a.file_hash, COALESCE(a.size, 0) AS filesize,
+				a.downloads, a.approved, a.width, a.height, a.*, COALESCE(thumb.id_attach, 0) AS id_thumb,
 				thumb.width AS thumb_width, thumb.height AS thumb_height, m.id_topic,
 				thumb.id_folder AS thumb_folder, thumb.file_hash AS thumb_hash, thumb.filename AS thumb_name
 			FROM {db_prefix}attachments AS a
@@ -300,8 +300,16 @@ function ILA_Post_Attachments($msg_id)
 	}
 
 	// Load the attachment context even if there are no attachments:
-	require_once($sourcedir . '/Display.php');
-	$context['ila']['attachments'][$msg_id] = loadAttachmentContext($msg_id, true);
+	if (substr($forum_version, 0, 7) == 'SMF 2.1')
+	{
+		require_once($sourcedir . '/Subs-Attachments.php');
+		$context['ila']['attachments'][$msg_id] = loadAttachmentContext($msg_id, true, $attachments);
+	}
+	else		
+	{
+		require_once($sourcedir . '/Display.php');
+		$context['ila']['attachments'][$msg_id] = loadAttachmentContext($msg_id, true);
+	}
 }
 
 //================================================================================
@@ -321,8 +329,8 @@ function ILA_PM_Attachments($msg_id)
 	$request = $smcFunc['db_query']('', '
 		SELECT
 			pa.id_attach, pa.id_folder, pa.id_pm, pa.pm_report, pa.filename, pa.file_hash,
-			IFNULL(pa.size, 0) AS filesize, pa.downloads, pa.width, pa.height,
-			IFNULL(thumb.id_attach, 0) AS id_thumb, thumb.width AS thumb_width, thumb.height AS thumb_height
+			COALESCE(pa.size, 0) AS filesize, pa.downloads, pa.width, pa.height,
+			COALESCE(thumb.id_attach, 0) AS id_thumb, thumb.width AS thumb_width, thumb.height AS thumb_height
 		FROM {db_prefix}pm_attachments AS pa
 			LEFT JOIN {db_prefix}pm_attachments AS thumb ON (thumb.id_attach = pa.id_thumb)
 			LEFT JOIN {db_prefix}personal_messages AS pm ON (pm.id_pm = pa.id_pm)
