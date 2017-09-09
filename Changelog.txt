@@ -1,3 +1,7 @@
+v5.10 - September 8th, 2017
+o Fixed the HTML building code so various parameters work properly.
+o Fixed undefined array element error in [b]Subs-InlineAttachments.php[/b].
+
 v5.9 - August 31st, 2017
 o Completed SMF 2.1 Beta 3 template edits.  Javascript edits still needed.
 o Replaced IFNULL with COALESCE in database queries for better Postgres support.

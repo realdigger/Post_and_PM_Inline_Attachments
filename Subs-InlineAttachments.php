@@ -572,7 +572,7 @@ function ILA_Fix_Param_Order(&$message)
 			$replace_str = $old = $order[''] = '';
 			foreach ($params as $param)
 			{
-				if (strpos($param, '=') === false)
+				if (strpos($param, '=') === false && isset($order[$old]))
 					$order[$old] .= ' ' . $param;
 				else
 					$order[$old = substr($param, 0, strpos($param, '='))] = substr($param, strpos($param, '=') + 1);
@@ -975,7 +975,7 @@ function ILA_subfunction($id, $full, $thumb, $name, $style = '', $has_thumb = fa
 
 	// Okay, can't show via known highslide/lightbox viewers.  Show it via SMF methods:
 	if ($has_thumb)
-		return '<a href="' . $full . '" id="link_' . $id . '" onclick="return expandThumb(' . $id . ');"><img src="' . $thumb . '" alt="" id="thumb_' . $id . '"' . (!empty($class) ? ' class="' . $class . '"' : '') . ' /></a>';
+		return '<a href="' . $full . '" id="link_' . $id . '" onclick="return expandThumb(' . $id . ');"><img src="' . $thumb . '" alt="" id="thumb_' . $id . '"' . (!empty($class) ? ' class="' . $class . '"' : '') . $style . ' /></a>';
 	else
 		return '<img src="' . $full . ';image" ' . ' alt="' . $name . '"' . ' class="bbc_img resized' . (!empty($class) ? ' ' . $class : '') . '"' . $style .' />';
 }
