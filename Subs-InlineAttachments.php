@@ -262,43 +262,40 @@ function ILA_Post_Attachments($msg_id)
 		return;
 
 	// Fetch attachments for use in "parse_bbc" function...
-	if (!isset($attachments[$msg_id]))
+	$attachments[$msg_id] = array();
+	$request = $smcFunc['db_query']('', '
+		SELECT
+			a.id_attach, a.id_folder, a.id_msg, a.filename, a.file_hash, COALESCE(a.size, 0) AS filesize,
+			a.downloads, a.approved, a.width, a.height, a.*, COALESCE(thumb.id_attach, 0) AS id_thumb,
+			thumb.width AS thumb_width, thumb.height AS thumb_height, m.id_topic,
+			thumb.id_folder AS thumb_folder, thumb.file_hash AS thumb_hash, thumb.filename AS thumb_name
+		FROM {db_prefix}attachments AS a
+			LEFT JOIN {db_prefix}attachments AS thumb ON (thumb.id_attach = a.id_thumb)
+			LEFT JOIN {db_prefix}messages AS m ON (m.id_msg = a.id_msg)
+		WHERE a.id_msg = {int:message_id}
+			AND a.attachment_type = {int:attachment_type}',
+		array(
+			'message_id' => $msg_id,
+			'attachment_type' => 0,
+			'is_approved' => 1,
+		)
+	);
+	$temp = array();
+	while ($row = $smcFunc['db_fetch_assoc']($request))
 	{
-		$attachments[$msg_id] = array();
-		$request = $smcFunc['db_query']('', '
-			SELECT
-				a.id_attach, a.id_folder, a.id_msg, a.filename, a.file_hash, COALESCE(a.size, 0) AS filesize,
-				a.downloads, a.approved, a.width, a.height, a.*, COALESCE(thumb.id_attach, 0) AS id_thumb,
-				thumb.width AS thumb_width, thumb.height AS thumb_height, m.id_topic,
-				thumb.id_folder AS thumb_folder, thumb.file_hash AS thumb_hash, thumb.filename AS thumb_name
-			FROM {db_prefix}attachments AS a
-				LEFT JOIN {db_prefix}attachments AS thumb ON (thumb.id_attach = a.id_thumb)
-				LEFT JOIN {db_prefix}messages AS m ON (m.id_msg = a.id_msg)
-			WHERE a.id_msg = {int:message_id}
-				AND a.attachment_type = {int:attachment_type}',
-			array(
-				'message_id' => $msg_id,
-				'attachment_type' => 0,
-				'is_approved' => 1,
-			)
-		);
-		$temp = array();
-		while ($row = $smcFunc['db_fetch_assoc']($request))
-		{
-			if (!$row['approved'] && !empty($modSettings['postmod_active']) && !allowedTo('approve_posts') && $context['ila']['id_member'][$msg_id] != $user_info['id'])
-				continue;
+		if (!$row['approved'] && !empty($modSettings['postmod_active']) && !allowedTo('approve_posts') && $context['ila']['id_member'][$msg_id] != $user_info['id'])
+			continue;
 
-			$temp[$row['id_attach']] = $row;
-			if (!isset($attachments[$row['id_msg']]))
-				$attachments[$row['id_msg']] = array();
-		}
-		$smcFunc['db_free_result']($request);
-
-		// This is better than sorting it with the query...
-		ksort($temp);
-		foreach ($temp as $row)
-			$attachments[$msg_id][] = $row;
+		$temp[$row['id_attach']] = $row;
+		if (!isset($attachments[$row['id_msg']]))
+			$attachments[$row['id_msg']] = array();
 	}
+	$smcFunc['db_free_result']($request);
+
+	// This is better than sorting it with the query...
+	ksort($temp);
+	foreach ($temp as $row)
+		$attachments[$msg_id][] = $row;
 
 	// Load the attachment context even if there are no attachments:
 	if (substr($forum_version, 0, 7) == 'SMF 2.1')
@@ -890,7 +887,7 @@ function ILA_Build_HTML(&$tag, &$id)
 		$html = (!empty($html) ? $html . '<br/>' : '') . 
 			'<span class="smalltext">' .
 				'<a href="' . $attachment['href'] . '"><img src="' . $settings['images_url'] . '/icons/clip.' . (!isset($txt['attach_times']) ? 'png' : 'gif') . '" align="middle" alt="*" border="0" /> ' . $attachment['name'] . '</a>' . 
-				($download_count ? ($download_count >= 5 ? '<br/>' : ' ') . '(' . $attachment['size'] . ($attachment['is_image'] && !empty($dimensions['width']) ? ' . ' . $dimensions['width'] . 'x' . $dimensions['height'] . ($download_count == 6 ? ')<br/>(' : ' - ') . $viewed : ' - ' . $downloaded) . ')' : '').
+				($download_count ? (($download_count >= 5 ? '<br/>' : ' ') . ($download_count >= 2 ? '(' . $attachment['size'] : '') . ($download_count >= 3 && $attachment['is_image'] && !empty($dimensions['width']) ? ', ' . $dimensions['width'] . 'x' . $dimensions['height'] : '') . ($download_count >= 4 ? (($download_count == 6 ? ')<br/>(' : ' - ') . ($attachment['is_image'] ? $viewed : ' - ' . $downloaded)) : '') . ($download_count >= 2 ? ')' : '')) : '') .
 			'</span>';
 	}
 
@@ -920,14 +917,16 @@ function ILA_Build_HTML(&$tag, &$id)
 		if (isset($context['ila_params']['float']) && $context['ila_params']['float'] == 'center')
 			$html = '<div style="margin-left: auto; margin-right: auto; display: block;">' . $html . '</div>';
 		elseif (isset($context['ila_params']['float']))
-			$html = '<div style="float: ' . $context['ila_params']['float'] . ';' . (!empty($style) ? $style : '') . '">' . $html . '</div>';
+			$html = '<div style="display: inline-block; float: ' . $context['ila_params']['float'] . ';' . (!empty($style) ? $style : '') . '">' . $html . '</div>';
 		elseif (!empty($style))
 		{
 			if ((!empty($modSettings['ila_download_count']) && $tag['tag'] != 'attachmini') || $tag['tag'] == 'attachurl')
-				$html = '<div style="' . (!empty($style) ? $style : '') . '">' . $html . '</div>';
+				$html = '<div style="display: inline-block; ' . (!empty($style) ? $style : '') . '">' . $html . '</div>';
 			else
 				$html = str_replace('<img src="', '<img style="' . $style . '" src="', $html);
 		}
+		else
+			$html = '<div style="display: inline-block;">' . $html . '</div>';
 	}
 
 	// Mark ONLY approved attachments as "don't show" if admin has checked that option:
