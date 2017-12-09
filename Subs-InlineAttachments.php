@@ -264,6 +264,7 @@ function ILA_Post_Attachments($msg_id)
 	// Fetch attachments for use in "parse_bbc" function...
 	if (!isset($attachments[$msg_id]))
 	{
+		$attachments[$msg_id] = array();
 		$request = $smcFunc['db_query']('', '
 			SELECT
 				a.id_attach, a.id_folder, a.id_msg, a.filename, a.file_hash, COALESCE(a.size, 0) AS filesize,
@@ -296,7 +297,7 @@ function ILA_Post_Attachments($msg_id)
 		// This is better than sorting it with the query...
 		ksort($temp);
 		foreach ($temp as $row)
-			$attachments[$row['id_msg']][] = $row;
+			$attachments[$msg_id][] = $row;
 	}
 
 	// Load the attachment context even if there are no attachments:
@@ -734,14 +735,18 @@ function ILA_Build_HTML(&$tag, &$id)
 	else
 		$msg = (isset($context['ila']['msg']) ? $context['ila']['msg'] : -1);
 
-	// Are attachments enabled and can we see them?	 If not, return no permission message:
-	if (!isset($context['ila']['attachments'][$msg][$id]))
-		return $txt['ila_invalid'];
-	$attachment = &$context['ila']['attachments'][$msg][$id];
-	if (empty($context['ila']['pm_attach']) && empty($modSettings['attachmentEnable']))
+	// If we are previewing the post, return "attachment not uploaded yet" message:
+	if (((isset($_REQUEST['action']) ? $_REQUEST['action'] : '') == 'post2') && (!isset($context['ila']['attachments'][$msg][$id])))
+		return $txt['ila_not_uploaded'];
+
+	// Are attachments enabled and can we see them?  If not, return no permission message:
+	if (empty($context['ila']['pm_attach']) && (empty($modSettings['attachmentEnable']) || !isset($context['ila']['attachments'][$msg])))
 		return $txt['ila_nopermission'];
 	if (!empty($context['ila']['pm_attach']) && (empty($modSettings['pmAttachmentEnable']) || empty($context['ila']['pm_view_attachments'])))
 		return $txt['ila_nopermission'];
+	if (!isset($context['ila']['attachments'][$msg][$id]))
+		return $txt['ila_invalid'];
+	$attachment = &$context['ila']['attachments'][$msg][$id];
 
 	// This part is done after board permission check because we don't want to give user false hope.
 	// If we are previewing the post, return "attachment not uploaded yet" message:
@@ -814,8 +819,7 @@ function ILA_Build_HTML(&$tag, &$id)
 		{
 			$width = (isset($context['ila_params']['width']) ? $context['ila_params']['width'] : 500);
 			$height = (isset($context['ila_params']['height']) ? $context['ila_params']['height'] : 600);
-			$turl = preg_replace('#index.php\?action=dlattach;topic=(\d+)\.(\d+);attach=(\d+)#i', 'attachment_$1.$2_$3.pdf', $url);
-			$html = '<iframe src="http://docs.google.com/gview?url=' . $turl .'&embedded=true" width="' . $width . '" height="' . $height .'" frameborder="0"></iframe>';
+			$html = '<object data="' . $url . '" type="application/pdf" width="' . $width . '" height="' . $height . '"><iframe src="' . $url . '" style="border: none;" width="' . $width . '" height="' . $height . '">' . $txt['ila_pdf1'] . ' <a href="' . $url . '">' . $txt['ila_pdf2'] . '</a></iframe></object>';
 		}
 		// If we are allowed to embed videos, then do so for supported formats:
 		elseif (!empty($modSettings['ila_embed_video_files']))
