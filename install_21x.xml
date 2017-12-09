@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>5.13</version>
+<version>6.0</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -224,14 +224,15 @@
 
 											function addAttachment()
 											{
-												allowed_attachments = allowed_attachments - 1;
 												current_attachment = current_attachment + 1;
 												if (allowed_attachments <= 0)
 													return alert("', $txt['more_attachments_error'], '");
 
 												var temp = "', $txt['ila_insert'], '";
 												temp = temp.replace("\%d", current_attachment);
-												setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a onclick="insertAttachment(\' + current_attachment + \'); return false;">\' + temp + \'</a>) (<a onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
+												setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a onclick="insertAttachment(\' + current_attachment + \'); return false;">\' + temp + \'</a>) (<a onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
+
+												allowed_attachments = allowed_attachments - 1;
 
 												return true;
 											}]]></add>

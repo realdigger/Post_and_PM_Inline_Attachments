@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>5.13</version>
+<version>6.0</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -51,7 +51,7 @@
 	<operation>
 		<search position="before"><![CDATA[header('Content-Type: ' . strtr($mime_type, array('image/bmp' => 'image/x-ms-bmp')));]]></search>
 		<add><![CDATA[
-	elseif (ILA_Mime_Type($file_ext, $mime_type))
+	elseif (ILA_Mime_Type($filename, file_ext, $mime_type))
 		header('Content-Type: ' . $mime_type);]]></add>
 	</operation>
 </file>
@@ -64,10 +64,7 @@
 </file>
 <file name="$sourcedir/ManageAttachments.php">
 	<operation>
-		<search position="after"><![CDATA[
-	);
-
-	// Pick the correct sub-action.]]></search>
+		<search position="after"><![CDATA[		'removeall' => 'RemoveAllAttachments']]></search>
 		<add><![CDATA[,
 		'ila' => 'ILA_Admin_Settings']]></add>
 	</operation>
@@ -215,8 +212,23 @@
 </file>
 <file name="$sourcedir/Subs-CustomView.php" error="skip">
 	<operation>
-		<search position="replace"><![CDATA[if (!isset($context['ila_dont_show_attach_below']) || !array_key_exists($attachment['id'], $context['ila_dont_show_attach_below']))]]></search>
-		<add><![CDATA[if (empty($context['ila']['dont_show'][$attachment['id']]) && ((!isset($context['ila_dont_show_attach_below']) || !array_key_exists($attachment['id'], $context['ila_dont_show_attach_below']))))]]></add>
+		<search position="replace"><![CDATA[loadLanguage('CustomView');
+	
+	if (!empty($modSettings['custom_view_attachments']))]]></search>
+		<add><![CDATA[loadLanguage('CustomView');
+	
+	$msg_id = $message['id'];
+	if (!empty($modSettings['custom_view_attachments']))]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[if (!isset($context['ila_dont_show_attach_below']) || !array_key_exists($attachment['id'], $context['ila_dont_show_attach_below']))
+			{]]></search>
+		<add><![CDATA[if (empty($context['ila']['dont_show'][$attachment['id']]) && ((!isset($context['ila_dont_show_attach_below']) || !array_key_exists($attachment['id'], $context['ila_dont_show_attach_below']))))
+			{
+				// Skip over already displayed inline attachments:
+				if (!empty($context['ila']['dont_show'][$msg_id][$attachment['id']]))
+					continue;
+]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/hs4smf-Subs.php" error="skip">
@@ -293,7 +305,7 @@
 	<operation>
 		<search position="before"><![CDATA[header('Content-Type: ' . strtr($mime_type, array('image/bmp' => 'image/x-ms-bmp')));]]></search>
 		<add><![CDATA[
-	elseif (ILA_Mime_Type($file_ext, $mime_type))
+	elseif (ILA_Mime_Type($filename, $file_ext, $mime_type))
 		header('Content-Type: ' . $mime_type);]]></add>
 	</operation>
 </file>
@@ -371,8 +383,8 @@
 ]]></add>
 	</operation>
 	<operation error="ignore">
-		<search position="replace"><![CDATA[<input type="file" size="38" name="attachment[]" class="input_file" />';]]></search>
-		<add><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a onclick="insertAttachment(', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + !empty($modSettings['ila_one_based_numbering'])), '); return false;">', sprintf($txt['ila_insert'], ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + !empty($modSettings['ila_one_based_numbering']))),'</a>)';]]></add>
+		<search position="replace"><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a href="javascript:void(0);" onclick="cleanFileInput(\'attachment1\');">', $txt['clean_attach'], '</a>)';]]></search>
+		<add><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a onclick="insertAttachment(', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + !empty($modSettings['ila_one_based_numbering'])), '); return false;">', sprintf($txt['ila_insert'], ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + !empty($modSettings['ila_one_based_numbering']))),'</a>) (<a href="javascript:void(0);" onclick="cleanFileInput(\'attachment1\');">', $txt['clean_attach'], '</a>)';]]></add>
 	</operation>
 	<operation error="ignore">
 		<search position="replace"><![CDATA[function addAttachment()
@@ -380,7 +392,7 @@
 											if (allowed_attachments <= 0)
 												return alert("', $txt['more_attachments_error'], '");
 
-											setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="38" name="attachment[]" class="input_file" /><\' + \'/dd><dd class="smalltext" id="moreAttachments"><a onclick="addAttachment(); return false;">(', $txt['more_attachments'], ')<\' + \'/a><\' + \'/dd>\');
+											setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="38" name="attachment[]" class="input_file" /><\' + \'/dd><dd class="smalltext" id="moreAttachments"><a href="javascript:void(0);" onclick="addAttachment(); return false;">(', $txt['more_attachments'], ')<\' + \'/a><\' + \'/dd>\');
 
 											allowed_attachments = allowed_attachments - 1;
 
@@ -407,15 +419,15 @@
 	</operation>
 	<operation error="ignore">
 		<search position="replace"><![CDATA[	echo '
-						<dd class="smalltext">';
+								<dd class="smalltext">';
 
-		// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.]]></search>
+		// Show some useful information such as allowed extensions, maximum size and amount of attachments allowed.]]></search>
 		<add><![CDATA[$ila_tag = (isset($modSettings['ila_insert_tag']) ? $modSettings['ila_insert_tag'] : 'attachment');
 		$ila_tag .= (empty($modSettings['ila_insert_format']) ? '=' : ' id=') . '\' + id + \'';
 		$ila_tag .= (!empty($modSettings['ila_insert_format']) && $modSettings['ila_insert_format'] == 2 ? ' msg=' . (isset($_REQUEST['msg']) ? $_REQUEST['msg'] : 'new') : '');
 		echo '
 						<dd class="smalltext">
-							<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+							<script type="text/javascript"><!-- // --><![CDATA[
 								function insertAttachment(id)
 								{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
 									$(smfmod_editor).data(\'sceditor\').insertText(\'[' . $ila_tag . ']\');' : '

@@ -1,3 +1,16 @@
+v6.0 - December 8th, 2017
+o [url=https://www.simplemachines.org/community/index.php?topic=525705.msg3950088#msg3950088]Per GL700Wing:[/url] Fixed issue where inserting a PM attachment inline doesn't work.
+o [url=https://www.simplemachines.org/community/index.php?topic=525705.msg3950088#msg3950088]Per GL700Wing:[/url] Fixed issue where inline PM attachments were being displayed as unapproved.
+o [url=https://www.simplemachines.org/community/index.php?topic=525705.msg3950088#msg3950088]Per GL700Wing:[/url] Fixed install issue with PM Attachments mod regarding [b]ManageAttachments.php[/b].
+o [url=https://www.simplemachines.org/community/index.php?topic=525705.msg3950088#msg3950088]Per GL700Wing:[/url] Fixed issue where inline PM attachments are shown again under PM text.
+o [url=https://www.simplemachines.org/community/index.php?topic=525705.msg3950088#msg3950088]Per GL700Wing:[/url] Fixed issue where inline PM attachments can't be downloaded.
+o [url=https://www.simplemachines.org/community/index.php?topic=525705.msg3950101#msg3950101]Per GL700Wing:[/url] Fixed issue where no option to clear/remove the first attachment when composing a new message.
+o [url=https://www.simplemachines.org/community/index.php?topic=525705.msg3950109#msg3950109]Per GL700Wing:[/url] Fixed issue where [nobbc][attachthumb][/nobbc] is an expandable thumbnail.
+o [url=https://www.simplemachines.org/community/index.php?topic=525705.msg3950802#msg3950802]Per GL700Wing:[/url] Fixed issue so that inline attachments can be quoted in Tapatalk.
+o [url=https://www.simplemachines.org/community/index.php?topic=525705.msg3950933#msg3950933]Per GL700Wing:[/url] Fixed another issue code so that inline attachments can be quoted in Tapatalk.
+o [url=https://www.simplemachines.org/community/index.php?topic=525705.msg3951094#msg3951094]Per GL700Wing:[/url] Fixed issue with Custom Attachment View mod where all attachments are shown.
+o Copied mime detection code from my [url=http://custom.simplemachines.org/mods/index.php?mod=4131]Play Media Attachments[/url] mod.
+
 v5.13 - November 26th, 2017
 o Added support for the Tapatalk mod.
 o Fixed undefined variable error when HS4SMF mod is installed and enabled.

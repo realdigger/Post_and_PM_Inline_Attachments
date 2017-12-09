@@ -685,7 +685,7 @@ function ILA_Param_Msg($msg)
 
 	$context['ila_params']['msg'] = ($msg == 'new' ? 'new' : (int) $msg);
 	$msg = (int) $msg;
-	if (empty($modSettings['ila_allow_quoted_images']) || empty($msg) || file_exists($sourcedir . '/Subs-Tapatalk.php'))
+	if (empty($modSettings['ila_allow_quoted_images']) || empty($msg))
 		return;
 	elseif (!isset($context['ila']['attachments'][$msg]) && empty($context['ila']['pm_attach']))
 		ILA_Post_Attachments($msg, true);
@@ -738,7 +738,7 @@ function ILA_Build_HTML(&$tag, &$id)
 	$id = $id - intval(!empty($modSettings['ila_one_based_numbering']));
 
 	// Make sure that we can access other messages:
-	$allowed = (isset($modSettings['ila_allow_quoted_images']) && !empty($modSettings['ila_allow_quoted_images']) && !file_exists($sourcedir . '/Subs-Tapatalk.php'));
+	$allowed = (isset($modSettings['ila_allow_quoted_images']) && !empty($modSettings['ila_allow_quoted_images']));
 	if (isset($context['ila_params']['msg']))
 		$msg = ($allowed || (isset($context['ila']['msg']) && $context['ila_params']['msg'] == $context['ila']['msg']) ? $context['ila_params']['msg'] : -1);
 	else
@@ -780,7 +780,7 @@ function ILA_Build_HTML(&$tag, &$id)
 	$style = min(100, max(0, (isset($modSettings['ila_transparent']) ? $modSettings['ila_transparent'] : 40)));
 	if (empty($attachment['is_approved']) && empty($style))
 		return $txt['ila_unapproved'];
-	$style = (empty($attachment['is_approved']) ? 'opacity: ' . ($style / 100) . '; filter: alpha(opacity=' . $style . ');' : '');
+	$style = (empty($attachment['is_approved']) && !$context['ila']['pm_attach'] ? 'opacity: ' . ($style / 100) . '; filter: alpha(opacity=' . $style . ');' : '');
 
 	//===========================================================================================
 	// Is this an image?  If so, assemble the HTML necessary to show it:
@@ -942,7 +942,7 @@ function ILA_Build_HTML(&$tag, &$id)
 	}
 
 	// Mark ONLY approved attachments as "don't show" if admin has checked that option:
-	if (!empty($modSettings['ila_duplicate']) && !empty($attachment['is_approved']))
+	if (!empty($modSettings['ila_duplicate']) && (!empty($attachment['is_approved']) || !empty($context['ila']['pm_attach'])))
 		$context['ila']['dont_show'][$msg][$attachment['id']] = true;
 
 	// Return to our lord and saviour, our caller! :p
@@ -991,7 +991,7 @@ function ILA_subfunction($id, $full, $thumb, $name, $style = '', $has_thumb = fa
 	if ($has_thumb)
 		return '<a href="' . $full . '" id="link_' . $id . '" onclick="return expandThumb(' . $id . ');"><img src="' . $thumb . '" alt="" id="thumb_' . $id . '"' . (!empty($class) ? ' class="' . $class . '"' : '') . $style . ' /></a>';
 	else
-		return '<img src="' . $full . ';image" ' . ' alt="' . $name . '"' . ' class="bbc_img resized' . (!empty($class) ? ' ' . $class : '') . '"' . $style .' />';
+		return '<a href="' . $full . '"><img src="' . $full . ';image" ' . ' alt="' . $name . '"' . ' class="bbc_img resized' . (!empty($class) ? ' ' . $class : '') . '"' . $style .' />';
 }
 
 // Attachment => Show full expanded picture
@@ -1017,7 +1017,7 @@ function ILA_tag_attachthumb(&$info, &$dim, $has_thumb, $style)
 		$dim = array('width' => $info['width'], 'height' => $info['height'], 'img' => $info['href']);
 	else
 		$dim = array('width' => $info['real_width'], 'height' => $info['real_height']);
-	return ILA_subfunction($info['id'], $dim['href'], $dim['href'], $info['name'], $style, $has_thumb);
+	return ILA_subfunction($info['id'], $dim['href'], $dim['href'], $info['name'], $style, $has_thumb, false);
 }
 
 // AttachMini => Show thumbnail, expandable to full picture; exclude attachment info below
@@ -1037,19 +1037,60 @@ function ILA_tag_attachurl(&$attachment, &$dim, $has_thumb, $style)
 //================================================================================
 // Helper function to return the correct MIME type for certain types of files:
 //================================================================================
-function ILA_Mime_Type($ext, &$mime_type)
+function ILA_mime_type($filename, $ext, $original = false)
 {
-	$mime = array(
-		'svg' => 'image/svg+xml',
-		'pdf' => 'application/pdf',
-		'ogv' => 'video/ogg',
-		'mp4' => 'video/mp4',
-		'webm' => 'video/webm',
-		'avi' => 'video/x-msvideo',
-		'wmv' => 'video/x-ms-wmv',
+	// Set up for audio/video detection:
+	$mime = false;
+	$ext = pathinfo($original, PATHINFO_EXTENSION);
+	$signatures = array(
+	// Audio file signatures:
+		/*  wav  */ "0|\x52\x49\x46\x46" => 'audio/wav|8|' . "\x57\x41\x56\x45",
+		/*  mp3  */ "0|\xFF\xFB" => 'audio/mpeg',
+		/*  mp3  */ "0|\x49\x44\x33" => 'audio/mpeg',
+		/*  m4a  */ "4|\x66\x74\x79\x70\x4D\x53\x4E\x56" => 'audio/mp4',
+		/*  aac  */ "0|\xFF\xF1" => 'audio/aac',
+		/*  aac  */ "0|\xFF\xF9" => 'audio/aac',
+		/*  aac  */ "0|\xFF\xFE" => 'audio/aac',
+	// Video file signatures:
+		/*  mp4  */ "4|\x66\x74\x79\x70\x69\x73\x6F\x6D" => 'video/mp4',
+		/*  m4v  */ "4|\x66\x74\x79\x70\x6D\x70\x34\x32" => 'video/mp4',
+		/*  webm */ "0|\x1A\x45\xDF\xA3" => 'video/webm',
+	// Audio/Video file signature (could be either):
+		/*  ogg  */ "0|\x4F\x67\x67\x53" => 'audio/ogg',
+		/* wma/v */ "0|\x30\x26\xB2\x75\x8E\x66\xCF\x11" => 'audio/wma',
+	// ALWAYS LAST CASE!  Must return "FALSE" if we get here!
+		/* N/A  */ "0|" => false,
 	);
-	$mime_type = (isset($mime[$ext]) ? $mime[$ext] : '');
-	return !empty($mime_type);
+
+	// Start checking against known signatures:
+	if ($handle = @fopen($filename, 'rb'))
+	{
+		$contents = @fread($handle, 64);
+		@fclose($handle);
+		foreach ($signatures as $id => $mime_type)
+		{
+			list($start1, $magic_bytes) = explode('|', $id, 2);
+			list($mime, $start2, $extra) = explode('|', $mime_type . '||');
+			if (substr($contents, intval($start1), strlen($magic_bytes)) == $magic_bytes)
+			{
+				if (empty($mime) || substr($contents, intval($start2), strlen($extra)) == $extra)
+					break;
+			}
+		}
+	}
+
+	// Since a file few signatures appear in both video and audio formats, we need to
+	// look at the file extension to determine which mime type to return:
+	if ($mime == 'audio/ogg')
+		return $ext == 'ogv' ? 'video/ogg' : $mime;
+	elseif ($mime == 'audio/wma')
+		return $ext == 'wmv' ? 'video/wmv' : $mime;
+	elseif (!empty($mime))
+		return $mime;
+	elseif (!function_exists('mime_content_type'))
+		return mime_content_type($filename);
+	elseif ($ext == 'svg')
+		return 'image/svg+xml';
 }
 
 ?>

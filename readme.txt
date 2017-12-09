@@ -1,11 +1,13 @@
 [hr]
-[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v5.13[/b][/size][/color]
+[center][color=red][size=16pt][b]POST & PM INLINE ATTACHMENTS v6.0[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3770]Link to Mod[/url]
 [/center]
 [hr]
 
 [color=blue][b][size=12pt][u]Introduction[/u][/size][/b][/color]
 This mod adds the ability to position your attachments in either your forum post or your personal message post using [attachment=n][/attachment] bbcode (where [b]n[/b] is the number of the attachment in the post, eg first = 0, second = 1).
+
+[b]NOTICE:[/b]  In order to support inline attachments in personal messages (PMs), you are [b]REQUIRED[/b] to have the [url=https://custom.simplemachines.org/mods/index.php?mod=1974]PM Attachments[/url] mod [b]VERSION 2.6 OR BETTER[/B] installed, prior to this installation of this mod!!
 
 [color=blue][b][size=12pt][u]New BBcodes[/u][/size][/b][/color]
 This mod supports 5 new bbcodes in order to position your attachments inline:
