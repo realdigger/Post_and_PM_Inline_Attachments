@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>5.12</version>
+<version>5.13</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -251,6 +251,67 @@
 		<search position="after"><![CDATA[$message['body'] = parse_bbc($message['body'], true, 'pm' . $message['id_pm']);]]></search>
 		<add><![CDATA[$message['body'] = str_replace('msg=new', 'msg=' . $message['id_pm'], $message['body']);
 	]]></add>
+	</operation>
+</file>
+
+<!---------------------------------------------------------------------------->
+<!-- Tapatalk Source file edits:
+<!---------------------------------------------------------------------------->
+<file name="$boarddir/mobiquo/include/Display.php" error="skip">
+	<!-- loadAttachmentContext function -->
+	<operation>
+		<search position="before"><![CDATA[function loadAttachmentContext($id_msg]]></search>
+		<add><![CDATA[, $override_show = false]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[global $attachments, $modSettings, $txt, $scripturl, $topic, $sourcedir, $smcFunc]]></search>
+		<add><![CDATA[, $context]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[// Set up the attachment info - based on code by Meriadoc.]]></search>
+		<add><![CDATA[// Has the function already defined the attachment context?
+	if (!empty($context['ila']['attachments'][$id_msg]))
+		return $context['ila']['attachments'][$id_msg];
+
+	]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[$attachmentData[$i] = array(]]></search>
+		<add><![CDATA[$msg_topic = isset($attachment['id_topic']) ? $attachment['id_topic'] : $topic;
+			]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['href' => $scripturl . '?action=dlattach;topic=' . $topic . '.0;attach=' . $attachment['id_attach'],
+				'link' => '<a href="' . $scripturl . '?action=dlattach;topic=' . $topic . '.0;attach=' . $attachment['id_attach'] . '">' . htmlspecialchars($attachment['filename']) . '</a>',
+				'is_image' => !empty($attachment['width']) && !empty($attachment['height']) && !empty($modSettings['attachmentShowImages']),]]></search>
+		<add><![CDATA['href' => $scripturl . '?action=dlattach;topic=' . $msg_topic . '.0;attach=' . $attachment['id_attach'],
+				'link' => '<a href="' . $scripturl . '?action=dlattach;topic=' . $msg_topic . '.0;attach=' . $attachment['id_attach'] . '">' . htmlspecialchars($attachment['filename']) . '</a>',
+				'is_image' => !empty($attachment['width']) && !empty($attachment['height']) && (!empty($modSettings['attachmentShowImages']) || $override_show),]]></add>
+	</operation>
+
+	<!-- Download function -->
+	<operation>
+		<search position="before"><![CDATA[header('Content-Type: ' . strtr($mime_type, array('image/bmp' => 'image/x-ms-bmp')));]]></search>
+		<add><![CDATA[
+	elseif (ILA_Mime_Type($file_ext, $mime_type))
+		header('Content-Type: ' . $mime_type);]]></add>
+	</operation>
+</file>
+<file name="$boarddir/mobiquo/include/Subs.php" error="skip">
+	<operation>
+		<search position="after"><![CDATA[// Shall we take the time to cache this?
+]]></search>
+		<add><![CDATA[// Setup for Inline Attachments
+	ILA_Setup($cache_id, $message);
+		
+	]]></add>
+	</operation>
+	<operation error="ignore">
+		<search position="after"><![CDATA[$orders = permute($preg);]]></search>
+		<add><![CDATA[if (in_array($possible['tag'], ILA_tags()))
+					$orders = array($preg);
+				else
+					]]></add>
 	</operation>
 </file>
 

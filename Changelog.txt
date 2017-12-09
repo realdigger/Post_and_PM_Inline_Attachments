@@ -1,3 +1,7 @@
+v5.13 - November 26th, 2017
+o Added support for the Tapatalk mod.
+o Fixed undefined variable error when HS4SMF mod is installed and enabled.
+
 v5.12 - November 14th, 2017
 o Modified code to enclose ILA tag with "display: inline-block" CSS style, based on [url=https://www.simplemachines.org/community/index.php?topic=525705.msg3945482#msg3945482]@rjen's code snipet.[/url].
 o Fixed attachment not inline after editing post, per [url=https://www.simplemachines.org/community/index.php?topic=525705.msg3947759#msg3947759]GL700Wing's instructions[/url].

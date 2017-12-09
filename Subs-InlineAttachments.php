@@ -229,7 +229,8 @@ function ILA_Setup($msg_id, &$message)
 //================================================================================
 function ILA_Post_Attachments($msg_id)
 {
-	global $context, $modSettings, $smcFunc, $attachments, $sourcedir, $user_info, $forum_version;
+	global $context, $modSettings, $smcFunc, $attachments, $sourcedir;
+	global $boarddir, $user_info, $forum_version;
 	static $view_attachments = array();
 
 	// Don't even attempt if attachments are disabled:
@@ -305,7 +306,13 @@ function ILA_Post_Attachments($msg_id)
 	}
 	else		
 	{
-		require_once($sourcedir . '/Display.php');
+		// Is Tapatalkr running?  Include the correct copy of "Display.php"....
+		if (!defined('IN_MOBIQUO'))
+			require_once($sourcedir . '/Display.php');
+		else
+			require_once($boarddir . '/mobiquo/include/Display.php');
+			
+		// Load the attachment context even if there are no attachments:
 		$context['ila']['attachments'][$msg_id] = loadAttachmentContext($msg_id, true);
 	}
 }
@@ -315,7 +322,7 @@ function ILA_Post_Attachments($msg_id)
 //================================================================================
 function ILA_PM_Attachments($msg_id)
 {
-	global $context, $modSettings, $smcFunc, $attachments, $sourcedir, $user_info;
+	global $context, $modSettings, $smcFunc, $attachments, $sourcedir, $user_info, $boarddir;
 
 	// If attachments aren't enabled, why do anything?
 	$msg_id = (int) $msg_id;
@@ -357,8 +364,13 @@ function ILA_PM_Attachments($msg_id)
 	foreach ($temp as $row)
 		$attachments[$row['id_pm']][] = $row;
 
+	// Is Tapatalkr running?  Include the correct copy of "PersonalMessage.php"....
+	if (!defined('IN_MOBIQUO'))
+		require_once($sourcedir . '/PersonalMessage.php');
+	else
+		require_once($boarddir . '/mobiquo/include/PersonalMessage.php');
+
 	// Load the attachment context even if there are no attachments:
-	require_once($sourcedir . '/PersonalMessage.php');
 	$context['ila']['attachments'][$msg_id] = loadPMAttachmentContext($msg_id);
 	$context['ila']['pm_attach'] = true;
 }
@@ -961,11 +973,10 @@ function ILA_subfunction($id, $full, $thumb, $name, $style = '', $has_thumb = fa
 		// HS4SMF Installed?
 		if (!empty($modSettings['hs4smf_enabled']) && function_exists('hs4smf_get_slidegroup'))
 		{
+			$context['hs4smf_img_count'] = !empty($context['hs4smf_img_count']) ? $context['hs4smf_img_count'] + 1 : 1;
 			$msgid = (int) $msg;
 			hs4smf_track_slidegroup($msgid); // is this needed?
 			$slidegroup = hs4smf_get_slidegroup($msgid);
-			if (!isset($settings['hs4smf_slideshow']) && $context['hs4smf_img_count'] > 1)
-				$settings['hs4smf_slideshow'] = 1;
 			return '<a href="' . $full . ';image" id="link_' . $id . '" class="highslide' . (!empty($class) ? ' ' . $class : '') . '" onclick="return hs.expand(this, ' . $slidegroup . ')"><img src="' . $thumb . '" alt="' . $name . '"' . ' id="thumb_' . $id . '"' . $style . (!empty($class) ? ' class="' . $class . '"' : '') . ' /></a>';
 		}
 		// Highslide Image Viewer Installed?
