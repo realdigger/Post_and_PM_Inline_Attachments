@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>6.1</version>
+<version>6.2</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -26,7 +26,7 @@
 	<operation>
 		<search position="before"><![CDATA[header('Content-Type: ' . strtr($mime_type, array('image/bmp' => 'image/x-ms-bmp')));]]></search>
 		<add><![CDATA[
-	elseif (ILA_Mime_Type($file_ext, $mime_type))
+	elseif (ILA_Mime_Type($filename, $file_ext, $mime_type))
 		header('Content-Type: ' . $mime_type);]]></add>
 	</operation>
 </file>
