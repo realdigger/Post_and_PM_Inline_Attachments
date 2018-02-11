@@ -490,7 +490,7 @@ function ILA_Reorganize_Tags(&$message, &$query)
 	$attach = array();
 	foreach ($attachments[$msg_id] as $attachment)
 	{
-		if (is_array($query['not_id_attach'])) && in_array($attachment['id_attach'], $query['not_id_attach']))
+		if (is_array($query['not_id_attach']) && in_array($attachment['id_attach'], $query['not_id_attach']))
 		{
 			$attach[$attachment['id_attach']] = $i;
 			$i += 1;
