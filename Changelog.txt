@@ -1,3 +1,6 @@
+v6.1 - December 15th, 2017
+o Fixed installer where ILA actions are inserted.
+
 v6.0 - December 8th, 2017
 o [url=https://www.simplemachines.org/community/index.php?topic=525705.msg3950088#msg3950088]Per GL700Wing:[/url] Fixed issue where inserting a PM attachment inline doesn't work.
 o [url=https://www.simplemachines.org/community/index.php?topic=525705.msg3950088#msg3950088]Per GL700Wing:[/url] Fixed issue where inline PM attachments were being displayed as unapproved.
