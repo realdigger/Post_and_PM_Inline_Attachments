@@ -3,7 +3,7 @@
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <name>Post and PM Inline Attachments</name>
 <id>Dougiefresh:ILA</id>
-<version>6.3</version>
+<version>6.4</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source file edits														-->
@@ -387,34 +387,48 @@
 		<add><![CDATA[<input type="file" size="60" name="attachment[]" id="attachment1" class="input_file" /> (<a onclick="insertAttachment(', ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + !empty($modSettings['ila_one_based_numbering'])), '); return false;">', sprintf($txt['ila_insert'], ((empty($context['current_attachments']) ? 0 : count($context['current_attachments'])) + !empty($modSettings['ila_one_based_numbering']))),'</a>) (<a href="javascript:void(0);" onclick="cleanFileInput(\'attachment1\');">', $txt['clean_attach'], '</a>)';]]></add>
 	</operation>
 	<operation error="ignore">
-		<search position="replace"><![CDATA[function addAttachment()
-										{
-											if (allowed_attachments <= 0)
-												return alert("', $txt['more_attachments_error'], '");
-
-											setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="38" name="attachment[]" class="input_file" /><\' + \'/dd><dd class="smalltext" id="moreAttachments"><a href="javascript:void(0);" onclick="addAttachment(); return false;">(', $txt['more_attachments'], ')<\' + \'/a><\' + \'/dd>\');
-
-											allowed_attachments = allowed_attachments - 1;
-
-											return true;
-										}
-]]></search>
-		<add><![CDATA[var current_attachment = ', (isset($context['current_attachments']) ? count($context['current_attachments']) : 0) + !empty($modSettings['ila_one_based_numbering']), ';
+		<search position="replace"><![CDATA[echo '
+									<script language="JavaScript" type="text/javascript"><!-- // --><![', 'CDATA', '[
+										var allowed_attachments = ', $context['num_allowed_attachments'], ' - 1;
+										var current_attachment = 1;
 
 										function addAttachment()
 										{
-											current_attachment = current_attachment + 1;
 											if (allowed_attachments <= 0)
 												return alert("', $txt['more_attachments_error'], '");
 
-											var temp = "', $txt['ila_insert'], '";
-											temp = temp.replace("\%d", current_attachment);
-											setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a onclick="insertAttachment(\' + current_attachment + \'); return false;">\' + temp + \'</a>) (<a onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
-
 											allowed_attachments = allowed_attachments - 1;
+											current_attachment = current_attachment + 1;
+
+											setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="38" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a href="javascript:void(0);" onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)<\' + \'/dd>\' + (allowed_attachments > 0 ? \'<dd class="smalltext" id="moreAttachments"><a href="javascript:void(0);" onclick="addAttachment(); return false;">(', $txt['more_attachments'], ')<\' + \'/a><\' + \'/dd>\' : \'\'));
 
 											return true;
 										}
+									// ', ']', ']></script>
+									</dd>
+									<dd class="smalltext" id="moreAttachments"><a href="javascript:void(0);" onclick="addAttachment(); return false;">(', $txt['more_attachments'], ')</a></dd>';
+]]></search>
+		<add><![CDATA[echo '
+							<script type="text/javascript"><!-- // --><![', 'CDATA', '[
+								var allowed_attachments = ', $context['num_allowed_attachments'], ';
+								var current_attachment = ', (isset($context['current_attachments']) ? count($context['current_attachments']) : 0) + !empty($modSettings['ila_one_based_numbering']), ';
+
+								function addAttachment()
+								{
+									allowed_attachments = allowed_attachments - 1;
+									current_attachment = current_attachment + 1;
+									if (allowed_attachments <= 0)
+										return alert("', $txt['more_attachments_error'], '");
+
+									var temp = "', $txt['ila_insert'], '";
+									temp = temp.replace("\%d", current_attachment);
+									setOuterHTML(document.getElementById("moreAttachments"), \'<dd class="smalltext"><input type="file" size="60" name="attachment[]" id="attachment\' + current_attachment + \'" class="input_file" /> (<a onclick="insertAttachment(\' + current_attachment + \'); return false;">\' + temp + \'</a>) (<a onclick="cleanFileInput(\\\'attachment\' + current_attachment + \'\\\');">', $txt['clean_attach'], '</a>)\' + \'</dd><dd class="smalltext" id="moreAttachments"><a onclick="addAttachment(); return false;">(' . $txt['more_attachments'] . ')<\' + \'/a><\' + \'/dd>\');
+
+									return true;
+								}
+							// ', ']', ']></script>
+						</dd>
+						<dd class="smalltext" id="moreAttachments"><a href="#" onclick="addAttachment(); return false;">(', $txt['more_attachments'], ')</a></dd>';
 ]]></add>
 	</operation>
 	<operation error="ignore">
@@ -430,8 +444,8 @@
 							<script type="text/javascript"><!-- // --><![CDATA[
 								function insertAttachment(id)
 								{', (file_exists($sourcedir . '/Subs-SCEditor.php') ? '
-									$(smfmod_editor).data(\'sceditor\').insertText(\'[' . $ila_tag . ']\');' : '
-									replaceText(\'[' . $ila_tag . ']\', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
+									$(smfmod_editor).data(\'sceditor\').insertText(\' [' . $ila_tag . '] \');' : '
+									replaceText(\' [' . $ila_tag . '] \', document.forms.postmodify.' . $context['post_box_name'] . ');'), '
 								}
 							// ]]]]><![CDATA[></script>';
 							

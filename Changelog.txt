@@ -1,3 +1,6 @@
+v6.4 - February 17th, 2018
+o Implemented [url=https://www.simplemachines.org/community/index.php?action=profile;u=112942]GL700Wing[/url]'s fixes, as shown [url=https://www.simplemachines.org/community/index.php?topic=525705.msg3962266#msg3962266]here[/url].
+
 v6.3 - January 7th, 2018
 o Fixed coding syntax error in [b]Subs-InlineAttachments.php[/b].
 

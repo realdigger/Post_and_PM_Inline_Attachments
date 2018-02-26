@@ -942,9 +942,11 @@ function ILA_Build_HTML(&$tag, &$id)
 	}
 
 	// Mark ONLY approved attachments as "don't show" if admin has checked that option:
-	if (!empty($modSettings['ila_duplicate']) && (!empty($attachment['is_approved']) || !empty($context['ila']['pm_attach'])))
+	if (!empty($modSettings['ila_duplicate']) && !empty($attachment['is_approved']))
 		$context['ila']['dont_show'][$msg][$attachment['id']] = true;
-
+	if (!empty($modSettings['ila_duplicate']) && $context['ila']['pm_attach'])
+		$context['ila']['dont_show'][$attachment['id']] = true;
+		
 	// Return to our lord and saviour, our caller! :p
 	return $html;
 }
@@ -1013,13 +1015,14 @@ function ILA_tag_attach(&$info, &$dim, $has_thumb, $style)
 function ILA_tag_attachthumb(&$info, &$dim, $has_thumb, $style)
 {
 	$data = &$info;
+	$image = ($expand = !empty($info['thumbnail']['has_thumb'])) ? $info['thumbnail']['href'] : $info['href'];
 	if (!empty($info['thumbnail']['has_thumb']))
 		$dim = array('width' => $info['width'], 'height' => $info['height'], 'img' => $info['href']);
 	else
 		$dim = array('width' => $info['real_width'], 'height' => $info['real_height']);
-	return ILA_subfunction($info['id'], $dim['href'], $dim['href'], $info['name'], $style, $has_thumb, false);
+	$expand = false;
+	return ILA_subfunction($info['id'], $info['href'], $image, $info['name'], $style, $has_thumb, $expand);
 }
-
 // AttachMini => Show thumbnail, expandable to full picture; exclude attachment info below
 function ILA_tag_attachmini(&$info, &$dim, $has_thumb, $style)
 {
